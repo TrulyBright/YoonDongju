@@ -39,7 +39,7 @@ else
     {
         if (Id==0) // "/notices"로 접속하면 Id가 0이 됨.
         {
-            result = NoticeProvider.GetNoticeList(0, 10);
+            result = await NoticeProvider.GetNoticeList(0, 10);
         }
     }
 }
