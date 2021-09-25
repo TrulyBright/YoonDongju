@@ -1,0 +1,16 @@
+@page "/sections/{Genre?}"
+
+Section:
+@if (string.IsNullOrEmpty(Genre))
+{
+    <p>LIST</p>
+}
+else
+{
+    <p>@Genre</p>
+}
+
+@code {
+    [Parameter]
+    public string Genre { get; set; }
+}

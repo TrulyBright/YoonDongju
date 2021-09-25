@@ -1,0 +1,13 @@
+@page "/magazines/{Volume:int?}"
+@if (Volume==0)
+{
+    @:LIST
+}
+else
+{
+    <p>Magazine vol.@Volume</p>
+}
+@code {
+    [Parameter]
+    public int Volume { get; set; }
+}

@@ -1,0 +1,39 @@
+@page "/notices/{Id:int?}"
+@using YoonDongju.Data
+
+@if (Id==0)
+{
+    <h1>@Status</h1>
+    <EditForm Model=@Draft OnValidSubmit=@SubmitDraft>
+        <DataAnnotationsValidator/>
+        <section class="form-group">
+            <label for="Title">제목</label>
+            <InputText @bind-Value=Draft.Title class="form-control" id="Title"/>
+            <ValidationMessage For="()=>Draft.Title"/>
+        </section>
+        <section class="form-group">
+            <label for="Content">본문</label>
+            <InputTextArea @bind-Value=Draft.Content class="form-control" id="Content"/>
+            <ValidationMessage For="()=>Draft.Content"/>
+        </section>
+            @* <label for="Author">작성자</label>
+            <InputText @bind-Value=Notice.Author class="form-control" id="Author"/> *@
+        <input type="submit" class="btn btn-primary" value="게시">
+    </EditForm>
+}
+else
+{
+    <p>목록</p>
+}
+
+@code {
+    [Parameter]
+    public int Id {get;set;}
+    Notice Draft = new Notice();
+    string Status = "NOT";
+    void SubmitDraft()
+    {
+        NoticeProvider.GetNoticeList(0, 10);
+    }
+    private Notice[] NoticeList;
+}
