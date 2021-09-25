@@ -3,7 +3,7 @@
 
 @if (Id==0)
 {
-    <h1>@Status</h1>
+    <h1>@result</h1>
     <EditForm Model=@Draft OnValidSubmit=@SubmitDraft>
         <DataAnnotationsValidator/>
         <section class="form-group">
@@ -23,17 +23,23 @@
 }
 else
 {
-    <p>목록</p>
+    <p>본문</p>
 }
 
 @code {
     [Parameter]
     public int Id {get;set;}
     Notice Draft = new Notice();
-    string Status = "NOT";
+    object result;
     void SubmitDraft()
     {
-        NoticeProvider.GetNoticeList(0, 10);
     }
     private Notice[] NoticeList;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Id==0) // "/notices"로 접속하면 Id가 0이 됨.
+        {
+            result = NoticeProvider.GetNoticeList(0, 10);
+        }
+    }
 }

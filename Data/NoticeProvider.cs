@@ -5,7 +5,7 @@ namespace YoonDongju.Data
 {
     public class NoticeProvider
     {
-        public static void GetNoticeList(int from, int offset)
+        public static object GetNoticeList(int skip, int count)
         {
             using (var DB = new SqliteConnection("Data Source=test.db"))
             {
@@ -15,16 +15,10 @@ namespace YoonDongju.Data
                 @$"
                     SELECT title
                     FROM notices
-                    LIMIT {from} OFFSET {offset};
+                    LIMIT {skip} {count};
                 ";
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        var row = reader.GetString(0);
-                        Console.WriteLine(row);
-                    }
-                }
+                object result = command.ExecuteScalar();
+                return result;
             }
         }
     }
