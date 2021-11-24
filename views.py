@@ -2,6 +2,7 @@ import uuid
 import sqlite3
 import datetime
 import pytz
+import markdown
 from pathlib import Path
 from typing import Optional, Union
 from flask import render_template, abort, redirect, flash, send_from_directory, request
@@ -85,16 +86,18 @@ def notices(no: Optional[int]=None) -> str:
     NAME = notices.__name__
     with sqlite3.connect(f"sql/{NAME}.db") as DB:
         if no is not None:
-            query = f"SELECT * FROM {NAME} WHERE no=?"
+            query = f"SELECT no, title, content, author, published, attached FROM {NAME} WHERE no=?"
             fetched = DB.execute(query, [no]).fetchone()
             if fetched is None: # id번째 공지가 없음.
                 abort(NOT_FOUND)
-            return render_template("notice.html", fetched=fetched)
+            data = {key: fetched[i] for i, key in enumerate(("no", "title", "content", "author", "published", "attached"))}
+            return render_template("notice.html", data=data, markdown=markdown.markdown)
         else:
             offset = int(request.args.get("offset", 0))
-            query = f"SELECT * FROM {NAME} ORDER BY no DESC LIMIT 10 OFFSET ?"
+            query = f"SELECT no, title, author, published FROM {NAME} ORDER BY no DESC LIMIT 10 OFFSET ?"
             fetched = DB.execute(query, [offset*10]).fetchall()
-            return render_template("notices.html", fetched=fetched)
+            data = [{key: row[i] for i, key in enumerate(("no", "title", "author", "published"))} for row in fetched]
+            return render_template("notices.html", data=data, markdown=markdown.markdown)
 
 def magazines(no: Optional[int]=None) -> str:
     """`no`호 문집 정보를 열람합니다. `no==None`이면 문집 목록을 봅니다."""

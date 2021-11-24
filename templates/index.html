@@ -1,3 +1,28 @@
 {% extends "layout.html" %}
 {% block body %}
+<body>
+    <div id="main-menu-bar">
+        <button type="menu"><a href="/about">소개</a></button>
+        <button type="menu" id="browse-class-list"><a href="#classes">분반</a></button>
+        <div id="class-list">
+            <button type="menu"><a href="/classes/poetry">시반<span class="english"></span></a></button>
+            <button type="menu"><a href="/classes/novella">소설반</a></button>
+            <button type="menu"><a href="/classes/critique">합평반</a></button>
+            <button type="menu"><a href="/classes/reading">독서반</a></button>
+        </div>
+        <button type="menu"><a href="/magazines">문집</a></button>
+        <button type="menu"><a href="/notices">공지</a></button>
+        <button type="menu"><a href="/admin">관리</a></button>
+    </div>
+    <div id="welcome-title">연세문학회</div>
+    <div id="background">{% for _ in range(5) %}<div></div>{% endfor %}</div>
+    <div id="bottom-left-information">
+        <p>서울특별시 서대문구 연세로 50</p>
+        <p>연세대학교 대강당 109호</p>
+        <p class="english">109 Main Auditorium</p>
+        <p class="english">Yonsei University 50 Yonsei-ro, Seodaemun-gu, Seoul 03722</p>
+    </div>
+</body>
+{% endblock %}
+{% block script %}
 {% endblock %}

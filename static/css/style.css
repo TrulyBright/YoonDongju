@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600&display=swap');
+* {
+    margin: 0;
+    padding: 0;
+    color: white;
+    font-family: "Noto Serif KR", serif;
+}
+.english {
+    color: inherit;
+    font-family: "Times New Roman";
+}
+a {
+    text-decoration: none;
+}
+html, body {
+    height: 100%;
+    position: relative;
+}
+#background {
+    height: 100%;
+    filter: grayscale(100%);
+    display: flex;
+}
+#background div {
+    width: 20%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+#background div:nth-child(1) {
+    background-image: url("/static/assets/성석제.jpg");
+}
+#background div:nth-child(2) {
+    background-image: url("/static/assets/나희덕.jpg");
+}
+#background div:nth-child(3) {
+    background-image: url("/static/assets/윤동주.jpg");
+}
+#background div:nth-child(4) {
+    background-image: url("/static/assets/공지영.jpg");
+}
+#background div:nth-child(5) {
+    background-image: url("/static/assets/기형도.jpg");
+}
+#welcome-title {
+    left: 0;
+    right: 0;
+    top: 40%;
+    position: absolute;
+    text-align: center;
+    z-index: 50;
+    color: white;
+    font-size: 50px;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+#bottom-left-information {
+    left: 3%;
+    bottom: 5%;
+    position: absolute;
+    z-index: 50;
+    font-size: 25px;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+#bottom-left-information .english {
+    font-size: 20px;
+}
+#main-menu-bar {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    opacity: 70%;
+}
+#main-menu-bar button {
+    padding: 0.3em 1em;
+    color: white;
+    background: black;
+    border: 2px solid black;
+    border-radius: 0 15px 15px 0;
+    font-size: 25px;
+    cursor: pointer;
+}
+#main-menu-bar button:hover {
+    background: gray;
+}
+#class-list {
+    display: none;
+}
