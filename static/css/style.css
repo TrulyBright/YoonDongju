@@ -51,19 +51,23 @@ body {
     background-size: cover;
 }
 #background div:nth-child(1) {
-    background-image: url("/static/assets/성석제.jpg");
+    background-image: url("/static/assets/성석제-반전.jpg");
+    background-position: 65%;
 }
 #background div:nth-child(2) {
     background-image: url("/static/assets/나희덕.jpg");
+    background-position: 35%;
 }
 #background div:nth-child(3) {
     background-image: url("/static/assets/윤동주.jpg");
 }
 #background div:nth-child(4) {
     background-image: url("/static/assets/공지영.jpg");
+    background-position: 60%;
 }
 #background div:nth-child(5) {
     background-image: url("/static/assets/정현종.png");
+    background-position: 30%;
 }
 #front-overlay {
     width: 100%;
