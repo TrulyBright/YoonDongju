@@ -32,6 +32,19 @@ img {
 .inline-anchor {
     text-decoration: underline;
 }
+button,
+input[type="submit"] {
+    background: #FFDDDD;
+    padding: 3px;
+    border: 1px solid #FFDDDD;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+button:hover,
+input[type="submit"]:hover {
+    background: white;
+}
 html {
     width: 100%;
     height: 100%;
