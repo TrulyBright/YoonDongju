@@ -1,8 +1,38 @@
 {% extends "layout.html" %}
-{% block body %}
-    <ol>
-        {% for notice in fetched %}
-            <li>{{ notice }}</li>
-        {% endfor %}
-    </ol>
+{%-block additional_css-%}
+<link rel="stylesheet" href="static/css/notices.css">
+{%-endblock-%}
+{% block subtitle %} :: 공지{% endblock %}
+{% block main %}
+<div id="main">
+    <div id="left-column">
+        <ul id="categories" class="box">
+            {%-block categories-%}
+            <li><a href="/notices">공지</a></li>
+            {%-endblock-%}
+        </ul>
+    </div>
+    <div id="board" class="box">
+        <h2>{{ list_title }}</h2>
+        <div id="list">
+            <div class="head">
+                <div>번호</div>
+                <div>제목</div>
+                <div>작성자</div>
+                <div>게시일</div>
+            </div>
+            {%-for row in data-%}
+                {%-for col_name, col_data in row.items()-%}
+                    <div class="{{'centered' if col_name!='title' else ''}}">
+                    {%-if col_name=="title"-%}
+                        <a href="/notices/{{row['no']}}">{{col_data}}</a>
+                    {%-else-%}
+                        {{col_data}}
+                    {%-endif-%}
+                    </div>
+                {%-endfor-%}
+            {%-endfor-%}
+        </div>
+    </div>
+</div>
 {% endblock %}

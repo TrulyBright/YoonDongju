@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
 <form action="/notices/write" method="post" enctype="multipart/form-data">
-    <input type="text" name="title" placeholder="제목">
-    <input type="text" name="content" placeholder="내용">
+    <input type="text" name="title" placeholder="제목" spellcheck="false" autofocus required>
+    <textarea name="content" placeholder="본문" spellcheck="false" required></textarea>
     <input type="file" name="attached">
     <button type="submit">게시</button>
 </form>

@@ -1,0 +1,46 @@
+#front-image-container {
+    height: 50%;
+    display: flex;
+    justify-content: center;
+    margin: 0 5%;
+    background: white;
+    border-radius: 15px;
+}
+#main {
+    height: 40%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: minmax(0, 1fr);
+    row-gap: 5%;
+}
+#main > div {
+    width: 90%;
+    padding: 5%;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+}
+#main .title {
+    display: flex;
+    align-items: baseline;
+}
+#main .title h2 {
+    margin-right: 3px;
+}
+#recent-notices {
+    overflow-y: auto;
+}
+#recent-notices li {
+    border-bottom: 3px solid snow;
+}
+#recent-magazines {
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
+#recent-magazines li {
+    height: 100%;
+    display: inline-block;
+}
+#recent-magazines li:last-child a {
+    height: calc(100%);
+}

@@ -1,4 +1,9 @@
 {% extends "layout.html" %}
-{% block body %}
-{{ fetched }}
+{% block subtitle %} :: 공지 - {{data["title"]}}{% endblock %}
+{% block content %}
+{{ data["title"] }}
+{{ markdown(data["content"])|safe }}
+{{ data["author"] }}
+{{ data["published"] }}
+{{ data["attached"] }}
 {% endblock %}

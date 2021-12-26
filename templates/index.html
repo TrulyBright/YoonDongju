@@ -1,112 +1,35 @@
-{% extends "layout.html" %}
-{% block body %}
-<body>
-    <header>
-        <div><a href="/">연세문학회</a></div>
-        <button type="menu"></button>
-        <button type="menu" id="browse-class-list"><a href="#classes">분반</a></button>
-        <div id="class-list">
-            <button type="menu"><a href="/classes/poetry">시반</a></button>
-            <button type="menu"><a href="/classes/novella">소설반</a></button>
-            <button type="menu"><a href="/classes/critique">합평반</a></button>
-            <button type="menu"><a href="/classes/reading">독서반</a></button>
-        </div>
-        <button type="menu"><a href="#magazine">문집</a></button>
-        <button type="menu"><a href="/notices">공지</a></button>
-        <button type="menu"><a href="/admin">관리</a></button>
-    </header>
-    <div id="background">{% for _ in range(5) %}<div></div>{% endfor %}</div>
-    <div id="front-overlay">
-        <div id="welcome-title">연세문학회</div>
-        <section id="bottom-left-information">
-            <p>서울특별시 서대문구 연세로 50</p>
-            <p>연세대학교 대강당 109호</p>
-            <p class="english">109 Main Auditorium (211)</p>
-            <p class="english">Yonsei University 50 Yonsei-ro, Seodaemun-gu, Seoul 03722</p>
-        </section>
-        <div id="arrow-down"><a href="#about"><img src="/static/assets/arrow-down.png" alt="아래쪽 화살표"></a></div>
+{%-extends "layout.html"-%}
+{%-block additional_css-%}
+<link rel="stylesheet" href="/static/css/index.css">
+{%-endblock-%}
+{%-block main-%}
+<div id="front-image-container">
+    <img src="/static/assets/images/연세문학회1-그림만.jpg" alt="연세문학회 문집 더미에 파묻힌 강아지가 바깥으로 몸을 반쯤 내밀고 숨을 돌리는 그림">
+</div>
+<div id="main">
+    <div>
+        <h2><a href="/notices">공지</a></h2>
+        <ul id="recent-notices">
+            <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quia quas provident, ad, tempora officia placeat sed enim quis exercitationem, aliquam laborum illo ullam quod? Sit corporis sunt mollitia laborum rem!</li>
+            <li>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum iste amet cumque velit ea beatae rem, quibusdam nam dignissimos porro consequuntur suscipit placeat ullam at magni recusandae neque quas rerum!</li>
+            <li>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Architecto quaerat, quo repellat dicta aperiam aliquid ipsum vero qui error incidunt perferendis et voluptatem nulla eveniet consequuntur illo optio sed ab.</li>
+            <li>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Nesciunt dolores voluptatibus corporis error, odit eveniet natus quas in ipsa nisi. Ducimus alias ut dolorem autem doloribus nobis tempore unde. Odit?</li>
+        </ul>
     </div>
-    <div id="content">
-        <div class="text" id="about">
-            <section>
-                <h1>연세문학회는</h1>
-                <p>연세대 문학청년들이 문학과 관련된 각종 정기, 비정기 활동을 하는 동아리입니다.</p>
-                <p>정기 활동으로는 매주 열리는 4개 분반 - 시반, 소설반, 합평반, 독서반 - 과 상반기 시 설치미술전, 하반기 영상 문학제가 있으며, 비정기 활동으로는 릴레이 시 창작회, 별 헤는 밤 등이 있습니다.</p>
-                <p>연 2회, 회원들의 작품을 모아 문집을 발간합니다.</p>
-                <br>
-                <p>1932년 연희전문학교에서 『문우』란 문집을 발간하며 연세 문학의 중추가 된 「문학교우회」는 정현종(철학 59) 시인에게서 「연세문학회」란 이름을 얻어,</p>
-                <p>현재까지도 연세대 문학도들의 만남과 활동의 장으로 기능하고 있습니다.</p>
-                <br>
-                <p>윤동주, 송몽규, 정현종, 기형도, 마광수, 나희덕, 성석제, 공지영 외 다수 문인들이 연세문학회를 거쳤으며,</p>
-                <p>머지않은 미래에 대강당 109호는 이 대열에 합류할 누군가를 또 배출할 것입니다.</p>
-            </section>
-        </div>
-        <div class="image">
-            <figure>
-                <img src="/static/assets/문우.jpg" alt="문우 1941년 폐간호 표지">
-                <figcaption>『문우』 1941년 폐간호</figcaption>
-            </figure>
-        </div>
-        <div class="image">
-        </div>
-        <div class="text" id="classes">
-            <section>
-                <h1>분반</h1>
-                <p>분반은 주 1회 열리는 연세문학회의 핵심 정기 활동으로, 회원 누구나 어느 주차든 참여할 수 있습니다.</p>
-                <p>-시반설명-</p>
-                <p>-소설반설명-</p>
-                <p>-합평반설명-</p>
-                <p>독서반은 타 분반과 성격이 다르게, 기성 작가들의 작품을 읽고 감상을 나누는 시간입니다.</p>
-            </section>
-        </div>
-        <div class="text" id="magazine">
-            <section>
-                <h1>문집 『연세문학』</h1>
-                <p>연희전문학교 학생회에서 1922년 창간한 『연희』와 『연희』를 뒤이어 간행되다가 1941년 검열로 폐간된 『문우』를 계승하여 곧 창간 100주년을 맞이하는 연세대 문집 『연세문학』은 연 2회, 봄·여름호와 가을·겨울호가 발행됩니다.</p>
-                <p>회원이라면 누구나 - 시, 소설, 희곡, 수필, 평론, 기타 문학이라면 무엇이든 - 투고할 수 있으며,</p>
-                <p>재학생뿐 아니라 졸업생에게서 작품을 받기도 합니다.</p>
-                <p>자세한 투고 정보는 회장에게 문의하세요. 임원진 정보는 <a href="/board" class="inline-anchor">여기</a> 있습니다.</p>
-            </section>
-        </div>
-        <div class="image">
-            <figure>
-                <img src="/static/assets/2020 연세문학.jpg" alt="2020 『연세문학』 표지">
-                <figcaption>2020 『연세문학』</figcaption>
-            </figure>
-        </div>
-        <div class="text" id="join">
-            <section>
-                <h1>가입</h1>
-                <section class="quote">
-                    <p>사람이 온다는 것은</p>
-                    <p>실은 어마어마한 일이다.</p>
-                    <p>그는</p>
-                    <p>그의 과거와</p>
-                    <p>현재와</p>
-                    <p>그리고</p>
-                    <p>그의 미래와 함께 오기 때문이다.</p>
-                    <p>한 사람의 일생이 오기 때문이다.</p>
-                </section>
-                <p>정현종 - 「방문객」 <span class="hanja">中</span></p>
-                <br>
-                <p>연세문학회는 상시모집 중이며, 별다른 절차 없이 신청 즉시 가입됩니다.</p>
-                <p>아래에 정보를 기입하고 신청하시면 곧 인사행정팀장이 카카오톡 문학회 공지방에 초대해드립니다.</p>
-                <form>
-                    <input type="text" name="name" placeholder="이름" spellcheck="false" required>
-                    <select name="major">
-                        <optgroup label="문과대학">
-                            <option value="">국어국문학</option>
-                        </optgroup>
-                    </select>
-                    <input type="number" name="id" placeholder="학번(10자리)" spellcheck="false" required>
-                    <input type="number" name="tel" placeholder="전화번호" spellcheck="false" required>
-                    <input type="submit" value="신청">
-                </form>
-                <p>어마어마한 가입을 환영합니다.</p>
-            </section>
-        </div>
+    <div>
+        <h2><a href="/magazines">문집</a></h2>
+        <ul id="recent-magazines">
+            <li><img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지"></li>
+            <li><img src="/static/assets/images/2017 연세문학 임시.jpg" alt="'연세문학' 2017년호 표지"></li>
+            <li><img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지"></li>
+            <li><img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지"></li>
+            <li><img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지"></li>
+            <li><img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지"></li>
+            <li><img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지"></li>
+            <li><img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지"></li>
+            <li><img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지"></li>
+            <li><img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지"></li>
+        </ul>
     </div>
-</body>
-{% endblock %}
-{% block script %}
-{% endblock %}
+</div>
+{%-endblock-%}

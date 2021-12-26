@@ -1,6 +1,12 @@
 # Proejct YoonDong-ju: the official website of Yonsei Literature Club
 > 하늘을 우러러 한점 버그가 없기를
 ## Requirements
+* npm
+* Typescript compiiler
+* pip
+* python >=3.8
+## Run in local
+1. `npx tsc`
 1. `pip install -r requirements.txt`
 1. `python main.py`
 ## Features
@@ -10,7 +16,7 @@
   * [Flask](https://flask.palletsprojects.com): for being the easiest python web framework.
   * [Jinja2](https://jinja.palletsprojects.com/): for being too easy to not use.
 * JavaScript
-  * Neither [React](https://reactjs.org/) nor [Vue](https://v3.vuejs.org/) but [VanillaJS](http://vanilla-js.com): since this webiste does not require any complex DOM tasks, which the former two are for.
+  * Neither [React](https://reactjs.org/) nor [Vue](https://v3.vuejs.org/) but [VanillaJS](http://vanilla-js.com) with the help of [Typescript](https://www.typescriptlang.org/): since this webiste does not implement any complex UIs, which the former two are for.
 * SQL
   * [SQLite](https://www.sqlite.org): for its minimality and [ability to handle up to 100K hits/day without any performance issue.](https://www.sqlite.org/whentouse.html#:~:text=SQLite%20works%20great%20as%20the,should%20work%20fine%20with%20SQLite.)
 ## Code Conventions

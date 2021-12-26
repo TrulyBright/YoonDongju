@@ -1,9 +1,9 @@
 import uuid
 import sqlite3
-import datetime
 import pytz
 import markdown
 from pathlib import Path
+from datetime import datetime
 from typing import Optional, Union
 from flask import render_template, abort, redirect, flash, send_from_directory, request
 from flask import current_app as app
@@ -52,7 +52,7 @@ def write_notice() -> Union[str, redirect]:
         title = request.form["title"]
         content = request.form["content"]
         author = "sample author"
-        published = datetime.datetime.now(pytz.timezone("Asia/Seoul"))
+        published = datetime.now(pytz.timezone("Asia/Seoul")).date()
         attached = request.files["attached"]
         # NOTE: <form> 태그에 enctype="multipart/form-data"가 설정되지 않으면
         # 파일을 받을 수 없습니다.
@@ -96,7 +96,7 @@ def notices(no: Optional[int]=None) -> str:
             offset = int(request.args.get("offset", 0))
             query = f"SELECT no, title, author, published FROM {NAME} ORDER BY no DESC LIMIT 10 OFFSET ?"
             fetched = DB.execute(query, [offset*10]).fetchall()
-            data = [{key: row[i] for i, key in enumerate(("no", "title", "author", "published"))} for row in fetched]
+            data = [{col_name:row[i] for i, col_name in enumerate(("no", "title", "author", "published"))} for row in fetched]
             return render_template("notices.html", data=data, markdown=markdown.markdown)
 
 def magazines(no: Optional[int]=None) -> str:

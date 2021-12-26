@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+      "module": "esnext",
+      "removeComments": true,
+      "lib": ["es2021", "DOM"],
+      "target": "ES2021",
+      "alwaysStrict": true,
+      "outDir": "./static/js"
+    },
+}

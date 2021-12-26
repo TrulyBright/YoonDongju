@@ -1,13 +1,96 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    {% block head %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/css/style.css">
-    <title>연세문학회{% block title %}{% endblock %}</title>
-    {% endblock %}
+    {%-block head-%}
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/static/css/basic.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        {%-block additional_css-%}{%-endblock-%}
+        <title>연세문학회{% block subtitle %}{% endblock %}</title>
+    {%-endblock-%}
 </head>
-{% block body %}
-{% endblock %}
+<body>
+{%-block header-%}
+<header>
+    <h1><a href="/">연세문학회</a></h1>
+    <a href="/about">소개</a>
+    <div id="class-list-trigger">
+        <ul id="class-list">
+            <li><a href="/classes/poetry">시반</a></li>
+            <li><a href="/classes/novel">소설반</a></li>
+            <li><a href="/classes/critique">합평반</a></li>
+            <li><a href="/classes/reading">독서반</a></li>
+        </ul>
+    </div>
+    <a href="/magazines">문집</a>
+    <a href="/notices">공지</a>
+    <!-- TODO: 관리 탭은 임원진에게만 보이게 -->
+    <a href="/admin">관리</a>
+</header>
+{%-endblock-%}
+{%-block main-%}
+{%-endblock-%}
+{%-block footer-%}
+<footer>
+    <div>
+        <h3>연락처</h3>
+        <div>
+            <p><i class="material-icons">location_on</i>대강당 109호</p>
+            <p><i class="material-icons">email</i><a href="mailto: roompennoyeah@gmail.com">roompennoyeah@gmail.com</a></p>
+            <p><i class="material-icons">phone</i>회장 서혜빈 <a href="tel: 01057974309">010-5797-4309</a></p>
+        </div>
+    </div>
+    <div>
+        <h3>가입</h3>
+        <a id="join-link">동아리 회원가입</a>
+        <a href="/register">웹사이트 회원가입</a>
+    </div>
+    <div>
+        <h3>정보</h3>
+        <a target="_blank" href="https://github.com/trulybright/YoonDong-ju">사이트 정보</a>
+        <a target="_blank" href="">동아리 회칙</a>
+    </div>
+</footer>
+{%-endblock-%}
+{%-block modals-%}
+<div id="overlay-on-modal-up" class="hidden"></div>
+<div id="join-modal" class="hidden modal">
+    <a class="close-button">×</a>
+    <h1>동아리 가입</h1>
+    <figure>
+        <blockquote>
+            <p>사람이 온다는 것은</p>
+            <p>실은 어마어마한 일이다.</p>
+            <p>그는</p>
+            <p>그의 과거와</p>
+            <p>현재와</p>
+            <p>그리고</p>
+            <p>그의 미래와 함께 오기 때문이다.</p>
+            <p>한 사람의 일생이 오기 때문이다.</p>
+        </blockquote>
+        <figcaption>
+            정현종 - 「방문객」 <span class="hanja">中</span>
+        </figcaption>
+    </figure>
+    <br>
+    <p>연세문학회는 상시모집 중이며, 별다른 절차 없이 신청 즉시 가입됩니다.</p>
+    <p>아래에 정보를 기입하고 신청하시면 곧 인사행정팀장이 카카오톡 문학회 공지방에 초대해드립니다.</p>
+    <form>
+        <input type="text" name="name" placeholder="이름" spellcheck="false" required>
+        <select name="major" required>
+            <option disabled selected>전공</option>
+            {%-for code, major in major_information-%}
+            {%-endfor-%}
+        </select>
+        <input type="number" name="id" placeholder="학번(10자리)" spellcheck="false" required>
+        <input type="tel" name="tel" placeholder="전화번호" spellcheck="false" required>
+        <input type="submit" value="신청">
+    </form>
+</div>
+{%-endblock-%}
+{%-block scripts-%}
+<script src="/static/js/main.js"></script>
+{%-endblock-%}
+</body>
 </html>
