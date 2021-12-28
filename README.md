@@ -1,5 +1,5 @@
 # Proejct YoonDong-ju: the official website of Yonsei Literature Club
-> 하늘을 우러러 한점 버그가 없기를
+> 하늘을 우러러 한 점 버그가 없기를
 ## Requirements
 * npm
 * Typescript compiiler
@@ -13,7 +13,7 @@
 * 공지 열람 및 작성.
 ## Frameworks & Solutions
 * Python
-  * [Flask](https://flask.palletsprojects.com): for being the easiest python web framework.
+  * [Flask](https://flask.palletsprojects.com) deployed by [Gunicorn](https://gunicorn.org/): for being the easiest python web framework.
   * [Jinja2](https://jinja.palletsprojects.com/): for being too easy to not use.
 * JavaScript
   * Neither [React](https://reactjs.org/) nor [Vue](https://v3.vuejs.org/) but [VanillaJS](http://vanilla-js.com) with the help of [Typescript](https://www.typescriptlang.org/): since this webiste does not implement any complex UIs, which the former two are for.
