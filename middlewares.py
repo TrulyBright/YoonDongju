@@ -1,4 +1,5 @@
-from flask import Flask, redirect, render_template
+from flask import Flask, redirect
+from views import render_template
 
 def add_middlewares(app:Flask):
     app.register_error_handler(404, handle_404)

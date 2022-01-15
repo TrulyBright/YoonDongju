@@ -1,0 +1,75 @@
+#main {
+    min-height: 70%;
+    display: grid;
+    grid-template-columns: 1fr 9fr;
+    column-gap: 1%;
+}
+.box {
+    padding: 3%;
+    background: snow;
+    border-radius: 15px;
+}
+#left-column {
+    display: flex;
+    flex-direction: column;
+}
+#categories {
+    list-style: none;
+    padding: 3% 15px;
+}
+#list {
+    display: grid;
+    grid-template-columns: 1fr 7fr 1fr 1fr;
+}
+#list .head {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 7fr 1fr 1fr;
+    display: grid;
+    background: #FFDDDD;
+    text-align: center;
+    font-weight: 900;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+#list > div:not(.head),
+.head > div {
+    padding: 0 1%;
+    border-bottom: 1px solid #FFDDDD;
+    box-sizing: border-box;
+}
+#list .centered {
+    text-align: center;
+}
+hr {
+    border-top: 3px solid #FFDDDD;
+}
+hr:not(.markdown) {
+    margin: 15px 0;
+}
+#board button,
+#board input[type="submit"] {
+    margin-right: 3px;
+}
+.box li {
+    list-style-position: inside;
+}
+.markdown {
+    word-break: break-all;
+}
+.markdown * {
+    margin: revert;
+    padding: revert;
+}
+.markdown blockquote {
+    box-sizing: border-box;
+    border-left: .25em solid #dfe2e5;
+    padding: 0 1em;
+}
+.markdown a {
+    color: skyblue;
+    font-weight: unset;
+}
+.markdown a:hover {
+    text-decoration: underline;
+}

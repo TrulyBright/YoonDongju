@@ -2,10 +2,12 @@
 * {
     margin: 0;
     padding: 0;
-    border-color: snow;
 }
 blockquote {
     font-family: "Noto Serif KR", serif;
+}
+figcaption {
+    font-size: smaller;
 }
 .hanja {
     font-family: "Noto Serif KR", serif;
@@ -40,10 +42,15 @@ input[type="submit"] {
     text-align: center;
     text-decoration: none;
     cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
 }
 button:hover,
 input[type="submit"]:hover {
     background: white;
+}
+hr {
+    border-top: 3px solid #FFDDDD;
 }
 html {
     width: 100%;

@@ -1,11 +1,12 @@
 import uuid
 import sqlite3
 import pytz
-import markdown
+import flask
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Union
-from flask import render_template, abort, redirect, flash, send_from_directory, request
+from marko.ext.gfm import gfm
+from flask import abort, redirect, flash, send_from_directory, request
 from flask import current_app as app
 from werkzeug.datastructures import FileStorage
 
@@ -13,6 +14,22 @@ NOT_FOUND = 404
 
 class UnableToSaveFile(Exception):
     """파일을 저장할 수 없는 오류."""
+
+def render_template(template_name_or_list: str, **context):
+    # layout에 들어갈 데이터를 항상 주도록 커스터마이징
+    layout_data = {
+        "location": "대강당 109호",
+        "email": "roompennoyeah@gmail.com",
+        "president-name": "서혜빈",
+        "president-tel": "010-5797-4309"
+    } # TODO: 하드코딩 제거
+    return flask.render_template(
+        template_name_or_list,
+        datetime=datetime,
+        layout_data=layout_data,
+        gfm=gfm,
+        **context
+    )
 
 def index() -> str:
     """첫 화면."""
@@ -91,13 +108,13 @@ def notices(no: Optional[int]=None) -> str:
             if fetched is None: # id번째 공지가 없음.
                 abort(NOT_FOUND)
             data = {key: fetched[i] for i, key in enumerate(("no", "title", "content", "author", "published", "attached"))}
-            return render_template("notice.html", data=data, markdown=markdown.markdown)
+            return render_template("notice.html", data=data)
         else:
             offset = int(request.args.get("offset", 0))
             query = f"SELECT no, title, author, published FROM {NAME} ORDER BY no DESC LIMIT 10 OFFSET ?"
             fetched = DB.execute(query, [offset*10]).fetchall()
             data = [{col_name:row[i] for i, col_name in enumerate(("no", "title", "author", "published"))} for row in fetched]
-            return render_template("notices.html", data=data, markdown=markdown.markdown)
+            return render_template("notices.html", data=data)
 
 def magazines(no: Optional[int]=None) -> str:
     """`no`호 문집 정보를 열람합니다. `no==None`이면 문집 목록을 봅니다."""

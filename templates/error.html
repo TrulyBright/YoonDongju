@@ -1,2 +1,15 @@
 {% extends "layout.html" %}
-{% block css %} <link rel="stylesheet" href="/static/css/error.css"> {% endblock %}
+{%-block additional_css-%}
+<link rel="stylesheet" href="/static/css/error.css">
+{%-endblock-%}
+{%-block main-%}
+<div id="main">
+    <div class="error">
+        <h1>없는 페이지입니다.</h1>
+        <figure>
+            <blockquote>내가<br>행복했던 곳으로 가주세요</blockquote>
+            <figcaption>박지웅, 「택시」</figcaption>
+        </figure>
+    </div>
+</div>
+{%-endblock-%}

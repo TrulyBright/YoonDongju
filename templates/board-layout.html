@@ -1,0 +1,19 @@
+{%-extends "layout.html"-%}
+{%-block additional_css-%}
+<link rel="stylesheet" href="/static/css/board-layout.css">
+{%-endblock-%}
+{%-block main-%}
+<div id="main">
+    <div id="left-column">
+        <ul id="categories" class="box">
+            {%-block categories-%}
+            <li><a href="/notices">공지</a></li>
+            {%-endblock-%}
+        </ul>
+    </div>
+    <div id="board" class="box">
+        {%-block content-%}
+        {%-endblock-%}
+    </div>
+</div>
+{%-endblock-%}

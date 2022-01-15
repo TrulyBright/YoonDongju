@@ -36,20 +36,22 @@
     <div>
         <h3>연락처</h3>
         <div>
-            <p><i class="material-icons">location_on</i>대강당 109호</p>
-            <p><i class="material-icons">email</i><a href="mailto: roompennoyeah@gmail.com">roompennoyeah@gmail.com</a></p>
-            <p><i class="material-icons">phone</i>회장 서혜빈 <a href="tel: 01057974309">010-5797-4309</a></p>
+            <p><i class="material-icons">location_on</i>{{layout_data["location"]}}</p>
+            <p><i class="material-icons">email</i><a href="mailto: {{layout_data['email']}}">{{layout_data['email']}}</a></p>
+            <p><i class="material-icons">phone</i>회장 {{layout_data["president-name"]}} <a href="tel: {{layout_data['president-tel'].replace('-', '')}}">{{layout_data["president-tel"]}}</a></p>
         </div>
     </div>
     <div>
         <h3>가입</h3>
         <a id="join-link">동아리 회원가입</a>
-        <a href="/register">웹사이트 회원가입</a>
+        <a href="/register">홈페이지 회원가입</a>
     </div>
     <div>
         <h3>정보</h3>
-        <a target="_blank" href="https://github.com/trulybright/YoonDong-ju">사이트 정보</a>
-        <a target="_blank" href="">동아리 회칙</a>
+        <a href="/rules">동아리 회칙</a>
+        <a href="https://github.com/trulybright/YoonDong-ju">사이트 정보</a>
+        <small>서체: 고운 바탕 (한/영) / Noto Serif KR (한자)</small>
+        <small>© {{datetime.now().year}} 연세문학회 | 작품 저작권은 항상 작가에게 있습니다.</small>
     </div>
 </footer>
 {%-endblock-%}
@@ -89,8 +91,9 @@
     </form>
 </div>
 {%-endblock-%}
-{%-block scripts-%}
 <script src="/static/js/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
+{%-block scripts-%}
 {%-endblock-%}
 </body>
 </html>

@@ -1,9 +1,10 @@
-{% extends "layout.html" %}
+{% extends "board-layout.html" %}
 {% block subtitle %} :: 공지 - {{data["title"]}}{% endblock %}
 {% block content %}
-{{ data["title"] }}
-{{ markdown(data["content"])|safe }}
-{{ data["author"] }}
-{{ data["published"] }}
-{{ data["attached"] }}
+<h1>{{data["title"]}}</h1>
+<div class="author-date">{{data["author"]}} | {{data["published"]}}</div>
+<hr>
+<div class="markdown">{{gfm(data["content"])|safe}}</div>
 {% endblock %}
+{%-block scripts-%}
+{%-endblock-%}
