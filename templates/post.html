@@ -1,5 +1,5 @@
 {% extends "board-layout.html" %}
-{% block subtitle %} :: 공지 - {{data["title"]}}{% endblock %}
+{% block subtitle %} :: {{this_is}} - {{data["title"]}}{% endblock %}
 {% block content %}
 <h1>{{data["title"]}}</h1>
 <div class="author-date">{{data["author"]}} | {{data["published"]}}</div>

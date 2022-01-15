@@ -1,3 +1,7 @@
-{%-extends "layout.html"-%}
-{%-block content-%}
+{% extends "board-layout.html" %}
+{% block subtitle %} :: 소개{% endblock %}
+{% block content %}
+<div class="markdown">{{gfm(data["content"])|safe}}</div>
+{% endblock %}
+{%-block scripts-%}
 {%-endblock-%}

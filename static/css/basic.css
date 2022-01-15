@@ -53,6 +53,10 @@ button:hover,
 input[type="submit"]:hover {
     background: white;
 }
+button a:hover,
+input[type="submit"] a:hover {
+    text-decoration: none;
+}
 hr {
     border-top: 3px solid #FFDDDD;
 }

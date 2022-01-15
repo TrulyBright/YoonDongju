@@ -7,7 +7,9 @@
     <div id="left-column">
         <ul id="categories" class="box">
             {%-block categories-%}
-            <li><a href="/notices">공지</a></li>
+            {%-for name, suburl in categories.items()-%}
+            <li><a href="/{{suburl}}">{{name}}</a></li>
+            {%-endfor-%}
             {%-endblock-%}
         </ul>
     </div>

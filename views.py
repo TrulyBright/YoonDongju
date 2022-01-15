@@ -41,7 +41,11 @@ def index() -> str:
 
 def about() -> str:
     """소개 화면."""
-    return render_template("about.html")
+    with sqlite3.connect(f"sql/special_posts.db") as DB:
+        query = f"SELECT title, content FROM special_posts WHERE title=='about'"
+        title, content = DB.execute(query).fetchone()
+        data = {"title": title, "content": content}
+        return render_template("about.html", categories={"소개":"about"}, data=data)
 
 def upload(file: FileStorage):
     """파일을 `app.config["UPLOAD_DIR"]`에 저장하고 파일 이름을 반환합니다.
@@ -68,7 +72,7 @@ def upload(file: FileStorage):
 
 def write_notice() -> Union[str, redirect]:
     if request.method == "GET":
-        return render_template("notice-write.html")
+        return render_template("write.html")
     elif request.method == "POST":
         title = request.form["title"]
         content = request.form["content"]
@@ -109,16 +113,16 @@ def notices(no: Optional[int]=None) -> str:
         if no is not None:
             query = f"SELECT no, title, content, author, published, attached FROM {NAME} WHERE no=?"
             fetched = DB.execute(query, [no]).fetchone()
-            if fetched is None: # id번째 공지가 없음.
+            if fetched is None: # no번째 공지가 없음.
                 abort(NOT_FOUND)
             data = {key: fetched[i] for i, key in enumerate(("no", "title", "content", "author", "published", "attached"))}
-            return render_template("notice.html", data=data)
+            return render_template("post.html", categories={"공지":"notices"}, this_is="공지", data=data)
         else:
             skip = int(request.args.get("skip", 0))
             query = f"SELECT no, title, author, published FROM {NAME} ORDER BY no DESC LIMIT 10 OFFSET ?"
             fetched = DB.execute(query, [skip]).fetchall()
             data = [{col_name:row[i] for i, col_name in enumerate(("no", "title", "author", "published"))} for row in fetched]
-            return render_template("notices.html", data=data)
+            return render_template("list.html", categories={"공지":"notices"}, this_is="공지", data=data)
 
 def magazines(no: Optional[int]=None) -> str:
     """`no`호 문집 정보를 열람합니다. `no==None`이면 문집 목록을 봅니다."""
