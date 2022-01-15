@@ -5,11 +5,19 @@
 {%-block main-%}
 <div id="main">
     <div class="error">
+        {%-if code==404-%}
         <h1>없는 페이지입니다.</h1>
         <figure>
-            <blockquote>내가<br>행복했던 곳으로 가주세요</blockquote>
-            <figcaption>박지웅, 「택시」</figcaption>
+            <blockquote>(길은막다른골목이적당하오.)</blockquote>
+            <figcaption>이상, 「오감도」</figcaption>
         </figure>
+        {%-elif code==500-%}
+        <h1>서버 내부 오류가 났습니다.</h1>
+        <figure>
+            <blockquote>Quoth the Server "Nevermore."</blockquote>
+            <figcaption>Edgar Server Poe, "The Server"</figcaption>
+        </figure>
+        {%-endif-%}
     </div>
 </div>
 {%-endblock-%}

@@ -114,9 +114,9 @@ def notices(no: Optional[int]=None) -> str:
             data = {key: fetched[i] for i, key in enumerate(("no", "title", "content", "author", "published", "attached"))}
             return render_template("notice.html", data=data)
         else:
-            offset = int(request.args.get("offset", 0))
+            skip = int(request.args.get("skip", 0))
             query = f"SELECT no, title, author, published FROM {NAME} ORDER BY no DESC LIMIT 10 OFFSET ?"
-            fetched = DB.execute(query, [offset*10]).fetchall()
+            fetched = DB.execute(query, [skip]).fetchall()
             data = [{col_name:row[i] for i, col_name in enumerate(("no", "title", "author", "published"))} for row in fetched]
             return render_template("notices.html", data=data)
 
