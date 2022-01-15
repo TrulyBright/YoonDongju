@@ -31,6 +31,9 @@
 }
 #recent-notices li {
     border-bottom: 3px solid snow;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 #recent-magazines {
     overflow-x: auto;

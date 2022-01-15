@@ -13,7 +13,14 @@ figcaption {
     font-family: "Noto Serif KR", serif;
 }
 a {
+    color: inherit;
     text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+header a,
+footer a {
     color: #805959;
     font-weight: bold;
 }

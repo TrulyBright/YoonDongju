@@ -33,7 +33,11 @@ def render_template(template_name_or_list: str, **context):
 
 def index() -> str:
     """첫 화면."""
-    return render_template("index.html")
+    with sqlite3.connect(f"sql/notices.db") as DB:
+        query = f"SELECT no, title, published FROM notices ORDER BY no DESC LIMIT 4"
+        fetched = DB.execute(query).fetchall()
+        recent_notices = [{col_name:row[i] for i, col_name in enumerate(("no", "title", "published"))} for row in fetched]
+        return render_template("index.html", recent_notices=recent_notices, len=len)
 
 def about() -> str:
     """소개 화면."""
