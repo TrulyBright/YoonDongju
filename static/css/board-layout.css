@@ -41,18 +41,18 @@
 #list .centered {
     text-align: center;
 }
+#bottom-bar {
+    display: flex;
+    flex-direction: row-reverse;
+    padding: 1%;
+}
 hr {
     border-top: 3px solid #FFDDDD;
-}
-hr:not(.markdown) {
     margin: 15px 0;
 }
 #board button,
 #board input[type="submit"] {
     margin-right: 3px;
-}
-.box li {
-    list-style-position: inside;
 }
 .markdown {
     word-break: break-all;
