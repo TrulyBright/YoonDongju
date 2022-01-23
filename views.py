@@ -1,6 +1,7 @@
 import uuid
 import sqlite3
 import pytz
+import math
 import flask
 from pathlib import Path
 from datetime import datetime
@@ -72,7 +73,7 @@ def upload(file: FileStorage):
 
 def write_notice() -> Union[str, redirect]:
     if request.method == "GET":
-        return render_template("write.html")
+        return render_template("write.html", categories={"공지":"notices"})
     elif request.method == "POST":
         title = request.form["title"]
         content = request.form["content"]
@@ -83,16 +84,16 @@ def write_notice() -> Union[str, redirect]:
         # 파일을 받을 수 없습니다.
         try:
             if attached.filename:
-                at = str(upload(attached))
+                attached = str(upload(attached))
             else:
-                at = None
+                attached = None
             with sqlite3.connect("sql/notices.db") as DB:
                 query = """
                 INSERT INTO notices
                 (title, content, author, published, attached)
                 values (?, ?, ?, ?, ?)
                 """
-                DB.execute(query, [title, content, author, published, at])
+                DB.execute(query, [title, content, author, published, attached])
                 no = DB.execute("SELECT no FROM notices order by no desc limit 1").fetchone()[0]
                 return redirect(f"/notices/{no}")
         except:
@@ -122,7 +123,15 @@ def notices(no: Optional[int]=None) -> str:
             query = f"SELECT no, title, author, published FROM {NAME} ORDER BY no DESC LIMIT 10 OFFSET ?"
             fetched = DB.execute(query, [skip]).fetchall()
             data = [{col_name:row[i] for i, col_name in enumerate(("no", "title", "author", "published"))} for row in fetched]
-            return render_template("list.html", categories={"공지":"notices"}, this_is="공지", data=data)
+            return render_template(
+                "list.html",
+                categories={"공지":"notices"},
+                this_is="공지",
+                data=data,
+                list_size=DB.execute("SELECT COUNT(0) FROM notices").fetchone()[0],
+                skip=skip,
+                math=math
+            )
 
 def magazines(no: Optional[int]=None) -> str:
     """`no`호 문집 정보를 열람합니다. `no==None`이면 문집 목록을 봅니다."""

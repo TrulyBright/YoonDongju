@@ -43,7 +43,8 @@
 }
 #bottom-bar {
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: row;
+    justify-content: space-between;
     padding: 1%;
 }
 hr {
@@ -72,4 +73,7 @@ hr {
 }
 .markdown a:hover {
     text-decoration: underline;
+}
+button.current-index {
+    background: white;
 }
