@@ -71,9 +71,17 @@ def upload(file: FileStorage):
             return at.name
     raise UnableToSaveFile("Can't get any unique name with uuid.uuid4()")
 
-def write_notice() -> Union[str, redirect]:
+def write_notice(no: int=None) -> Union[str, redirect]:
     if request.method == "GET":
-        return render_template("write.html", categories={"공지":"notices"})
+        if no is None:
+            return render_template("write.html", categories={"공지":"notices"}, editing=False)
+        with sqlite3.connect(f"sql/notices.db") as DB:
+            query = f"SELECT no, title, content, published, attached FROM notices WHERE no=?"
+            fetched = DB.execute(query, [no]).fetchone()
+            if fetched is None: # no번째 공지가 없음.
+                abort(NOT_FOUND)
+            data = {key: fetched[i] for i, key in enumerate(("no", "title", "content", "published", "attached"))}
+            return render_template("write.html", categories={"공지":"notices"}, this_is="공지", data=data, editing=True)
     elif request.method == "POST":
         title = request.form["title"]
         content = request.form["content"]
@@ -100,6 +108,9 @@ def write_notice() -> Union[str, redirect]:
             app.logger.exception("Exception publishing notice")
             # flash("Failed")
             return redirect(request.url)
+
+def delete_notice(no: int):
+    pass
 
 def download(name: str):
     return send_from_directory(app.config["UPLOAD_DIR"], name)

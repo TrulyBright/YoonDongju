@@ -32,6 +32,5 @@
 * 서체
   * 국문/영문 서체: 고운 바탕
   * 한문 서체: Noto Serif Korean
-  * 영문 서체(선택): Times New Roman
 ## Contributors
 * [TrulyBright](https://github.com/TrulyBright)
