@@ -75,12 +75,12 @@ def upload(file: FileStorage):
             return at.name
     raise UnableToSaveFile("Can't get any unique name with uuid.uuid4()")
 
-def write_notice(no: int=None):
+def write_post(no: int=None):
     editing = request.path.endswith("/edit")
     editing_about = request.path.startswith("/about")
     if request.method == "GET":
         if not editing_about and no is None:
-            return render_template("write.html", categories={"공지":"notices"}, editing=False)
+            return render_template("write.html", categories={"공지":"notices"}, this_is="공지", editing=False)
         with sqlite3.connect(f"sql/posts.db") as DB:
             condition = "type='about'" if editing_about else "type='notice' and no=?"
             query = f"SELECT no, title, content, published, attached FROM posts WHERE {condition}"
@@ -128,7 +128,7 @@ def write_notice(no: int=None):
                 DB.execute(query, ["about" if editing_about else "notice", title, content, author, published, attached])
             return redirect("/about" if editing_about else f"/notices/{DB.execute('SELECT no FROM posts order by no desc limit 1').fetchone()[0]}")
 
-def delete_notice(no: int):
+def delete_post(no: int):
     pass
 
 def download(name: str):
