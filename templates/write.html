@@ -1,11 +1,24 @@
 {% extends "board-layout.html" %}
-{% block subtitle %} :: 공지 작성{% endblock %}
+{% block subtitle %} :: {{this_is}} 작성{% endblock %}
 {%-block additional_css-%}
 <link rel="stylesheet" href="/static/css/board-layout.css">
 <link rel="stylesheet" href="/static/css/writing.css">
 {%-endblock-%}
 {% block content %}
-<form action="/notices/write" method="post" enctype="multipart/form-data">
+<form action="
+    {%-if editing-%}
+        {%-if this_is=='소개'-%}
+            /about/edit
+        {%-else-%}
+            {{categories[this_is]}}/{{data['no']}}/edit
+        {%-endif-%}
+    {%-else-%}
+        {%-if this_is=='소개'-%}
+          /about/write
+        {%-else-%}
+            {{categories[this_is]}}/write
+        {%-endif-%}
+    {%-endif-%}" method="post" enctype="multipart/form-data">
     <h1><input type="text" name="title" placeholder="제목" rows="1" spellcheck="false" value="{{data['title'] if editing else ''}}" autofocus required></h1>
     <hr>
     <textarea name="content" spellcheck="false" placeholder="본문" required>{{data["content"] if editing else '# 제목

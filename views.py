@@ -34,19 +34,23 @@ def render_template(template_name_or_list: str, **context):
 
 def index() -> str:
     """첫 화면."""
-    with sqlite3.connect(f"sql/notices.db") as DB:
-        query = f"SELECT no, title, published FROM notices ORDER BY no DESC LIMIT 4"
+    with sqlite3.connect(f"sql/posts.db") as DB:
+        query = f"SELECT no, title, published FROM posts WHERE type='notice' ORDER BY no DESC LIMIT 4"
         fetched = DB.execute(query).fetchall()
         recent_notices = [{col_name:row[i] for i, col_name in enumerate(("no", "title", "published"))} for row in fetched]
         return render_template("index.html", recent_notices=recent_notices, len=len)
 
 def about() -> str:
     """소개 화면."""
-    with sqlite3.connect(f"sql/special_posts.db") as DB:
-        query = f"SELECT title, content FROM special_posts WHERE title=='about'"
-        title, content = DB.execute(query).fetchone()
-        data = {"title": title, "content": content}
-        return render_template("about.html", categories={"소개":"about"}, data=data)
+    with sqlite3.connect(f"sql/posts.db") as DB:
+        query = f"SELECT author, published, content FROM posts WHERE type='about'"
+        fetched = DB.execute(query).fetchone()
+        if fetched is None:
+            data = {"content": "소개가 없습니다. 우상단 '글쓰기'를 눌러 소개문을 쓸 수 있습니다."}
+        else:
+            author, published, content = fetched
+            data = {"author": author, "published": published, "content": content}
+        return render_template("about.html", categories={"소개":"about"}, data=data, nonexistent=fetched is None)
 
 def upload(file: FileStorage):
     """파일을 `app.config["UPLOAD_DIR"]`에 저장하고 파일 이름을 반환합니다.
@@ -71,43 +75,58 @@ def upload(file: FileStorage):
             return at.name
     raise UnableToSaveFile("Can't get any unique name with uuid.uuid4()")
 
-def write_notice(no: int=None) -> Union[str, redirect]:
+def write_notice(no: int=None):
+    editing = request.path.endswith("/edit")
+    editing_about = request.path.startswith("/about")
     if request.method == "GET":
-        if no is None:
+        if not editing_about and no is None:
             return render_template("write.html", categories={"공지":"notices"}, editing=False)
-        with sqlite3.connect(f"sql/notices.db") as DB:
-            query = f"SELECT no, title, content, published, attached FROM notices WHERE no=?"
-            fetched = DB.execute(query, [no]).fetchone()
-            if fetched is None: # no번째 공지가 없음.
+        with sqlite3.connect(f"sql/posts.db") as DB:
+            condition = "type='about'" if editing_about else "type='notice' and no=?"
+            query = f"SELECT no, title, content, published, attached FROM posts WHERE {condition}"
+            fetched = DB.execute(query, [] if editing_about else [no]).fetchone()
+            if not editing_about and fetched is None: # no번째 공지가 없음.
                 abort(NOT_FOUND)
-            data = {key: fetched[i] for i, key in enumerate(("no", "title", "content", "published", "attached"))}
-            return render_template("write.html", categories={"공지":"notices"}, this_is="공지", data=data, editing=True)
+            data = dict() if fetched is None else {key: fetched[i] for i, key in enumerate(("no", "title", "content", "published", "attached"))}
+            return render_template(
+                "write.html",
+                categories={"소개":"about"} if editing_about else {"공지":"notices"},
+                this_is="소개" if editing_about else "공지",
+                data=data,
+                editing=fetched is not None
+            )
     elif request.method == "POST":
         title = request.form["title"]
         content = request.form["content"]
-        author = "sample author"
+        author = "sample author" # TODO
         published = datetime.now(pytz.timezone("Asia/Seoul")).date()
         attached = request.files["attached"]
-        # NOTE: <form> 태그에 enctype="multipart/form-data"가 설정되지 않으면
+        # NOTE: <form> 태그에 enctype="multipart/form-data"가 붙지 않으면
         # 파일을 받을 수 없습니다.
-        try:
-            if attached.filename:
-                attached = str(upload(attached))
+        if attached.filename:
+            attached = str(upload(attached))
+        else:
+            attached = None
+        with sqlite3.connect("sql/posts.db") as DB:
+            condition = "type='about'" if editing_about else "type='notice' and no=?"
+            query = f"""
+            UPDATE posts
+            SET title=?,
+                content=?,
+                author=?,
+                published=?,
+                attached=?
+            WHERE {condition}
+            """ if editing else """
+            INSERT INTO posts
+            (type, title, content, author, published, attached)
+            values (?, ?, ?, ?, ?, ?)
+            """
+            if editing:
+                DB.execute(query, [title, content, author, published, attached] if editing_about else [title, content, author, published, attached, no])
             else:
-                attached = None
-            with sqlite3.connect("sql/notices.db") as DB:
-                query = """
-                INSERT INTO notices
-                (title, content, author, published, attached)
-                values (?, ?, ?, ?, ?)
-                """
-                DB.execute(query, [title, content, author, published, attached])
-                no = DB.execute("SELECT no FROM notices order by no desc limit 1").fetchone()[0]
-                return redirect(f"/notices/{no}")
-        except:
-            app.logger.exception("Exception publishing notice")
-            # flash("Failed")
-            return redirect(request.url)
+                DB.execute(query, ["about" if editing_about else "notice", title, content, author, published, attached])
+            return redirect("/about" if editing_about else f"/notices/{DB.execute('SELECT no FROM posts order by no desc limit 1').fetchone()[0]}")
 
 def delete_notice(no: int):
     pass
@@ -117,13 +136,9 @@ def download(name: str):
 
 def notices(no: Optional[int]=None) -> str:
     """`no`번째 공지를 열람합니다. `no==None`이면 공지 목록을 봅니다."""
-    # NOTE: sqlite3 라이브러리는 parameter substitution을
-    # table name에는 지원하지 않습니다.
-    # 참고: https://stackoverflow.com/questions/39196462/how-to-use-variable-for-sqlite-table-name
-    NAME = notices.__name__
-    with sqlite3.connect(f"sql/{NAME}.db") as DB:
+    with sqlite3.connect(f"sql/posts.db") as DB:
         if no is not None:
-            query = f"SELECT no, title, content, author, published, attached FROM {NAME} WHERE no=?"
+            query = f"SELECT no, title, content, author, published, attached FROM posts WHERE no=? and type='notice'"
             fetched = DB.execute(query, [no]).fetchone()
             if fetched is None: # no번째 공지가 없음.
                 abort(NOT_FOUND)
@@ -131,7 +146,7 @@ def notices(no: Optional[int]=None) -> str:
             return render_template("post.html", categories={"공지":"notices"}, this_is="공지", data=data)
         else:
             skip = int(request.args.get("skip", 0))
-            query = f"SELECT no, title, author, published FROM {NAME} ORDER BY no DESC LIMIT 10 OFFSET ?"
+            query = f"SELECT no, title, author, published FROM posts WHERE type='notice' ORDER BY no DESC LIMIT 10 OFFSET ?"
             fetched = DB.execute(query, [skip]).fetchall()
             data = [{col_name:row[i] for i, col_name in enumerate(("no", "title", "author", "published"))} for row in fetched]
             return render_template(
@@ -139,7 +154,7 @@ def notices(no: Optional[int]=None) -> str:
                 categories={"공지":"notices"},
                 this_is="공지",
                 data=data,
-                list_size=DB.execute("SELECT COUNT(0) FROM notices").fetchone()[0],
+                list_size=DB.execute("SELECT COUNT(0) FROM posts").fetchone()[0],
                 skip=skip,
                 math=math
             )

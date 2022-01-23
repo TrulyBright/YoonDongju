@@ -2,24 +2,16 @@ import sqlite3
 from pathlib import Path
 
 query = dict()
-query["notices"] = """
-CREATE TABLE IF NOT EXISTS notices (
+query["posts"] = """
+CREATE TABLE IF NOT EXISTS posts (
     no integer not null primary key,
+    type text default null,
     title text not null,
     author integer not null,
     content text not null,
     published datetime not null,
     attached text
 )"""
-query["special_posts"] = """
-CREATE TABLE IF NOT EXISTS special_posts (
-    title text not null unique,
-    content text not null,
-    author integer not null,
-    published datetime not null,
-    attached text
-);
-"""
 query["users"] = """
 CREATE TABLE IF NOT EXISTS users (
     id integer not null primary key,
