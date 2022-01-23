@@ -12,8 +12,8 @@
         <ul id="recent-notices">
             {%-for notice in recent_notices-%}
                 <li>
-                    <div><a href="/notices/{{notice['no']}}">
-                        {{notice["title"] if len(notice["title"])<=16 else notice["title"][:16]+"···"}}
+                    <div class="recent-notice-title"><a href="/notices/{{notice['no']}}">
+                        {{notice["title"]}}
                     </a></div>
                     <div>{{notice["published"]}}</div>
                 </li>

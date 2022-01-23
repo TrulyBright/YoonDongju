@@ -6,11 +6,19 @@
     <div class="author-date">{{data["author"]}} | {{data["published"]}}</div>
     <div>
         <button type="button"><a href="/{{categories[this_is]}}/{{data['no']}}/edit">수정</a></button>
-        <button type="button"><a href="/{{categories[this_is]}}/{{data['no']}}/delete">삭제</a></button>
+        <button type="button" id="delete-button">삭제</button>
     </div>
 </div>
 <hr>
 <div class="markdown">{{gfm(data["content"])|safe}}</div> <!--글쓴이를 신뢰하여 별다른 검사 없이 바로 "|safe"를 적용합니다.-->
 {% endblock %}
 {%-block scripts-%}
+<script>
+    document.querySelector("#delete-button").addEventListener("click", (event)=>{
+        if (confirm("이 글을 삭제합니다.")) {
+            fetch(location.origin+location.pathname+"/delete", {method:"DELETE"})
+            .then(()=>{location.replace(document.referrer)}); // TODO: include credentials
+        }
+    });
+</script>
 {%-endblock-%}

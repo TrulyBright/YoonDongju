@@ -128,8 +128,14 @@ def write_post(no: int=None):
                 DB.execute(query, ["about" if editing_about else "notice", title, content, author, published, attached])
             return redirect("/about" if editing_about else f"/notices/{DB.execute('SELECT no FROM posts order by no desc limit 1').fetchone()[0]}")
 
-def delete_post(no: int):
-    pass
+def delete_post(no: int): # TODO: 권한
+    with sqlite3.connect("sql/posts.db") as DB:
+        query = """
+        DELETE FROM posts
+        WHERE no=?
+        """
+        DB.execute(query, [no])
+        return "meaningless dummy value" # 의미없이 그냥 리턴하는 값.
 
 def download(name: str):
     return send_from_directory(app.config["UPLOAD_DIR"], name)
