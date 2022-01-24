@@ -107,11 +107,6 @@ header a:hover {
 #class-list li:hover {
     border: 1px solid #FFDDDD;
 }
-#class-list-trigger::before {
-    content: "분반";
-    color: #805959;
-    font-weight: inherit;
-}
 #class-list-trigger:hover #class-list {
     display: block;
 }
