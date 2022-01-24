@@ -107,6 +107,9 @@ header a:hover {
 #class-list li:hover {
     border: 1px solid #FFDDDD;
 }
+#class-list-trigger {
+    margin: unset;
+}
 #class-list-trigger:hover #class-list {
     display: block;
 }
