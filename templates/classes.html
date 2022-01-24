@@ -1,0 +1,24 @@
+{%-extends "board-layout.html"-%}
+{%-block additional_css-%}
+<link rel="stylesheet" href="/static/css/classes.css">
+{%-endblock-%}
+{%-block main-%}
+<div id="main">
+    {%-for category_name, category_code in categories.items()-%}
+    <a href="/classes/{{category_code}}">
+        <h2>
+            {{category_name}}
+        </h2>
+        <div>
+            {{schedule[category_name]}}
+        </div>
+        <div>
+            {{description[category_name]}}
+        </div>
+        <div>
+            분반장: {{moderator[category_name]}}
+        </div>
+    </a>
+    {%-endfor-%}
+</div>
+{%-endblock-%}

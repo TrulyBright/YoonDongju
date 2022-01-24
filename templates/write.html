@@ -9,19 +9,51 @@
     {%-if editing-%}
         {%-if this_is=='소개'-%}
             /about/edit
+        {%-elif for_class_activity-%}
+            /classes/{{categories[this_is]}}/{{data['no']}}/edit
         {%-else-%}
             /{{categories[this_is]}}/{{data['no']}}/edit
         {%-endif-%}
     {%-else-%}
         {%-if this_is=='소개'-%}
-          /about/write
+            /about/write
+        {%-elif for_class_activity-%}
+            /classes/{{categories[this_is]}}/write
         {%-else-%}
             /{{categories[this_is]}}/write
         {%-endif-%}
     {%-endif-%}" method="post" enctype="multipart/form-data">
-    <h1><input type="text" name="title" placeholder="제목" rows="1" spellcheck="false" value="{{data['title'] if editing else ''}}" autofocus required></h1>
+    <h1><input type="text" name={{"topic" if for_class_activity else "title"}} placeholder={{"주제" if for_class_activity else "제목"}} rows="1" spellcheck="false" value="{{data['topic' if for_class_activity else 'title'] if editing else ''}}" autofocus required></h1>
     <hr>
-    <textarea name="content" spellcheck="false" placeholder="본문" required>{{data["content"] if editing else '# 제목
+    {%-if for_class_activity-%}
+    <div class="for-class-activity">
+        <h3>활동일</h3>
+        <input type="date" name="conducted" value={{data['conducted'] if editing else ""}} required>
+    </div>
+    <div class="for-class-activity" id="participants">
+        <h3>참여자 명단</h3>
+        <h5>분반장 이름도 적습니다.</h5>
+        {%-if editing-%}
+            {%-for i, p in enumerate(data["participants"])-%}
+                <div id="participant{{i+1}}">
+                    <input type="text" name="participant{{i+1}}" placeholder="참여자" value="{{p}}" required>
+                    <button type="button" onclick="document.querySelector('#participants').removeChild(document.querySelector('#participant{{i+1}}'))">제거</button>
+                </div>
+            {%-endfor-%}
+        {%-else-%}
+            <input type="text" name="participant1" placeholder="참여자" required>
+        {%-endif-%}
+    </div>
+    <div class="for-class-activity">
+        <button type="button" id="add-participant">참여자 추가</button>
+        <p><label for="hide-participants">참여자 명단을<select name="hide-participants">
+            <option value="1" selected>회원에게 공개</option>
+            <option value="0">임원진에게만 공개</option>
+        </select></label></p>
+    </div>
+    <h3 class="for-class-activity">활동 내용</h3>
+    {%-endif-%}
+    <textarea name="content" spellcheck="false" placeholder={{"내용" if for_class_activity else "본문"}} required>{{data["content"] if editing else '# 제목
 
 ## 제목2
 
@@ -92,13 +124,15 @@ _강조 문법은 **한꺼번에** 쓸 수 있습니다._
 | 정현종    | 철학 59 | 「방문객」 |
 
 ## 기타
-`Ctrl+A`로 이 도움말을 싹 지울 수 있습니다.'}}
-</textarea>
+`Ctrl+A`로 이 도움말을 싹 지울 수 있습니다.'}}</textarea>
     <div class="markdown preview"></div>
     <hr>
     <div>
+        {%-if for_class_activity-%}
+        {%-else-%}
         <p>첨부파일</p>
         <input type="file" name="attached">
+        {%-endif-%}
         <button type="submit">게시</button>
     </div>
 </form>

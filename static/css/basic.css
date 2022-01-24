@@ -3,6 +3,12 @@
     margin: 0;
     padding: 0;
 }
+textarea,
+input,
+select,
+option {
+    font-family: inherit;
+}
 figcaption {
     font-size: smaller;
 }

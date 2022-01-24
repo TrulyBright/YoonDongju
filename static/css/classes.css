@@ -1,0 +1,26 @@
+#main {
+    min-height: 70%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    column-gap: 1%;
+    row-gap: 1%;
+    background-color: snow;
+    padding: 2%;
+    box-sizing: border-box;
+}
+#main a {
+    display: flex;
+    padding: 3%;
+    background-color: #FFDDDD;
+    border: 1px solid #FFDDDD;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+#main a:hover {
+    text-decoration: none;
+    background-color: snow;
+}
+#main a div {
+    margin: 0 10%;
+}

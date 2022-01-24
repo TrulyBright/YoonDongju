@@ -1,3 +1,4 @@
+from multiprocessing import Condition
 import uuid
 import sqlite3
 import pytz
@@ -32,7 +33,7 @@ def render_template(template_name_or_list: str, **context):
         **context
     )
 
-def index() -> str:
+def index():
     """첫 화면."""
     with sqlite3.connect(f"sql/posts.db") as DB:
         query = f"SELECT no, title, published FROM posts WHERE type='notice' ORDER BY no DESC LIMIT 4"
@@ -40,7 +41,7 @@ def index() -> str:
         recent_notices = [{col_name:row[i] for i, col_name in enumerate(("no", "title", "published"))} for row in fetched]
         return render_template("index.html", recent_notices=recent_notices, len=len)
 
-def about() -> str:
+def about():
     """소개 화면."""
     with sqlite3.connect(f"sql/posts.db") as DB:
         query = f"SELECT author, published, content FROM posts WHERE type='about'"
@@ -125,8 +126,8 @@ def write_post(no: int=None):
             if editing:
                 DB.execute(query, [title, content, author, published, attached] if editing_about else [title, content, author, published, attached, no])
             else:
-                DB.execute(query, ["about" if editing_about else "notice", title, content, author, published, attached])
-            return redirect("/about" if editing_about else f"/notices/{DB.execute('SELECT no FROM posts order by no desc limit 1').fetchone()[0]}")
+                cursor = DB.execute(query, ["about" if editing_about else "notice", title, content, author, published, attached])
+            return redirect("/about" if editing_about else f"/notices/{no if editing else cursor.lastrowid}")
 
 def delete_post(no: int): # TODO: 권한
     with sqlite3.connect("sql/posts.db") as DB:
@@ -140,7 +141,7 @@ def delete_post(no: int): # TODO: 권한
 def download(name: str):
     return send_from_directory(app.config["UPLOAD_DIR"], name)
 
-def notices(no: Optional[int]=None) -> str:
+def notices(no: Optional[int]=None):
     """`no`번째 공지를 열람합니다. `no==None`이면 공지 목록을 봅니다."""
     with sqlite3.connect(f"sql/posts.db") as DB:
         if no is not None:
@@ -165,7 +166,7 @@ def notices(no: Optional[int]=None) -> str:
                 math=math
             )
 
-def magazines(no: Optional[int]=None) -> str:
+def magazines(no: Optional[int]=None):
     """`no`호 문집 정보를 열람합니다. `no==None`이면 문집 목록을 봅니다."""
     NAME = magazines.__name__
     with sqlite3.connect(f"sql/{NAME}.db") as DB:
@@ -181,16 +182,164 @@ def magazines(no: Optional[int]=None) -> str:
             fetched = DB.execute(query, [NAME, offset*10]).fetchall()
             return render_template("magazine-list.html", fetched=fetched)
 
-def sector(name: Optional[str]=None) -> str:
-    """코드가 `name`인 분반 정보를 열람합니다. `name==None`이면 분반 목록을 봅니다.
-
-    `name` 목록:
-        시반: `poetry`
-        소설반: `novella`
-        합평반: `critique`
-        독서반: `reading`
+def classes(name: Optional[str]=None, no: Optional[int]=None):
+    """코드가 `name`인 분반의 no번째 활동 기록을 봅니다.
+    `no==None`이면 코드가 `name`인 분반의 활동 목록을 봅니다.
+    `name`도 `None`이면 분반 목록을 봅니다.
     """
-    return render_template("sector.html", name=name)
+    # TODO: 하드코딩 제거
+    categories = {"시반": "poetry", "소설반": "novel", "합평반": "critique", "독서반": "reading"}
+    description = {
+        "시반": "시를 씁니다.",
+        "소설반": "소설을 씁니다.",
+        "합평반": "회원이 쓴 작품을 합평합니다. 회원들이 평을 하는 동안 작가는 단 한 마디도 할 수 없습니다.",
+        "독서반": "기성 작가가 쓴 작품을 읽고 감상을 나눕니다.",
+    }
+    moderator = {
+        "시반": "이상명",
+        "소설반": "이주한",
+        "합평반": "석범진",
+        "독서반": "이진명",
+    }
+    schedule = {
+        "시반": "모요일 모 시",
+        "소설반": "모요일 모 시",
+        "합평반": "모요일 모 시",
+        "독서반": "모요일 모 시",
+    }
+    if name is None:
+        return render_template(
+            "classes.html",
+            categories=categories,
+            description=description,
+            moderator=moderator,
+            schedule=schedule,
+        )
+    with sqlite3.connect("sql/class-archive.db") as DB, sqlite3.connect(f"sql/participants-{name}.db") as participantsDB:
+        if no is None:
+            skip = int(request.args.get("skip", 0))
+            query = f"""
+            SELECT
+                no,
+                moderator,
+                conducted,
+                topic
+            FROM {name}
+            ORDER BY no
+            DESC
+            LIMIT 10
+            OFFSET ?
+            """
+            fetched = DB.execute(query, [skip]).fetchall()
+            data = [{
+                col_name:row[i]
+                for i, col_name
+                in enumerate(("no", "moderator", "conducted", "topic"))
+                } for row in fetched
+            ]
+            for row in data:
+                row["number_of_participants"] = participantsDB.execute(f"SELECT COUNt(0) FROM '{row['no']}'").fetchone()[0]
+            return render_template(
+                "class-list.html",
+                categories=categories,
+                this_is={value:key for key, value in categories.items()}[name],
+                data=data,
+                list_size=DB.execute(f"SELECT COUNT(0) FROM {name}").fetchone()[0],
+                skip=skip,
+                math=math
+            )
+        query = f"""
+        SELECT no, moderator, conducted, topic, content, hide_participants
+        FROM {name}
+        WHERE no=?
+        """
+        row = DB.execute(query, [no]).fetchone()
+        if row is None:
+            abort(NOT_FOUND)
+        query = f"""
+        SELECT name from "{no}"
+        """
+        participants = [row[0] for row in participantsDB.execute(query).fetchall()]
+        data = {col_name:row[i] for i, col_name in enumerate(["no", "moderator", "conducted", "topic", "content", "hide_participants"])}
+        if data["hide_participants"]:
+            pass # TODO: 임원진에게만 보이도록
+        data["participants"] = participants
+        return render_template("class-activity-post.html", categories=categories, data=data, this_is={value:key for key, value in categories.items()}[name])
 
-def workspace() -> str:
+def write_class_activity(name: str, no: Optional[int]=None):
+    editing = request.path.endswith("/edit")
+    categories = {"시반": "poetry", "소설반": "novel", "합평반": "critique", "독서반": "reading"}
+    if request.method == "GET":
+        if editing:
+            with sqlite3.connect(f"sql/class-archive.db") as DB, sqlite3.connect(f"sql/participants-{name}.db") as participantsDB:
+                query = f"""
+                SELECT no, moderator, conducted, topic, content
+                FROM {name}
+                WHERE no=?
+                """
+                fetched = DB.execute(query, [no]).fetchone()
+                if fetched is None:
+                    abort(NOT_FOUND)
+                data = {key:fetched[i] for i, key in enumerate(("no", "moderator", "conducted", "topic", "content"))}
+                query = f"""
+                SELECT name
+                FROM "{no}"
+                """
+                data["participants"] = [row[0] for row in participantsDB.execute(query).fetchall()]
+                return render_template(
+                    "write.html",
+                    categories=categories,
+                    this_is={value:key for key, value in categories.items()}[name],
+                    data=data,
+                    editing=editing,
+                    for_class_activity=True,
+                    enumerate=enumerate
+                )
+        return render_template("write.html", categories=categories, this_is={value:key for key, value in categories.items()}[name], editing=False, for_class_activity=True)
+    elif request.method == "POST":
+        topic = request.form["topic"]
+        conducted = request.form["conducted"]
+        content = request.form["content"]
+        participants = [participant_name for form_name, participant_name in request.form.items() if form_name.startswith("participant")]
+        hide_participants = bool(int(request.form["hide-participants"]))
+        with sqlite3.connect("sql/class-archive.db") as DB, sqlite3.connect(f"sql/participants-{name}.db") as participantsDB:
+            query = f"""
+            UPDATE {name}
+            SET topic=?,
+                conducted=?,
+                content=?,
+                hide_participants=?
+            WHERE no=?
+            """ if editing else f"""
+            INSERT INTO {name}
+            (topic, conducted, content, moderator, hide_participants)
+            VALUES (?, ?, ?, ?, ?)
+            """
+            cursor = DB.execute(query, [topic, conducted, content, no, hide_participants] if editing else [topic, conducted, content, "sample moderator", hide_participants])
+            if editing:
+                query = f"""
+                DROP TABLE IF EXISTS "{no}"
+                """
+                participantsDB.execute(query)
+            query = f"""
+            CREATE TABLE "{no if editing else DB.execute(f"SELECT COUNT(0) FROM {name}").fetchone()[0]}" (
+                name text not null -- TODO: 학번으로 대체? 그러나 분반장이 회원에게 학번을 물어봐야 하는 번거로움이 있음.
+            )
+            """
+            participantsDB.execute(query)
+            query = f"""
+            INSERT INTO "{no if editing else DB.execute(f"SELECT COUNT(0) FROM {name}").fetchone()[0]}" (name)
+            VALUES {", ".join(["(?)"]*len(participants))}
+            """
+            participantsDB.execute(query, participants)
+            return redirect(f"/classes/{name}/{no if editing else cursor.lastrowid}")
+
+def delete_class_activity(name: str, no: int):
+    with sqlite3.connect("sql/class-archive.db") as DB, sqlite3.connect(f"sql/participants-{name}.db") as participantsDB:
+        DB.execute(f"DELETE FROM {name} WHERE no=?", [no])
+        participantsDB.execute(f"DROP TABLE '{no}'")
+        return "meaningless dummy value"
+
+def workspace():
     """관리자 화면."""
+    return render_template("workspace.html")

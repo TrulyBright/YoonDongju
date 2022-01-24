@@ -1,0 +1,49 @@
+{% extends "board-layout.html" %}
+{% block subtitle %} :: {{this_is}}{% endblock %}
+{%-block additional_css-%}
+<link rel="stylesheet" href="/static/css/board-layout.css">
+<link rel="stylesheet" href="/static/css/class-list.css">
+{%-endblock-%}
+{%-block categories-%}
+{%-for name, suburl in categories.items()-%}
+<li><a href="/classes/{{suburl}}">{{name}}</a></li>
+{%-endfor-%}
+{%-endblock-%}
+{%-block content-%}
+<div id="list">
+    <div class="head">
+        <div>회차</div>
+        <div>주제</div>
+        <div>분반장</div>
+        <div>참여인원</div>
+        <div>활동일</div>
+    </div>
+    {%-for row in data-%}
+        <div class="centered">{{row["no"]}}</div>
+        <div><a href="/classes/{{categories[this_is]}}/{{row['no']}}">{{row["topic"]}}</a></div>
+        <div class="centered">{{row["moderator"]}}</div>
+        <div class="centered">{{row["number_of_participants"]}}</div>
+        <div class="centered">{{row["conducted"]}}</div>
+    {%-endfor-%}
+</div>
+<div id="bottom-bar">
+    <div id="list-navigator">
+        {%-set current_index = math.ceil((skip+1)/10)-1-%} <!--현재 current_index번 목록에 있음-->
+        {%-set list_range_start = math.ceil((skip+1)/100)-1-%} <!--이 목록 목록이 list_range_start번 목록에서 시작함-->
+        {%-if list_range_start != 0-%}
+            <button type="button"><a href="/classes/{{categories[this_is]}}?skip={{(list_range_start-1)*100}}">이전</a></button>
+        {%-endif-%}
+        {%-for i in range(0, 100, 10)-%}
+            {%-if list_range_start*100+i <= list_size-%}
+                <button type="button" class={{"current-index" if current_index == list_range_start*10+i//10 else ""}}>
+                    <a href="/classes/{{categories[this_is]}}?skip={{list_range_start*100+i}}">{{list_range_start*10+i//10+1}}</a>
+                </button>
+            {%-endif-%}
+        {%-endfor-%}
+        {%-if (list_range_start+1)*100 < list_size %}
+            <button type="button"><a href="/classes/{{categories[this_is]}}?skip={{(list_range_start+1)*100}}">다음</a></button>
+        {%-endif-%}
+    </div>
+    <button type="button"><a href="/classes/{{categories[this_is]}}/write">글쓰기</a></button>
+</div>
+{%-endblock-%}

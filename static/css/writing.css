@@ -29,3 +29,10 @@
 #board form input::placeholder {
     font-family: inherit;
 }
+.for-class-activity {
+    grid-column: 1 / -1;
+}
+input[type="checkbox"],
+select {
+    margin-left: 5px;
+}
