@@ -1,4 +1,3 @@
-from multiprocessing import Condition
 import uuid
 import sqlite3
 import pytz

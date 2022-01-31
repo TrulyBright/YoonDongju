@@ -1,6 +1,11 @@
 {% extends "board-layout.html" %}
 {% block subtitle %} :: {{this_is}} - {{data["title"]}}{% endblock %}
-{% block content %}
+{%-block categories-%}
+{%-for name, suburl in categories.items()-%}
+<li><a href="/classes/{{suburl}}">{{name}}</a></li>
+{%-endfor-%}
+{%-endblock-%}
+{%-block content-%}
 <h1>{{data["topic"]}}</h1>
 <div class="function-bar">
     <div class="author-date">분반장 {{data["moderator"]}} | 활동일 {{data["conducted"]}}</div>
