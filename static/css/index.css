@@ -17,7 +17,6 @@
     row-gap: 5%;
 }
 #main > div {
-    width: 90%;
     padding: 5%;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
@@ -47,10 +46,7 @@
     height: 100%;
     display: inline-block;
 }
-#recent-magazines li:last-child a {
-    height: calc(100%);
-}
-@media only screen and (min-width: 320px) and (max-width: 480px) {
+@media only screen and (max-width: 480px) {
     #front-image-container {
         height: auto;
     }
@@ -62,20 +58,24 @@
     }
     #main {
         grid-template-columns: 1fr;
-        grid-template-rows: auto;
+        grid-template-rows: unset;
+        height: unset;
+    }
+    #recent-magazines {
+        height: 70%;
     }
 }
-@media only screen and (min-width: 481px) and (max-width: 768px) {
+@media only screen and (max-width: 768px) {
     .volumes {
         grid-template-columns: 1fr 1fr 1fr;
     }
 }
-@media only screen and (min-width: 769px) and (max-width: 1024px) {
+@media only screen and (max-width: 1024px) {
     .volumes {
         grid-template-columns: 1fr 1fr 1fr 1fr;
     }
 }
-@media only screen and (min-width: 1025px) and (max-width: 1200px) {
+@media only screen and (max-width: 1200px) {
     .volumes {
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     }
