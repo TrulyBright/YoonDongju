@@ -14,21 +14,39 @@
 {%-block header-%}
 <header>
     <h1><a href="/">연세문학회</a></h1>
-    <a href="/about">소개</a>
-    <div id="class-list-trigger">
-        <a href="/classes">분반</a>
-        <ul id="class-list">
-            <li><a href="/classes/poetry">시반</a></li>
-            <li><a href="/classes/novel">소설반</a></li>
-            <li><a href="/classes/critique">합평반</a></li>
-            <li><a href="/classes/reading">독서반</a></li>
-        </ul>
+    <div id="desktop-header-menus">
+        <a href="/about">소개</a>
+        <div class="class-list-trigger">
+            <a href="/classes">분반</a>
+            <ul class="class-list">
+                <li><a href="/classes/poetry">시반</a></li>
+                <li><a href="/classes/novel">소설반</a></li>
+                <li><a href="/classes/critique">합평반</a></li>
+                <li><a href="/classes/reading">독서반</a></li>
+            </ul>
+        </div>
+        <a href="/magazines">문집</a>
+        <a href="/notices">공지</a>
+        <!-- TODO: 관리 탭은 임원진에게만 보이게 -->
+        <a href="/admin">관리</a>
     </div>
-    <a href="/magazines">문집</a>
-    <a href="/notices">공지</a>
-    <!-- TODO: 관리 탭은 임원진에게만 보이게 -->
-    <a href="/admin">관리</a>
-    <i id="see-more" class="material-icons">more_vert</i>
+    <div id="mobile-header-menus">
+        <i id="see-more" class="material-icons">more_vert</i>
+        <a href="/about">소개</a>
+        <div class="class-list-trigger">
+            <a>분반</a>
+            <div class="class-list">
+                <a href="/classes/poetry">시반</a>
+                <a href="/classes/novel">소설반</a>
+                <a href="/classes/critique">합평반</a>
+                <a href="/classes/reading">독서반</a>
+            </div>
+        </div>
+        <a href="/magazines">문집</a>
+        <a href="/notices">공지</a>
+        <!-- TODO: 관리 탭은 임원진에게만 보이게 -->
+        <a href="/admin">관리</a>
+    </div>
 </header>
 {%-endblock-%}
 {%-block main-%}

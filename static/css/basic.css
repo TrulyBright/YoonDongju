@@ -86,19 +86,36 @@ header {
     padding: 0 2%;
     font-weight: bold;
 }
-header a {
-    margin: 0 15px;
-}
-header > div {
-    margin: 0 15px;
-}
 header a:hover {
     text-decoration: none;
 }
-#see-more {
-    display: none;
+#desktop-header-menus {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
-#class-list {
+#desktop-header-menus a {
+    margin: 0 15px;
+}
+#mobile-header-menus {
+    display: none;
+    flex-direction: column;
+    width: 100vw;
+    border: none;
+}
+#mobile-header-menus > * {
+    display: none;
+    text-align: center;
+}
+#mobile-header-menus:hover > * {
+    display: block;
+}
+#see-more {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+}
+.class-list {
     display: none;
     position: absolute;
     list-style: none;
@@ -106,13 +123,20 @@ header a:hover {
     border-style: solid;
     background: snow;
 }
-#class-list li:hover {
+#mobile-header-menus .class-list {
+    position: unset;
+    border: none;
+}
+#mobile-header-menus .class-list a {
+    display: block;
+}
+.class-list li:hover {
     border: 1px solid #FFDDDD;
 }
-#class-list-trigger {
+.class-list-trigger {
     margin: unset;
 }
-#class-list-trigger:hover #class-list {
+.class-list-trigger:hover .class-list {
     display: block;
 }
 footer {
@@ -195,10 +219,8 @@ footer a:hover {
     body {
         height: unset;
     }
-    header > :not(h1):not(#see-more) {
-        display: none;
-    }
     header {
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         position: sticky;
@@ -208,6 +230,12 @@ footer a:hover {
         margin: 0 0;
         box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);
     }
+    #desktop-header-menus {
+        display: none;
+    }
+    #mobile-header-menus {
+        display: flex;
+    }
     #see-more {
         display: block;
     }
@@ -215,10 +243,8 @@ footer a:hover {
         grid-template-columns: 1fr;
     }
 }
-@media only screen and (max-width: 768px) {
-    .volumes {
-        grid-template-columns: 1fr 1fr 1fr;
-    }
+@media only screen and (min-width: 481px) and (max-width: 768px) {
+
 }
 @media only screen and (min-width: 769px) and (max-width: 1024px) {
     .volumes {
