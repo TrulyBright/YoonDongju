@@ -24,3 +24,8 @@
 #main a div {
     margin: 0 10%;
 }
+@media only screen and (min-width: 481px) and (max-width: 768px) {
+    #main {
+        grid-template-columns: 1fr 1fr;
+    }
+}
