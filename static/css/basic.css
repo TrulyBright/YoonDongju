@@ -188,3 +188,37 @@ footer a:hover {
     width: 90%;
     margin: 1% 5%;
 }
+@media only screen and (min-width: 320px) and (max-width: 480px) {
+    header > :not(h1):not(i) {
+        display: none;
+    }
+    header {
+        justify-content: center;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        background-color: #FFDDDD;
+        padding: 1%;
+        width: 100%;
+        margin: 0 0;
+        box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);
+    }
+    footer {
+
+    }
+}
+@media only screen and (min-width: 481px) and (max-width: 768px) {
+    .volumes {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+@media only screen and (min-width: 769px) and (max-width: 1024px) {
+    .volumes {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+}
+@media only screen and (min-width: 1025px) and (max-width: 1200px) {
+    .volumes {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    }
+}

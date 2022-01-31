@@ -165,21 +165,17 @@ def notices(no: Optional[int]=None):
                 math=math
             )
 
-def magazines(no: Optional[int]=None):
-    """`no`호 문집 정보를 열람합니다. `no==None`이면 문집 목록을 봅니다."""
-    NAME = magazines.__name__
-    with sqlite3.connect(f"sql/{NAME}.db") as DB:
-        if no is not None:
-            query = f"SELECT *FROM {NAME} WHERE no=?"
-            fetched = DB.execute(query, [no]).fetchone()
-            if fetched is None: # no번째 문집이 없음.
-                abort(NOT_FOUND)
-            return render_template("magazine.html", fetched=fetched)
-        else:
-            offset = int(request.args.get("offset", 0))
-            query = f"SELECT id, title, author, attached FROM {NAME} ORDER BY no DESC LIMIT 10 OFFSET ?"""
-            fetched = DB.execute(query, [NAME, offset*10]).fetchall()
-            return render_template("magazine-list.html", fetched=fetched)
+def magazines():
+    """문집 목록을 봅니다."""
+    with sqlite3.connect(f"sql/magazines.db") as DB, sqlite3.connect("sql/contents-per-magazines.db") as contentsDB:
+        offset = int(request.args.get("offset", 0))
+        query = f"SELECT no, cover, published FROM magazines ORDER BY no DESC LIMIT 10 OFFSET ?"""
+        fetched = DB.execute(query, [offset*10]).fetchall()
+        data = [{col:row[i] for i, col in enumerate(("no", "cover", "published"))} for row in fetched]
+        for row in data:
+            fetched = contentsDB.execute(f"SELECT author, title, type, language FROM {row['no']}").fetchall()
+            row["contents"] = [{col:work_row[i] for i, col in enumerate(("author", "title", "type", "language"))} for work_row in row]
+        return render_template("magazines.html", data=data, range=range)
 
 def classes(name: Optional[str]=None, no: Optional[int]=None):
     """코드가 `name`인 분반의 no번째 활동 기록을 봅니다.

@@ -32,6 +32,13 @@ query = {
             hide_participants bool not null
         )
         """ for name in {"poetry", "novel", "critique", "reading"}],
+    "magazines": """
+        CREATE TABLE IF NOT EXISTS magazines (
+            no integer not null primary key,
+            cover text not null,
+            published date not null
+        )
+    """
 }
 
 def initalize():
