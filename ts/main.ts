@@ -1,5 +1,6 @@
 const joinModal = document.querySelector("#join-modal");
 const modalOverlay = document.querySelector("#overlay-on-modal-up");
+const seeMore = document.querySelector("#see-more");
 
 document.querySelector("#join-link").addEventListener("click", (event)=>{
     joinModal.classList.toggle("hidden");
@@ -10,4 +11,7 @@ document.querySelectorAll(".close-button").forEach((button)=>{
         (button.parentNode as HTMLElement).classList.toggle("hidden");
         modalOverlay.classList.toggle("hidden");
     });
+});
+seeMore.addEventListener("click", (event)=>{
+    document.querySelector("#mobile-header-menus").classList.toggle("open");
 });
