@@ -1,10 +1,10 @@
 #main {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    column-gap: 1%;
-    row-gap: 1%;
+    column-gap: 6px;
+    row-gap: 4px;
     background-color: snow;
-    padding: 2%;
+    padding: 12px;
     box-sizing: border-box;
 }
 #main a {
