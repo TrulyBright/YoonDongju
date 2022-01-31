@@ -6,9 +6,6 @@
     background: white;
     border-radius: 15px;
 }
-#front-mobile {
-    display: none;
-}
 #main {
     height: 40%;
     display: grid;
@@ -49,12 +46,6 @@
 @media only screen and (max-width: 480px) {
     #front-image-container {
         height: auto;
-    }
-    #front-mobile {
-        display: block;
-    }
-    #front-desktop {
-        display: none;
     }
     #main {
         grid-template-columns: 1fr;
