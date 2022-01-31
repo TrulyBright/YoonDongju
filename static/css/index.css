@@ -42,6 +42,7 @@
 #recent-magazines li {
     height: 100%;
     display: inline-block;
+    margin: 0;
 }
 @media only screen and (max-width: 480px) {
     #front-image-container {
