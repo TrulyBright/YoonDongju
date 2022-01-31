@@ -82,7 +82,6 @@ header {
     display: flex;
     flex-direction: row;
     align-items: center;
-    height: 5%;
     margin: 2.5% 5%;
     padding: 0 2%;
     font-weight: bold;
@@ -188,7 +187,11 @@ footer a:hover {
     width: 90%;
     margin: 1% 5%;
 }
-@media only screen and (min-width: 320px) and (max-width: 480px) {
+@media only screen and (max-width: 480px) {
+    html,
+    body {
+        height: unset;
+    }
     header > :not(h1):not(i) {
         display: none;
     }
@@ -207,7 +210,7 @@ footer a:hover {
 
     }
 }
-@media only screen and (min-width: 481px) and (max-width: 768px) {
+@media only screen and (max-width: 768px) {
     .volumes {
         grid-template-columns: 1fr 1fr 1fr;
     }
