@@ -4,13 +4,11 @@
 {%-if nonexistent-%}
 <div class="function-bar">
     <div class="author-date"></div>
-    <div>
-        <button type="button"><a href="/about/write">글쓰기</a></button>
-    </div>
+    <div><button type="button"><a href="/about/write">글쓰기</a></button></div>
 </div>
 {%-else-%} <!--TODO: 관리자에게만 function bar가 보이게-->
 <div class="function-bar">
-    <div class="author-date">최종 수정자: {{data["author"]}} | 최종 수정일: {{data["published"]}}</div>
+    <div class="author-date"><div>최종 수정자: {{data["author"]}}</div><div>최종 수정일: {{data["published"]}}</div></div>
     <div><button type="button"><a href="/about/edit">수정</a></button></div>
 </div>
 {%-endif-%}

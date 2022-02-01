@@ -83,6 +83,11 @@ button.current-index {
     flex-direction: row;
     justify-content: space-between;
 }
+.function-bar .author-date {
+    display: flex;
+    flex-direction: row;
+    column-gap: 15px;
+}
 @media only screen and (max-width: 480px) {
     #main {
         grid-template-columns: 1fr;
@@ -92,5 +97,11 @@ button.current-index {
     #list {
         grid-template-columns: auto auto auto auto;
         font-size: small;
+    }
+    .function-bar .author-date {
+        flex-direction: column;
+    }
+    .markdown blockquote {
+        margin: unset;
     }
 }

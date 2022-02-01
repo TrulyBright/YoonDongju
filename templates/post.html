@@ -3,7 +3,7 @@
 {% block content %}
 <h1>{{data["title"]}}</h1>
 <div class="function-bar">
-    <div class="author-date">{{data["author"]}} | {{data["published"]}}</div>
+    <div class="author-date"><div>작성자 {{data["author"]}}</div><div>게시일 {{data["published"]}}</div></div>
     <div><button type="button"><a href="/{{categories[this_is]}}/{{data['no']}}/edit">수정</a></button><button type="button" id="delete-button">삭제</button></div>
 </div>
 <hr>
