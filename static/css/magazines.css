@@ -7,8 +7,8 @@
 .volumes {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-    column-gap: 1%;
-    row-gap: 1%;
+    column-gap: 15px;
+    row-gap: 15px;
 }
 .volume-item {
     display: flex;
