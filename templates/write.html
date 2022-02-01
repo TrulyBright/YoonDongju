@@ -33,11 +33,12 @@
     {%-if for_class_activity-%}
     <div class="for-class-activity">
         <h3>활동일</h3>
-        <input type="date" name="conducted" value={{data['conducted'] if editing else ""}} required>
+        <input type="date" name="conducted" value="{{data['conducted'] if editing else ""}}" required>
     </div>
     <div class="for-class-activity" id="participants">
         <h3>참여자 명단</h3>
         <h5>분반장 이름도 적습니다.</h5>
+        <h6>추가는 Tab키로 합니다.</h6>
         {%-if editing-%}
             {%-for i, p in enumerate(data["participants"])-%}
                 <div id="participant{{i+1}}">
@@ -45,12 +46,9 @@
                     <button type="button" onclick="document.querySelector('#participants').removeChild(document.querySelector('#participant{{i+1}}'))">제거</button>
                 </div>
             {%-endfor-%}
-        {%-else-%}
-            <input type="text" name="participant1" placeholder="참여자" required>
         {%-endif-%}
     </div>
     <div class="for-class-activity">
-        <button type="button" id="add-participant">참여자 추가</button>
         <p><label for="hide-participants">참여자 명단을<select name="hide-participants">
             <option value="1" selected>회원에게 공개</option>
             <option value="0">임원진에게만 공개</option>

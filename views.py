@@ -166,16 +166,72 @@ def notices(no: Optional[int]=None):
             )
 
 def magazines():
-    """문집 목록을 봅니다."""
     with sqlite3.connect(f"sql/magazines.db") as DB, sqlite3.connect("sql/contents-per-magazines.db") as contentsDB:
-        offset = int(request.args.get("offset", 0))
-        query = f"SELECT no, cover, published FROM magazines ORDER BY no DESC LIMIT 10 OFFSET ?"""
-        fetched = DB.execute(query, [offset*10]).fetchall()
-        data = [{col:row[i] for i, col in enumerate(("no", "cover", "published"))} for row in fetched]
-        for row in data:
-            fetched = contentsDB.execute(f"SELECT author, title, type, language FROM {row['no']}").fetchall()
-            row["contents"] = [{col:work_row[i] for i, col in enumerate(("author", "title", "type", "language"))} for work_row in row]
+        query = f"SELECT no, year, season, published, cover FROM magazines ORDER BY no DESC"""
+        fetched = DB.execute(query).fetchall()
+        data = [{col:row[i] for i, col in enumerate(("no", "year", "season", "published", "cover"))} for row in fetched]
+        for volume in data:
+            query = f"""
+            SELECT type, author, title, language
+            FROM "{volume["no"]}"
+            """
+            volume["contents"] = [{col:row[i] for i, col in enumerate(("type", "author", "title", "language"))} for row in contentsDB.execute(query).fetchall()]
         return render_template("magazines.html", data=data, range=range)
+
+def write_magazine(no: int=None):
+    editing = request.path.endswith("/edit")
+    with sqlite3.connect("sql/magazines.db") as DB, sqlite3.connect("sql/contents-per-magazines.db") as contentsDB:
+        if request.method == "GET":
+            return render_template("write-magazine.html")
+        elif request.method == "POST":
+            year = request.form["year"]
+            season = {"sangbangi":1, "habangi": 2}[request.form["season"]]
+            published = request.form["published"]
+            cover = str(upload(request.files["cover"]))
+            types = [type for key, type in request.form.items() if key.endswith("type")]
+            authors = [author for key, author in request.form.items() if key.endswith("author")]
+            titles = [title for key, title in request.form.items() if key.endswith("title")]
+            languages = [language for key, language in request.form.items() if key.endswith("language")]
+            contents = [[types[i], authors[i], titles[i], languages[i]] for i in range(len(authors))]
+            query = f"""
+            UPDATE magazines
+            SET year=?,
+                season=?,
+                published=?,
+                cover=?
+            WHERE no=?
+            """ if editing else """
+            INSERT INTO magazines
+            (year, season, published, cover)
+            VALUES (?, ?, ?, ?)
+            """
+            if editing:
+                DB.execute(query, [year, season, published, cover, no])
+            else:
+                cursor = DB.execute(query, [year, season, published, cover])
+            if editing:
+                query = f"""
+                DROP TABLE IF EXISTS {no}
+                """
+                contentsDB.execute(query)
+            query = f"""
+            CREATE TABLE "{no if editing else DB.execute(f"SELECT COUNT(0) FROM magazines").fetchone()[0]}" (
+                type text not null,
+                author text not null,
+                title text not null,
+                language text not null
+            )
+            """
+            contentsDB.execute(query)
+            for c in contents:
+                query = f"""
+                INSERT INTO "{no if editing else DB.execute(f"SELECT COUNT(0) FROM magazines").fetchone()[0]}"
+                (type, author, title, language)
+                VALUES ({", ".join(["?"]*len(c))})
+                """
+                print(query)
+                contentsDB.execute(query, c)
+            return redirect(f"/magazines#vol{no if editing else cursor.lastrowid}")
 
 def classes(name: Optional[str]=None, no: Optional[int]=None):
     """코드가 `name`인 분반의 no번째 활동 기록을 봅니다.
@@ -338,3 +394,6 @@ def delete_class_activity(name: str, no: int):
 def workspace():
     """관리자 화면."""
     return render_template("workspace.html")
+
+def uploaded(filename: str):
+    return send_from_directory(app.config["UPLOAD_DIR"], filename)

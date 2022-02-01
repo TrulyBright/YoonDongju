@@ -6,6 +6,7 @@
     background-color: snow;
     padding: 12px;
     box-sizing: border-box;
+    border-radius: 15px;
 }
 #main a {
     display: flex;

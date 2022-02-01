@@ -1,0 +1,36 @@
+{%-extends "board-layout.html"-%}
+{% block subtitle %} :: 문집 추가 {% endblock %}
+{%-block additional_css-%}
+<link rel="stylesheet" href="/static/css/board-layout.css">
+<link rel="stylesheet" href="/static/css/write-magazine.css">
+{%-endblock-%}
+{%-block categories-%}
+<li><a href="/magazines">문집</a></li>
+{%-endblock-%}
+{%-block content-%}
+<form action="
+    {%-if editing-%}
+        /magazines/{{no}}/edit
+    {%-else-%}
+        /magazines/write
+    {%-endif-%}
+" method="post" enctype="multipart/form-data">
+    <h1>문집 {{"정보 수정" if editing else "추가"}}</h1>
+    <input type="number" name="year" placeholder="연도" required>
+    <div>
+        <label for="sangbangi">상반기</label>
+        <input type="radio" name="season" value="sangbangi" required>
+        <label for="habangi">하반기</label>
+        <input type="radio" name="season" value="habangi">
+    </div>
+    <label for="published">발행일 <input type="date" name="published" required></label>
+    <label for="cover">앞표지 <input type="file" name="cover" required></label>
+    <div>
+        <h3>수록작</h3>
+        <h6>추가는 Tab키로 합니다.</h6>
+        <div id="published-content-list"></div>
+    </div><input type="submit" value="게시"></form>
+{%-endblock-%}
+{%-block scripts-%}
+<script src="/static/js/write-magazine.js"></script>
+{%-endblock-%}

@@ -35,6 +35,8 @@ query = {
     "magazines": """
         CREATE TABLE IF NOT EXISTS magazines (
             no integer not null primary key,
+            year integer not null,
+            season text not null,
             cover text not null,
             published date not null
         )

@@ -1,0 +1,8 @@
+#board form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+#board form > * {
+    width: fit-content;
+}

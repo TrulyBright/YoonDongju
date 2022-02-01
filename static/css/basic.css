@@ -234,3 +234,8 @@ footer a:hover {
         display: flex !important;
     }
 }
+@media only screen and (max-width: 480px) {
+    body {
+        font-size: small;
+    }
+}
