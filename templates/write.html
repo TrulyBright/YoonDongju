@@ -4,6 +4,11 @@
 <link rel="stylesheet" href="/static/css/board-layout.css">
 <link rel="stylesheet" href="/static/css/writing.css">
 {%-endblock-%}
+{%-block categories-%}
+{%-for name, suburl in categories.items()-%}
+<li><a href="/classes/{{suburl}}">{{name}}</a></li>
+{%-endfor-%}
+{%-endblock-%}
 {% block content %}
 <form action="
     {%-if editing-%}

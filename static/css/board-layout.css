@@ -22,14 +22,14 @@
     grid-template-columns: 1fr 7fr 1fr 1fr;
 }
 #list .head {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: 1fr 7fr 1fr 1fr;
-    display: grid;
     background: #FFDDDD;
     text-align: center;
     font-weight: 900;
+}
+#list .head:first-child {
     border-top-left-radius: 15px;
+}
+#list .head.last {
     border-top-right-radius: 15px;
 }
 #list > div:not(.head),
@@ -81,4 +81,19 @@ button.current-index {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+}
+@media only screen and (max-width: 480px) {
+    #main {
+        grid-template-columns: 1fr;
+        min-height: unset;
+        row-gap: 30px;
+    }
+    #list {
+        grid-template-columns: auto auto auto auto;
+        font-size: small;
+    }
+    .markdown blockquote {
+        padding-right: unset;
+        margin: unset;
+    }
 }

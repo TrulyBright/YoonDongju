@@ -36,3 +36,14 @@ input[type="checkbox"],
 select {
     margin-left: 5px;
 }
+@media only screen and (max-width: 480px) {
+    .preview {
+        display: none;
+    }
+    #board form {
+        grid-template-columns: 1fr;
+    }
+    #board form textarea {
+        min-height: 300px;
+    }
+}

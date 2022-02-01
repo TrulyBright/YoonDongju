@@ -2,12 +2,10 @@
 {% block subtitle %} :: {{this_is}}{% endblock %}
 {%-block content-%}
 <div id="list">
-    <div class="head">
-        <div>번호</div>
-        <div>제목</div>
-        <div>작성자</div>
-        <div>게시일</div>
-    </div>
+    <div class="head">번호</div>
+    <div class="head">제목</div>
+    <div class="head">작성자</div>
+    <div class="head last">게시일</div>
     {%-for row in data-%}
         {%-for col_name, col_data in row.items()-%}
             <div class="{{'centered' if col_name!='title' else ''}}">

@@ -11,13 +11,11 @@
 {%-endblock-%}
 {%-block content-%}
 <div id="list">
-    <div class="head">
-        <div>회차</div>
-        <div>주제</div>
-        <div>분반장</div>
-        <div>참여인원</div>
-        <div>활동일</div>
-    </div>
+    <div class="head">회차</div>
+    <div class="head">주제</div>
+    <div class="head">분반장</div>
+    <div class="head">참여자</div>
+    <div class="head last">활동일</div>
     {%-for row in data-%}
         <div class="centered">{{row["no"]}}</div>
         <div><a href="/classes/{{categories[this_is]}}/{{row['no']}}">{{row["topic"]}}</a></div>
