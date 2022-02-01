@@ -65,6 +65,7 @@ hr {
 .markdown blockquote {
     box-sizing: border-box;
     border-left: .25em solid #dfe2e5;
+    margin-left: 5px;
     padding: 0 1em;
 }
 .markdown a {
@@ -91,9 +92,5 @@ button.current-index {
     #list {
         grid-template-columns: auto auto auto auto;
         font-size: small;
-    }
-    .markdown blockquote {
-        padding-right: unset;
-        margin: unset;
     }
 }
