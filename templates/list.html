@@ -36,7 +36,9 @@
             <button type="button"><a href="/notices?skip={{(list_range_start+1)*100}}">다음</a></button>
         {%-endif-%}
     </div>
+    {%-if current_user.is_mod()-%}
     <button type="button"><a href="/notices/write">글쓰기</a></button>
+    {%-endif-%}
 </div>
 {%-endblock-%}
 {%-block scripts-%}

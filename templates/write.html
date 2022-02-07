@@ -42,7 +42,7 @@
         {%-if editing-%}
             {%-for i, p in enumerate(data["participants"])-%}
                 <div id="participant{{i+1}}">
-                    <input type="text" name="participant{{i+1}}" placeholder="참여자" value="{{p}}" required>
+                    <input type="text" name="participant{{i+1}}" placeholder="참여자" value="{{p}}" spellcheck="false" required>
                     <button type="button" onclick="document.querySelector('#participants').removeChild(document.querySelector('#participant{{i+1}}'))">제거</button>
                 </div>
             {%-endfor-%}

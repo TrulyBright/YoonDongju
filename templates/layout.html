@@ -13,21 +13,23 @@
 {%-block header-%}
 <header>
     <h1><a href="/">연세문학회</a></h1>
-    <div id="desktop-header-menus">
+    <div id="header-menu">
         <a href="/about">소개</a>
         <a href="/classes">분반</a>
         <a href="/magazines">문집</a>
         <a href="/notices">공지</a>
-        <!-- TODO: 관리 탭은 임원진에게만 보이게 -->
+        {%-if current_user.is_mod()-%}
         <a href="/admin">관리</a>
-    </div>
-    <div id="mobile-header-menus">
-        <a href="/about">소개</a>
-        <a href="/classes">분반</a>
-        <a href="/magazines">문집</a>
-        <a href="/notices">공지</a>
-        <!-- TODO: 관리 탭은 임원진에게만 보이게 -->
-        <a href="/admin">관리</a>
+        {%-endif-%}
+        {%-if current_user.is_authenticated-%}
+        <a id="logout-for-mobile" href="/logout">로그아웃</a>
+        <div id="current-user-info">
+            <div>{{current_user.username}}({{current_user.id}})님 환영합니다.</div>
+            <a href="/logout">로그아웃</a>
+        </div>
+        {%-else-%}
+        <a class="clickable" id="login">로그인</a>
+        {%-endif-%}
     </div>
     <a id="see-more">☰</a>
 </header>
@@ -47,7 +49,7 @@
     <div>
         <h3>가입</h3>
         <a id="join-link">동아리 회원가입</a>
-        <a href="/register">홈페이지 회원가입</a>
+        <a class="clickable" id="register">홈페이지 회원가입</a>
     </div>
     <div>
         <h3>정보</h3>
@@ -77,18 +79,43 @@
         <figcaption>정현종 - 「방문객」 <span class="hanja">中</span></figcaption>
     </figure>
     <br>
-    <p>연세문학회는 상시모집 중이며, 별다른 절차 없이 신청 즉시 가입됩니다.</p>
-    <p>아래에 정보를 기입하고 신청하시면 곧 인사행정팀장이 카카오톡 문학회 공지방에 초대해드립니다.</p>
+    <div>
+        <p>연세문학회는 상시모집 중이며, 별다른 절차 없이 신청 즉시 가입됩니다.</p>
+        <p>아래에 정보를 기입하고 신청하시면 곧 인사행정팀장이 카카오톡 문학회 공지방에 초대해드립니다.</p>    
+    </div>
     <form>
         <input type="text" name="name" placeholder="이름" spellcheck="false" required>
         <select name="major" required>
-            <option disabled selected>전공</option>
-            {%-for code, major in major_information-%}
-            {%-endfor-%}
+            <option value="">국어국문학</option>
         </select>
         <input type="number" name="id" placeholder="학번(10자리)" spellcheck="false" required>
         <input type="tel" name="tel" placeholder="전화번호" spellcheck="false" required>
         <input type="submit" value="신청">
+    </form>
+</div>
+<div id="login-modal" class="hidden modal">
+    <button type="button" class="close-button">×</button>
+    <h1>로그인</h1>
+    <form method="post" action="/login">
+        <input type="text" name="username" placeholder="ID" spellcheck="false" required>
+        <input type="password" name="password" placeholder="비밀번호" required>
+        <input type="submit" value="접속">
+    </form>
+</div>
+<div id="register-modal" class="hidden modal">
+    <button type="button" class="close-button">×</button>
+    <h1>홈페이지 회원가입</h1>
+    <div>
+        <p>동아리 가입은 따로 해야 합니다.</p>
+        <p>연세포탈 비밀번호는 신촌캠 재학생 인증에만 이용되며, 저장되지 않습니다. <em><small>연세문학회를 믿으세요.</small></em></p>    
+    </div>
+    <br>
+    <form method="post" action="/register">
+        <input type="number" name="portal-id" placeholder="학번(10자리)" required>
+        <input type="password" name="portal-pw" placeholder="연세포탈 비밀번호" required>
+        <input type="text" name="username" placeholder="ID" spellcheck="false" required>
+        <input type="password" name="password" placeholder="비밀번호" required>
+        <input type="submit" value="가입">
     </form>
 </div>
 {%-endblock-%}

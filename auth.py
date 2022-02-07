@@ -1,5 +1,6 @@
-from re import UNICODE
+import os
 import sqlite3
+from dotenv import load_dotenv
 from flask import Flask
 from flask_login import LoginManager
 
@@ -18,10 +19,13 @@ class User:
         return True
     
     def is_anonymous(self):
-        return True
+        return False
     
     def get_id(self):
         return str(self.id)
+    
+    def is_mod(self):
+        return self.role == "moderator"
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -34,3 +38,5 @@ def load_user(user_id):
 
 def setup_auth(app: Flask):
     login_manager.init_app(app)
+    load_dotenv()
+    app.secret_key = os.getenv("SECRET_KEY")

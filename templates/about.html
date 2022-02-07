@@ -1,17 +1,20 @@
 {% extends "board-layout.html" %}
 {% block subtitle %} :: 소개{% endblock %}
 {% block content %}
-{%-if nonexistent-%}
-<div class="function-bar">
-    <div class="author-date"></div>
-    <div><button type="button"><a href="/about/write">글쓰기</a></button></div>
-</div>
-{%-else-%} <!--TODO: 관리자에게만 function bar가 보이게-->
-<div class="function-bar">
-    <div class="author-date"><div class="convertable">최종 수정자: {{data["author"]}}</div><div>최종 수정일: {{data["published"]}}</div></div>
-    <div><button type="button"><a href="/about/edit">수정</a></button></div>
-</div>
+{%-if current_user.is_mod()-%}
+    {%-if nonexistent-%}
+    <div class="function-bar">
+        <div class="author-date"></div>
+        <div><button type="button"><a href="/about/write">글쓰기</a></button></div>
+    </div>
+    {%-else-%} <!--TODO: 관리자에게만 function bar가 보이게-->
+    <div class="function-bar">
+        <div class="author-date"><div class="convertable">최종 수정자: {{data["author"]}}</div><div>최종 수정일: {{data["published"]}}</div></div>
+        <div><button type="button"><a href="/about/edit">수정</a></button></div>
+    </div>
+    {%-endif-%}
 {%-endif-%}
+<h1>{{data["title"]}}</h1>
 <div class="markdown convertable">{{gfm(data["content"])|safe}}</div>
 {% endblock %}
 {%-block scripts-%}

@@ -8,6 +8,7 @@
 ## Run in local
 1. `npx tsc`
 1. `pip install -r requirements.txt`
+1. `python -c 'import secrets; print("SECRET_KEY="+secrets.token_hex())' > .env`
 1. `python main.py`
 ## Features
 * 공지 열람 및 작성.

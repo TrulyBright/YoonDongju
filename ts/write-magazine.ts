@@ -27,6 +27,10 @@ function addRow (event) {
     authorInput.required = true;
     titleInput.required = true;
     languageInput.required = true;
+    typeInput.spellcheck = false;
+    authorInput.spellcheck = false;
+    titleInput.spellcheck = false;
+    languageInput.spellcheck = false;
     div.classList.add("published-content");
     removeThisLine.type = "button";
     removeThisLine.textContent = "제거";

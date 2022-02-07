@@ -79,23 +79,13 @@ header {
 header a:hover {
     text-decoration: none;
 }
-#desktop-header-menus {
+#header-menu {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
-#desktop-header-menus a {
+#header-menu a {
     margin: 0 15px;
-}
-#mobile-header-menus {
-    display: none;
-    flex-direction: column;
-    width: 100vw;
-    border: none;
-}
-#mobile-header-menus  * {
-    text-align: center;
-    padding: 0.5% 0;
 }
 #see-more {
     position: absolute;
@@ -109,13 +99,6 @@ header a:hover {
     border-width: 1px;
     border-style: solid;
     background: snow;
-}
-#mobile-header-menus .class-list {
-    position: unset;
-    border: none;
-}
-#mobile-header-menus .class-list a {
-    display: block;
 }
 #see-more {
     display: none;
@@ -168,11 +151,16 @@ footer a:hover {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 2%;
+    padding: 2% 15%;
     background: white;
     border-width: 1px;
     border-style: solid;
     border-radius: 15px;
+    box-sizing: border-box;
+}
+.modal h1 {
+    word-break: keep-all;
+    text-align: center;
 }
 .modal figure,
 .modal figure blockquote {
@@ -204,6 +192,22 @@ footer a:hover {
 #main {
     width: 90%;
     margin: 1% 5%;
+    box-sizing: border-box;
+}
+#current-user-info {
+    position: absolute;
+    display: flex;
+    right: 5%;
+}
+#logout-for-mobile {
+    display: none;
+}
+.clickable:hover {
+    cursor: pointer;
+}
+.modal form > *:not(input[type="submit"]) {
+    display: block;
+    width: 100%;
 }
 @media only screen and (max-width: 480px) {
     html,
@@ -221,21 +225,44 @@ footer a:hover {
         margin: 0 0;
         box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);
     }
-    #desktop-header-menus {
-        display: none;
-    }
     #see-more {
         display: block;
     }
     footer {
         grid-template-columns: 1fr;
     }
+    #header-menu {
+        display: none;
+    }
     .open {
         display: flex !important;
     }
-}
-@media only screen and (max-width: 480px) {
+    #header-menu {
+        flex-direction: column;
+        width: 100vw;
+        border: none;
+    }
+    #header-menu  * {
+        text-align: center;
+        padding: 0.5% 0;
+    }
+    #header-menu .class-list {
+        position: unset;
+        border: none;
+    }
+    #header-menu .class-list a {
+        display: block;
+    }
     body {
         font-size: small;
+    }
+    #current-user-info {
+        display: none;
+    }
+    #logout-for-mobile {
+        display: block;
+    }
+    .modal {
+        width: 90%;
     }
 }

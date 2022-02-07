@@ -15,8 +15,8 @@ query = {
     """,
     "users": """
         CREATE TABLE IF NOT EXISTS users (
-            id integer not null primary key, -- 학번입니다.
-            username text not null, 
+            id integer not null primary key unique, -- 학번입니다.
+            username text not null unique, 
             password text not null,
             role text not null
         )

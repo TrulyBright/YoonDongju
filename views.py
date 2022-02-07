@@ -1,8 +1,12 @@
 import uuid
+import time
+from flask_login import current_user, login_required, login_user, logout_user
+import httpx
 import sqlite3
 import pytz
 import math
 import flask
+import auth
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Union
@@ -24,10 +28,13 @@ def render_template(template_name_or_list: str, **context):
         "president-name": "서혜빈",
         "president-tel": "010-5797-4309"
     } # TODO: 하드코딩 제거
+    if not hasattr(current_user, "is_mod"):
+        current_user.is_mod = lambda: False
     return flask.render_template(
         template_name_or_list,
         datetime=datetime,
         layout_data=layout_data,
+        current_user=current_user,
         gfm=gfm,
         **context
     )
@@ -43,15 +50,16 @@ def index():
 def about():
     """소개 화면."""
     with sqlite3.connect(f"sql/posts.db") as DB:
-        query = f"SELECT author, published, content FROM posts WHERE type='about'"
+        query = f"SELECT title, author, published, content FROM posts WHERE type='about'"
         fetched = DB.execute(query).fetchone()
         if fetched is None:
             data = {"content": "소개가 없습니다. 우상단 '글쓰기'를 눌러 소개문을 쓸 수 있습니다."}
         else:
-            author, published, content = fetched
-            data = {"author": author, "published": published, "content": content}
+            title, author, published, content = fetched
+            data = {"title": title, "author": author, "published": published, "content": content}
         return render_template("about.html", categories={"소개":"about"}, data=data, nonexistent=fetched is None)
 
+@login_required
 def upload(file: FileStorage):
     """파일을 `app.config["UPLOAD_DIR"]`에 저장하고 파일 이름을 반환합니다.
     해당 디렉터리가 없다면 디렉터리도 생성합니다.
@@ -75,6 +83,7 @@ def upload(file: FileStorage):
             return at.name
     raise UnableToSaveFile("Can't get any unique name with uuid.uuid4()")
 
+@login_required
 def write_post(no: int=None):
     editing = request.path.endswith("/edit")
     editing_about = request.path.startswith("/about")
@@ -128,6 +137,7 @@ def write_post(no: int=None):
                 cursor = DB.execute(query, ["about" if editing_about else "notice", title, content, author, published, attached])
             return redirect("/about" if editing_about else f"/notices/{no if editing else cursor.lastrowid}")
 
+@login_required
 def delete_post(no: int): # TODO: 권한
     with sqlite3.connect("sql/posts.db") as DB:
         query = """
@@ -136,9 +146,6 @@ def delete_post(no: int): # TODO: 권한
         """
         DB.execute(query, [no])
         return "meaningless dummy value" # 의미없이 그냥 리턴하는 값.
-
-def download(name: str):
-    return send_from_directory(app.config["UPLOAD_DIR"], name)
 
 def notices(no: Optional[int]=None):
     """`no`번째 공지를 열람합니다. `no==None`이면 공지 목록을 봅니다."""
@@ -178,6 +185,7 @@ def magazines():
             volume["contents"] = [{col:row[i] for i, col in enumerate(("type", "author", "title", "language"))} for row in contentsDB.execute(query).fetchall()]
         return render_template("magazines.html", data=data, range=range)
 
+@login_required
 def write_magazine(no: int=None):
     editing = request.path.endswith("/edit")
     with sqlite3.connect("sql/magazines.db") as DB, sqlite3.connect("sql/contents-per-magazines.db") as contentsDB:
@@ -317,6 +325,7 @@ def classes(name: Optional[str]=None, no: Optional[int]=None):
         data["participants"] = participants
         return render_template("class-activity-post.html", categories=categories, data=data, this_is={value:key for key, value in categories.items()}[name])
 
+@login_required
 def write_class_activity(name: str, no: Optional[int]=None):
     editing = request.path.endswith("/edit")
     categories = {"시반": "poetry", "소설반": "novel", "합평반": "critique", "독서반": "reading"}
@@ -385,6 +394,7 @@ def write_class_activity(name: str, no: Optional[int]=None):
             participantsDB.execute(query, participants)
             return redirect(f"/classes/{name}/{no if editing else cursor.lastrowid}")
 
+@login_required
 def delete_class_activity(name: str, no: int):
     with sqlite3.connect("sql/class-archive.db") as DB, sqlite3.connect(f"sql/participants-{name}.db") as participantsDB:
         DB.execute(f"DELETE FROM {name} WHERE no=?", [no])
@@ -400,15 +410,16 @@ def uploaded(filename: str):
 
 def rules():
     with sqlite3.connect(f"sql/posts.db") as DB:
-        query = f"SELECT author, published, content FROM posts WHERE type='rules'"
+        query = f"SELECT title, author, published, content FROM posts WHERE type='rules'"
         fetched = DB.execute(query).fetchone()
         if fetched is None:
             data = {"content": "회칙이 없습니다. 우상단 '글쓰기'를 눌러 회칙을 기재할 수 있습니다."}
         else:
-            author, published, content = fetched
-            data = {"author": author, "published": published, "content": content}
+            title, author, published, content = fetched
+            data = {"title": title, "author": author, "published": published, "content": content}
         return render_template("rules.html", categories={"회칙":"rules"}, data=data, nonexistent=fetched is None)
 
+@login_required
 def write_rules():
     editing = request.path.endswith("/edit")
     if request.method == "GET":
@@ -437,3 +448,40 @@ def write_rules():
             """
             DB.execute(query, [title, content, author, published] if editing else ["rules", title, content, author, published])
             return redirect("/rules")
+
+def register():
+    id = request.form["id"]
+    pw = request.form["pw"]
+    with sqlite3.connect("users.db") as DB:
+        query = """
+        INSERT INTO users (id, username, password, role)
+        VALUES (?, ?, ?, ?)
+        """
+        now = int(time.time())
+        print(now)
+        DB.execute(query, [now, id, pw, "user"])
+        flask.flash("사이트 회원으로 가입됐습니다. 로그인해주세요.")
+        return redirect("/")
+
+def login():
+    username = request.form["username"]
+    password = request.form["password"]
+    with sqlite3.connect("sql/users.db") as DB:
+        query = """
+        SELECT id, username, role, password FROM users WHERE username=?
+        """
+        fetched = DB.execute(query, [username]).fetchone()
+        if fetched is None:
+            pass
+        elif fetched[3] != password:
+            pass
+        else:
+            login_user(auth.User(fetched[0], fetched[1], fetched[2]))
+            flask.flash(f"{fetched[1]}님 환영합니다.")
+            return redirect(request.referrer)
+
+@login_required
+def logout():
+    logout_user()
+    flask.flash("무사히 로그아웃되었습니다.")
+    return redirect("/")
