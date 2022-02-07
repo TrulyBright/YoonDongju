@@ -1,0 +1,55 @@
+{%-extends "layout.html"-%}
+{%-block additional_css-%}
+<link rel="stylesheet" href="/static/css/admin.css">
+{%-endblock-%}
+{%-block main-%}
+<div id="main">
+    <h1>관리자 화면</h1>
+    <div id="container">
+        <div id="navigator">
+            <div><h3 class="users">회원 관리</h3></div>
+        </div>
+        <div id="workspace">
+            <div class="users">
+                <h2>회원 관리</h2>
+                <div id="user-list">
+                    <div class="title">학번</div>
+                    <div class="title">실명</div>
+                    <div class="title">ID</div>
+                    <div class="title">직책</div>
+                    <div class="title">작업</div>
+                    {%-for user in users-%}
+                        <div>{{user["id"]}}</div>
+                        <div>{{user["real_name"]}}</div>
+                        <div>{{user["username"]}}</div>
+                        <div>{{user["role"]}}</div>
+                        <div class="tasks">
+                            <div id="change-role-{{user['id']}}" class="change-role">
+                                <button type="button" class="trigger" onclick="show({{user['id']}})">직책 변경</button>
+                                <div id="change-role-popup-{{user['id']}}" class="popup">
+                                    <label for="role"><select name="role" onchange="setPotentialRole(event.target.value)">
+                                        <option value="user">user(정회원)</option>
+                                        <option value="board">board(임원)</option>
+                                        <option value="president">president(회장)</option>
+                                    </select> 로 <button type="button" onclick="changeRole({{user['id']}})">변경</button></label>
+                                </div>
+                            </div>
+                            <!-- <button type="button">강제 탈퇴</button> TODO-->
+                            <!-- <button type="button">ID 변경</button> TODO -->
+                            <!-- <button type="button">비밀번호 변경</button> TODO -->
+                        </div>
+                    {%-endfor-%}
+                </div>
+                <div id="change-role-dropdown" class="hidden">
+                    <label for="role">직책을<select name="role">
+                        
+                    </select> 로 <button type="button">변경</button></label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{%-endblock-%}
+{%-block scripts-%}
+<script src="/static/js/admin.js"></script>
+{%-endblock-%}

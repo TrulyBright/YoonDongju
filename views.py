@@ -409,9 +409,18 @@ def delete_class_activity(name: str, no: int):
         participantsDB.execute(f"DROP TABLE '{no}'")
         return "meaningless dummy value"
 
-def workspace():
+@login_required
+def admin():
     """관리자 화면."""
-    return render_template("workspace.html")
+    if not current_user.is_mod:
+        abort(403)
+    with sqlite3.connect("sql/users.db") as DB:
+        fetched = DB.execute("SELECT id, real_name, username, role FROM users").fetchall()
+        users = [
+            {"id": row[0], "real_name": row[1], "username": row[2], "role": row[3]}
+            for row in fetched
+        ]
+        return render_template("admin.html", users=users)
 
 def uploaded(filename: str):
     return send_from_directory(app.config["UPLOAD_DIR"], filename)
@@ -515,3 +524,18 @@ def logout():
     logout_user()
     flask.flash("무사히 로그아웃되었습니다.")
     return redirect("/")
+
+@login_required
+def modify_user(id: int):
+    if not current_user.is_mod: abort(403)
+    role = request.args.get("role")
+    with sqlite3.connect("sql/users.db") as DB:
+        if role:
+            assert role in auth.Role.__members__
+            query = f"""
+            UPDATE users
+            SET role=?
+            WHERE id=?
+            """
+            DB.execute(query, [role, id])
+            return "Dummy"

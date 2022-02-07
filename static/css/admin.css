@@ -1,0 +1,50 @@
+#main {
+    background: snow;
+    border-radius: 15px;
+    padding: 15px;
+}
+#container {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 15px;
+}
+#navigator {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid #FFDDDD;
+    background: #FFDDDD;
+    border-radius: 15px;
+    padding: 15px;
+}
+#user-list {
+    width: fit-content;
+    display: grid;
+    grid-template-columns: auto auto 1fr auto auto;
+    padding: 15px;
+    border-radius: 15px;
+}
+#user-list > div {
+    padding: 5px;
+    border: 1px solid #FFDDDD;
+    box-sizing: border-box;
+}
+#user-list .title {
+    background: #FFDDDD;
+    text-align: center;
+}
+#user-list > div:first-child {
+    border-top-left-radius: 15px;
+}
+#user-list > div:nth-child(5) {
+    border-top-right-radius: 15px;
+}
+#change-role-dropdown {
+    background: snow;
+    border-radius: 15px;
+    position: fixed;
+}
+.change-role .popup {
+    display: none;
+    position: absolute;
+}

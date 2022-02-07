@@ -1,10 +1,16 @@
 import os
 import sqlite3
+from enum import Enum, IntEnum
 from dotenv import load_dotenv
 from flask import Flask
 from flask_login import LoginManager
 
 login_manager = LoginManager()
+
+class Role(IntEnum):
+    user = 0
+    board = 1
+    president = 2
 
 class User:
     def __init__(self, user_id, username, role, real_name):
@@ -27,7 +33,7 @@ class User:
     
     @property
     def is_mod(self):
-        return self.role == "moderator"
+        return Role[self.role] >= Role.board
 
 @login_manager.user_loader
 def load_user(user_id):
