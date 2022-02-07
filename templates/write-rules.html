@@ -1,0 +1,97 @@
+{% extends "board-layout.html" %}
+{% block subtitle %} :: 회칙 작성{% endblock %}
+{%-block additional_css-%}
+<link rel="stylesheet" href="/static/css/board-layout.css">
+<link rel="stylesheet" href="/static/css/writing.css">
+{%-endblock-%}
+{%-block categories-%}
+{%-for name, suburl in categories.items()-%}
+<li><a href="/rules">회칙</a></li>
+{%-endfor-%}
+{%-endblock-%}
+{% block content %}
+<form action="/rules/write" method="post" enctype="multipart/form-data">
+    <h1><input type="text" name="title" placeholder="회칙" rows="1" spellcheck="false" value="{{data['content']}}" autofocus required></h1>
+    <hr>
+    <textarea name="content" spellcheck="false" placeholder="조문" required>{{data["content"] if editing else '# 제목
+
+## 제목2
+
+###### 제목6
+
+## 강조하기
+
+*별표 하나로 감싸면 기웁니다.*
+
+_밑줄로 감싸도 기웁니다._
+
+**별표 둘로 감싸면 굵어집니다.**
+
+__밑줄 2개로 감싸도 굵어집니다.__
+
+~~[나무위키](https://namu.wiki)를 자주 보시나요?~~
+
+_강조 문법은 **한꺼번에** 쓸 수 있습니다._
+
+\\를 앞에 붙이면 \*, \_처럼 특수기호가 그대로 보입니다.
+
+## 목록 만들기
+
+### 순서 없는 목록
+- 세계맥주 4캔
+- 안주 넷
+  - 새우깡 둘
+  - 포도 둘
+    - 샤인 머스탱으로
+
+### 순서 있는 목록
+1. 교양이냐
+1. 전공이냐
+1. 그것이 문제로다
+
+### 점검표
+- 종강하고 할일
+  - [ ] 알바 구하기
+  - [ ] 교환학생 준비하기
+    1. [ ] 토플 점수 확보
+    1. [ ] 교환학생 장학금 알아보기
+  - [x] 친구와 여행 가기
+  - [ ] [문학동네소설상](https://www.munhak.com/competition) 투고하기
+
+## 사진 넣기
+
+![대체 텍스트입니다.](https://upload.wikimedia.org/wikipedia/commons/7/75/White_Ox_%281954%29_-_Lee_Jung_Seob.jpg "커서를 올렸을 때 나오는 텍스트입니다. 생략해도 됩니다.")
+
+## 외부로 연결하기
+
+교보문고에서도 [공모전](https://storynew.kyobobook.co.kr/story/cont/initStoryContStoryPros.ink)을 주최합니다.
+
+## 인용하기
+
+> 학생이라는 죄로 학교라는 교도소에서
+>> 교실이라는 감옥에 갇혀 출석부라는 죄수명단에 올라
+>>> 교복이란 죄수복을 입고 공부란 벌을 받고
+
+## 구분선 넣기
+----
+
+## 표
+
+| 왼쪽 정렬 | 가운데 정렬 | 오른쪽 정렬 |
+|----------|:----------:|------------:|
+| 윤동주    | 영문 38 | 「서시」 |
+| 한강      | 국문 89 | 『채식주의자』 |
+| 정현종    | 철학 59 | 「방문객」 |
+
+## 기타
+`Ctrl+A`로 이 도움말을 싹 지울 수 있습니다.'}}</textarea>
+    <div class="markdown preview convertable"></div>
+    <hr>
+    <div>
+        <button type="submit">게시</button>
+    </div>
+</form>
+{% endblock %}
+{%-block scripts-%}
+<script src="/static/js/writing.js" type="module"></script>
+{%-endblock-%}

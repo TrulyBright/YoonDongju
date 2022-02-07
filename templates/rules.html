@@ -1,0 +1,19 @@
+{% extends "board-layout.html" %}
+{% block subtitle %} :: 소개{% endblock %}
+{% block content %}
+{%-if nonexistent-%}
+<div class="function-bar">
+    <div class="author-date"></div>
+    <div><button type="button"><a href="/rules/write">글쓰기</a></button></div>
+</div>
+{%-else-%} <!--TODO: 관리자에게만 function bar가 보이게-->
+<div class="function-bar">
+    <div class="author-date"><div class="convertable">최종 수정자: {{data["author"]}}</div><div>최종 수정일: {{data["published"]}}</div></div>
+    <div><button type="button"><a href="/rules/edit">수정</a></button></div>
+</div>
+{%-endif-%}
+<div class="markdown convertable">{{gfm(data["content"])|safe}}</div>
+{% endblock %}
+{%-block scripts-%}
+<script src="/static/js/convert-hanja.js" type="module"></script>
+{%-endblock-%}

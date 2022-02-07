@@ -397,3 +397,43 @@ def workspace():
 
 def uploaded(filename: str):
     return send_from_directory(app.config["UPLOAD_DIR"], filename)
+
+def rules():
+    with sqlite3.connect(f"sql/posts.db") as DB:
+        query = f"SELECT author, published, content FROM posts WHERE type='rules'"
+        fetched = DB.execute(query).fetchone()
+        if fetched is None:
+            data = {"content": "회칙이 없습니다. 우상단 '글쓰기'를 눌러 회칙을 기재할 수 있습니다."}
+        else:
+            author, published, content = fetched
+            data = {"author": author, "published": published, "content": content}
+        return render_template("rules.html", categories={"회칙":"rules"}, data=data, nonexistent=fetched is None)
+
+def write_rules():
+    editing = request.path.endswith("/edit")
+    if request.method == "GET":
+        with sqlite3.connect("sql/posts.db") as DB:
+            query = "SELECT title, content, published FROM posts WHERE type='rules'"
+            fetched = DB.execute(query).fetchone()
+            data = dict() if fetched is None else {key:fetched[i] for i, key in enumerate(("title", "content", "published"))}
+            return render_template("write-rules.html", categories={"회칙":"rules"}, this_is="회칙", data=data, editing=fetched is not None)
+    elif request.method == "POST":
+        title = request.form["title"]
+        content = request.form["content"]
+        author = "sample author"
+        published = datetime.now(pytz.timezone("Asia/Seoul")).date()
+        with sqlite3.connect("sql/posts.db") as DB:
+            query = """
+            UPDATE posts
+            SET title=?,
+                content=?,
+                author=?,
+                published=?
+            WHERE type='rules'
+            """ if editing else """
+            INSERT INTO posts
+            (type, title, content, author, published)
+            VALUES (?, ?, ?, ?, ?)
+            """
+            DB.execute(query, [title, content, author, published] if editing else ["rules", title, content, author, published])
+            return redirect("/rules")
