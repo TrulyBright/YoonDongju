@@ -42,8 +42,8 @@ function addRow (event) {
         }
     });
     div.appendChild(typeInput);
-    div.appendChild(authorInput);
     div.appendChild(titleInput);
+    div.appendChild(authorInput);
     div.appendChild(languageInput);
     div.appendChild(removeThisLine);
     document.querySelector("#published-content-list").appendChild(div);

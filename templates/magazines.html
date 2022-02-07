@@ -11,19 +11,19 @@
     <div class="volumes">
         {%-for volume in data-%}
         <div class="volume-item" id="vol{{volume['no']}}">
-            <img src="/uploaded/{{volume['cover']}}" alt="연세문학 표지">
-            <div class="volume-info">
+            <div class="item">
+                <img src="/uploaded/{{volume['cover']}}" alt="{{volume['published']}}에 발행된 문집 표지">
+            </div>
+            <div class="content-info">
                 <h4>수록작</h4>
-                <ul>
-                    {%-for content in volume["contents"]-%}
-                    <li class="content-row">
-                        <div>{{content["type"]}}</div>
-                        <div class="convertable">{{content["author"]}}</div>
-                        <div class="convertable">{{content["title"]}}</div>
-                        <div>{{content["language"]}}</div>
-                    </li>
-                    {%-endfor-%}
-                </ul>
+                <div class="content-row">
+                {%-for content in volume["contents"]-%}
+                    <div>{{content["type"]}}</div>
+                    <div class="convertable">{{content["title"]}}</div>
+                    <div class="convertable">{{content["author"]}}</div>
+                    <div>{{content["language"]}}</div>
+                {%-endfor-%}
+                </div>
             </div>
         </div>
         {%-endfor-%}
@@ -32,4 +32,13 @@
 {%-endblock-%}
 {%-block scripts-%}
 <script src="/static/js/convert-hanja.js" type="module"></script>
+<script>
+    function setVolumeItemHeight (event) {
+        document.querySelectorAll(".volume-item").forEach((element)=>{
+            element.style.height = String(element.querySelector("img").clientHeight)+"px";
+        });
+    }
+    setVolumeItemHeight(null);
+    window.addEventListener("resize", setVolumeItemHeight);
+</script>
 {%-endblock-%}
