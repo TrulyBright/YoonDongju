@@ -18,8 +18,8 @@
                     {%-for content in volume["contents"]-%}
                     <li class="content-row">
                         <div>{{content["type"]}}</div>
-                        <div>{{content["author"]}}</div>
-                        <div>{{content["title"]}}</div>
+                        <div class="convertable">{{content["author"]}}</div>
+                        <div class="convertable">{{content["title"]}}</div>
                         <div>{{content["language"]}}</div>
                     </li>
                     {%-endfor-%}
@@ -29,4 +29,7 @@
         {%-endfor-%}
     </div>
 </div>
+{%-endblock-%}
+{%-block scripts-%}
+<script src="/static/js/convert-hanja.js" type="module"></script>
 {%-endblock-%}

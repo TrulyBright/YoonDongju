@@ -12,7 +12,7 @@
         <ul id="recent-notices">
             {%-for notice in recent_notices-%}
                 <li>
-                    <div class="recent-notice-title"><a href="/notices/{{notice['no']}}">{{notice["title"]}}</a></div>
+                    <div class="recent-notice-title convertable"><a href="/notices/{{notice['no']}}">{{notice["title"]}}</a></div>
                     <div>{{notice["published"]}}</div>
                 </li>
             {%-endfor-%}
@@ -36,4 +36,7 @@
         </div>
     </div>
 </div>
+{%-endblock-%}
+{%-block scripts-%}
+<script src="/static/js/convert-hanja.js" type="module"></script>
 {%-endblock-%}

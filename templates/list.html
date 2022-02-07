@@ -8,7 +8,7 @@
     <div class="head last">게시일</div>
     {%-for row in data-%}
         {%-for col_name, col_data in row.items()-%}
-            <div class="{{'centered' if col_name!='title' else ''}}">
+            <div class="{{'centered' if col_name!='title' else ''}} convertable">
             {%-if col_name=="title"-%}
                 <a href="/notices/{{row['no']}}">{{col_data}}</a>
             {%-else-%}
@@ -38,4 +38,7 @@
     </div>
     <button type="button"><a href="/notices/write">글쓰기</a></button>
 </div>
+{%-endblock-%}
+{%-block scripts-%}
+<script src="/static/js/convert-hanja.js" type="module"></script>
 {%-endblock-%}

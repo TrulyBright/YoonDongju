@@ -4,7 +4,7 @@
 {%-endblock-%}
 {%-block main-%}
 <div id="main">
-    <div class="error">
+    <div class="error convertable">
         {%-if code==404-%}
         <h1>없는 페이지입니다.</h1>
         <figure>
@@ -20,4 +20,7 @@
         {%-endif-%}
     </div>
 </div>
+{%-endblock-%}
+{%-block scripts-%}
+<script src="/static/js/convert-hanja.js" type="module"></script>
 {%-endblock-%}

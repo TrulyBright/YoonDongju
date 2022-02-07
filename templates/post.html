@@ -1,13 +1,13 @@
 {% extends "board-layout.html" %}
 {% block subtitle %} :: {{this_is}} - {{data["title"]}}{% endblock %}
 {% block content %}
-<h1>{{data["title"]}}</h1>
+<h1 class="convertable">{{data["title"]}}</h1>
 <div class="function-bar">
-    <div class="author-date"><div>작성자 {{data["author"]}}</div><div>게시일 {{data["published"]}}</div></div>
+    <div class="author-date"><div class="convertable">작성자 {{data["author"]}}</div><div>게시일 {{data["published"]}}</div></div>
     <div><button type="button"><a href="/{{categories[this_is]}}/{{data['no']}}/edit">수정</a></button><button type="button" id="delete-button">삭제</button></div>
 </div>
 <hr>
-<div class="markdown">{{gfm(data["content"])|safe}}</div> <!--글쓴이를 신뢰하여 별다른 검사 없이 바로 "|safe"를 적용합니다.-->
+<div class="markdown convertable">{{gfm(data["content"])|safe}}</div> <!--글쓴이를 신뢰하여 별다른 검사 없이 바로 "|safe"를 적용합니다.-->
 {% endblock %}
 {%-block scripts-%}
 <script>
@@ -18,4 +18,5 @@
         }
     });
 </script>
+<script src="/static/js/convert-hanja.js"></script>
 {%-endblock-%}

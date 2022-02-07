@@ -18,8 +18,8 @@
     <div class="head last">활동일</div>
     {%-for row in data-%}
         <div class="centered">{{row["no"]}}</div>
-        <div><a href="/classes/{{categories[this_is]}}/{{row['no']}}">{{row["topic"]}}</a></div>
-        <div class="centered">{{row["moderator"]}}</div>
+        <div><a href="/classes/{{categories[this_is]}}/{{row['no']}}" class="convertable">{{row["topic"]}}</a></div>
+        <div class="centered convertable">{{row["moderator"]}}</div>
         <div class="centered">{{row["number_of_participants"]}}</div>
         <div class="centered">{{row["conducted"]}}</div>
     {%-endfor-%}
@@ -44,4 +44,7 @@
     </div>
     <button type="button"><a href="/classes/{{categories[this_is]}}/write">글쓰기</a></button>
 </div>
+{%-endblock-%}
+{%-block scripts-%}
+<script src="/static/js/convert-hanja.js" type="module"></script>
 {%-endblock-%}
