@@ -8,14 +8,20 @@
         {%-if code==404-%}
         <h1>없는 페이지입니다.</h1>
         <figure>
-            <blockquote>(길은막다른골목이적당하오.)</blockquote>
-            <figcaption>이상, 「오감도」</figcaption>
+            <blockquote>내가<br>행복했던 곳으로 가주세요</blockquote>
+            <figcaption>박지웅, 「택시」</figcaption>
         </figure>
         {%-elif code==500-%}
         <h1>서버 내부 오류가 났습니다.</h1>
         <figure>
             <blockquote>Quoth the Server "Nevermore."</blockquote>
             <figcaption>Edgar Server Poe, "The Server"</figcaption>
+        </figure>
+        {%-elif code==403-%}
+        <h1>권한이 없습니다.</h1>
+        <figure>
+            <blockquote>나는 이제까지 한 번도 내가 이 땅의 사람들과 같은 조건으로 살고 있다고 생각해 본 적이 없다.</blockquote>
+            <figcaption>양귀자, 「나는 소망한다 내게 금지된 것을」</figcaption>
         </figure>
         {%-endif-%}
     </div>

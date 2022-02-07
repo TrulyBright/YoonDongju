@@ -1,7 +1,7 @@
 {% extends "board-layout.html" %}
 {% block subtitle %} :: 소개{% endblock %}
 {% block content %}
-{%-if current_user.is_mod()-%}
+{%-if current_user.is_mod-%}
     {%-if nonexistent-%}
     <div class="function-bar">
         <div class="author-date"></div>

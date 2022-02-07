@@ -18,7 +18,7 @@
         <a href="/classes">분반</a>
         <a href="/magazines">문집</a>
         <a href="/notices">공지</a>
-        {%-if current_user.is_mod()-%}
+        {%-if current_user.is_mod-%}
         <a href="/admin">관리</a>
         {%-endif-%}
         {%-if current_user.is_authenticated-%}
@@ -81,7 +81,7 @@
     <br>
     <div>
         <p>연세문학회는 상시모집 중이며, 별다른 절차 없이 신청 즉시 가입됩니다.</p>
-        <p>아래에 정보를 기입하고 신청하시면 곧 인사행정팀장이 카카오톡 문학회 공지방에 초대해드립니다.</p>    
+        <p>아래에 정보를 기입하고 신청하시면 곧 인사행정팀장이 카카오톡 문학회 공지방에 초대해드립니다.</p>
     </div>
     <form>
         <input type="text" name="name" placeholder="이름" spellcheck="false" required>
@@ -117,6 +117,20 @@
         <input type="password" name="password" placeholder="비밀번호" required>
         <input type="submit" value="가입">
     </form>
+</div>
+<div id="toast">
+    {%-with messages = get_flashed_messages()-%}
+        {%-if messages-%}
+            {%-for message in messages-%}
+                <p>{{ message }}</p>
+            {%-endfor-%}
+            <script>
+                const toast = document.querySelector("#toast");
+                toast.classList.add("show");
+                setTimeout(()=>{toast.classList.remove("show")}, 3000);
+            </script>
+        {%-endif-%}
+    {%-endwith-%}
 </div>
 {%-endblock-%}
 <script src="/static/js/main.js"></script>

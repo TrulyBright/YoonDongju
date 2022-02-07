@@ -24,6 +24,7 @@ class User:
     def get_id(self):
         return str(self.id)
     
+    @property
     def is_mod(self):
         return self.role == "moderator"
 

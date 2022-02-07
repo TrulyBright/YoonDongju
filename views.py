@@ -1,5 +1,5 @@
 import uuid
-import time
+import bcrypt
 from flask_login import current_user, login_required, login_user, logout_user
 import httpx
 import sqlite3
@@ -28,8 +28,6 @@ def render_template(template_name_or_list: str, **context):
         "president-name": "서혜빈",
         "president-tel": "010-5797-4309"
     } # TODO: 하드코딩 제거
-    if not hasattr(current_user, "is_mod"):
-        current_user.is_mod = lambda: False
     return flask.render_template(
         template_name_or_list,
         datetime=datetime,
@@ -85,6 +83,8 @@ def upload(file: FileStorage):
 
 @login_required
 def write_post(no: int=None):
+    if not current_user.is_mod:
+        abort(403)
     editing = request.path.endswith("/edit")
     editing_about = request.path.startswith("/about")
     if request.method == "GET":
@@ -139,6 +139,8 @@ def write_post(no: int=None):
 
 @login_required
 def delete_post(no: int): # TODO: 권한
+    if not current_user.is_mod:
+        abort(403)
     with sqlite3.connect("sql/posts.db") as DB:
         query = """
         DELETE FROM posts
@@ -187,6 +189,8 @@ def magazines():
 
 @login_required
 def write_magazine(no: int=None):
+    if not current_user.is_mod:
+        abort(403)
     editing = request.path.endswith("/edit")
     with sqlite3.connect("sql/magazines.db") as DB, sqlite3.connect("sql/contents-per-magazines.db") as contentsDB:
         if request.method == "GET":
@@ -327,6 +331,8 @@ def classes(name: Optional[str]=None, no: Optional[int]=None):
 
 @login_required
 def write_class_activity(name: str, no: Optional[int]=None):
+    if not current_user.is_mod:
+        abort(403)
     editing = request.path.endswith("/edit")
     categories = {"시반": "poetry", "소설반": "novel", "합평반": "critique", "독서반": "reading"}
     if request.method == "GET":
@@ -396,6 +402,8 @@ def write_class_activity(name: str, no: Optional[int]=None):
 
 @login_required
 def delete_class_activity(name: str, no: int):
+    if not current_user.is_mod:
+        abort(403)
     with sqlite3.connect("sql/class-archive.db") as DB, sqlite3.connect(f"sql/participants-{name}.db") as participantsDB:
         DB.execute(f"DELETE FROM {name} WHERE no=?", [no])
         participantsDB.execute(f"DROP TABLE '{no}'")
@@ -421,6 +429,8 @@ def rules():
 
 @login_required
 def write_rules():
+    if not current_user.is_mod:
+        abort(403)
     editing = request.path.endswith("/edit")
     if request.method == "GET":
         with sqlite3.connect("sql/posts.db") as DB:
@@ -450,18 +460,38 @@ def write_rules():
             return redirect("/rules")
 
 def register():
-    id = request.form["id"]
-    pw = request.form["pw"]
-    with sqlite3.connect("users.db") as DB:
+    portal_id = request.form["portal-id"]
+    portal_pw = request.form["portal-pw"]
+    username = request.form["username"]
+    password = request.form["password"]
+    if portal_id[4]!="1":
+        flash("신촌캠만 가입할 수 있습니다.")
+        return redirect(request.referrer)
+    portal_id = int(portal_id)
+    data = {
+        "loginType": "SSO",
+        "retUrl": "/relation/otherSiteSSO",
+        "type": "pmg",
+        "id": portal_id,
+        "password": portal_pw
+    }
+    if not httpx.post("https://library.yonsei.ac.kr/login", data=data, follow_redirects=True).url.path.endswith(data["retUrl"]):
+        flash("포탈 학번이나 비밀번호가 틀렸습니다.")
+        return redirect(request.referrer)
+    with sqlite3.connect("sql/users.db") as DB:
+        if DB.execute("SELECT id FROM users WHERE id=?", [portal_id]).fetchone() is not None:
+            flash("이미 이 학번으로 가입된 계정이 있습니다.")
+            return redirect(request.referrer)
+        elif DB.execute("SELECT id FROM users WHERE username=?", [username]).fetchone() is not None:
+            flash("이미 사용 중인 ID입니다.")
+            return redirect(request.referrer)
         query = """
         INSERT INTO users (id, username, password, role)
         VALUES (?, ?, ?, ?)
         """
-        now = int(time.time())
-        print(now)
-        DB.execute(query, [now, id, pw, "user"])
-        flask.flash("사이트 회원으로 가입됐습니다. 로그인해주세요.")
-        return redirect("/")
+        DB.execute(query, [portal_id, username, bcrypt.hashpw(password.encode(), bcrypt.gensalt()), "user"])
+        flask.flash("가입됐습니다! 이제 회원으로 로그인할 수 있습니다.")
+        return redirect(request.referrer)
 
 def login():
     username = request.form["username"]
@@ -471,14 +501,13 @@ def login():
         SELECT id, username, role, password FROM users WHERE username=?
         """
         fetched = DB.execute(query, [username]).fetchone()
-        if fetched is None:
-            pass
-        elif fetched[3] != password:
-            pass
-        else:
-            login_user(auth.User(fetched[0], fetched[1], fetched[2]))
-            flask.flash(f"{fetched[1]}님 환영합니다.")
+        if fetched is None or not bcrypt.checkpw(password.encode(), fetched[3]):
+            flash("없는 ID이거나, 비밀번호가 틀렸습니다.")
             return redirect(request.referrer)
+        id, username, role, _ = fetched
+        login_user(auth.User(id, username, role), remember=True)
+        flask.flash(f"{username}님 환영합니다.")
+        return redirect(request.referrer)
 
 @login_required
 def logout():

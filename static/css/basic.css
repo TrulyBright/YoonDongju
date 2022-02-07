@@ -209,6 +209,31 @@ footer a:hover {
     display: block;
     width: 100%;
 }
+#toast {
+    visibility: hidden;
+    min-width: 250px;
+    transform: translate(-50%, 0);
+    left: 50%;
+    color: white;
+    background: #333;
+    text-align: center;
+    border-radius: 15px;
+    padding: 16px;
+    position: fixed;
+    bottom: 30px;
+}
+#toast.show {
+    visibility: visible;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
 @media only screen and (max-width: 480px) {
     html,
     body {
