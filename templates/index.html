@@ -16,23 +16,14 @@
                     <div>{{notice["published"]}}</div>
                 </li>
             {%-endfor-%}
-            {%-for _ in [1,2,3,4,5]-%}
-            <li>ㅁㄴ임ㄹㄴ이</li>
-            {%-endfor-%}
         </ul>
     </div>
     <div>
         <h2><a href="/magazines">문집</a></h2>
         <div id="recent-magazines">
-            <img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지">
-            <img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지">
-            <img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지">
-            <img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지">
-            <img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지">
-            <img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지">
-            <img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지">
-            <img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지">
-            <img src="/static/assets/images/2020 연세문학.jpg" alt="'연세문학' 2020년호 표지">
+            {%-for data in recent_magazines-%}
+            <a href="/magazines?#vol{{data['no']}}"><img src="/uploaded/{{data['cover']}}" alt="{{data['published']}} 발간된 문집 표지"></a>
+            {%-endfor-%}
         </div>
     </div>
 </div>

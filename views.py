@@ -39,11 +39,14 @@ def render_template(template_name_or_list: str, **context):
 
 def index():
     """첫 화면."""
-    with sqlite3.connect(f"sql/posts.db") as DB:
+    with sqlite3.connect(f"sql/posts.db") as DB, sqlite3.connect(f"sql/magazines.db") as magazineDB:
         query = f"SELECT no, title, published FROM posts WHERE type='notice' ORDER BY no DESC LIMIT 4"
         fetched = DB.execute(query).fetchall()
         recent_notices = [{col_name:row[i] for i, col_name in enumerate(("no", "title", "published"))} for row in fetched]
-        return render_template("index.html", recent_notices=recent_notices, len=len)
+        query = f"SELECT no, cover, published FROM magazines ORDER BY published DESC LIMIT 5"
+        fetched = magazineDB.execute(query).fetchall()
+        recent_magazines = [{"no": row[0], "cover": row[1], "published": row[2]} for row in fetched]
+        return render_template("index.html", recent_notices=recent_notices, recent_magazines=recent_magazines)
 
 def about():
     """소개 화면."""
@@ -176,7 +179,7 @@ def notices(no: Optional[int]=None):
 
 def magazines():
     with sqlite3.connect(f"sql/magazines.db") as DB, sqlite3.connect("sql/contents-per-magazines.db") as contentsDB:
-        query = f"SELECT no, year, season, published, cover FROM magazines ORDER BY no DESC"""
+        query = f"SELECT no, year, season, published, cover FROM magazines ORDER BY published DESC"""
         fetched = DB.execute(query).fetchall()
         data = [{col:row[i] for i, col in enumerate(("no", "year", "season", "published", "cover"))} for row in fetched]
         for volume in data:
@@ -381,7 +384,7 @@ def write_class_activity(name: str, no: Optional[int]=None):
             (topic, conducted, content, moderator, hide_participants)
             VALUES (?, ?, ?, ?, ?)
             """
-            cursor = DB.execute(query, [topic, conducted, content, no, hide_participants] if editing else [topic, conducted, content, "sample moderator", hide_participants])
+            cursor = DB.execute(query, [topic, conducted, content, no, hide_participants] if editing else [topic, conducted, content, current_user.real_name, hide_participants])
             if editing:
                 query = f"""
                 DROP TABLE IF EXISTS "{no}"
@@ -450,7 +453,7 @@ def write_rules():
     elif request.method == "POST":
         title = request.form["title"]
         content = request.form["content"]
-        author = "sample author"
+        author = current_user.real_name
         published = datetime.now(pytz.timezone("Asia/Seoul")).date()
         with sqlite3.connect("sql/posts.db") as DB:
             query = """
