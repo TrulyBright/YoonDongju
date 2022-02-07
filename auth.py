@@ -7,10 +7,11 @@ from flask_login import LoginManager
 login_manager = LoginManager()
 
 class User:
-    def __init__(self, user_id, username, role):
+    def __init__(self, user_id, username, role, real_name):
         self.id = user_id
         self.username = username
         self.role = role
+        self.real_name = real_name
 
     def is_authenticated(self):
         return True
@@ -31,10 +32,10 @@ class User:
 @login_manager.user_loader
 def load_user(user_id):
     with sqlite3.connect("sql/users.db") as DB:
-        query = "SELECT id, username, role FROM users WHERE id=?"
+        query = "SELECT id, username, role, real_name FROM users WHERE id=?"
         fetched = DB.execute(query, [int(user_id)]).fetchone()
         if fetched:
-            return User(fetched[0], fetched[1], fetched[2])
+            return User(fetched[0], fetched[1], fetched[2], fetched[3])
         return None
 
 def setup_auth(app: Flask):

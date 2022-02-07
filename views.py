@@ -107,7 +107,7 @@ def write_post(no: int=None):
     elif request.method == "POST":
         title = request.form["title"]
         content = request.form["content"]
-        author = "sample author" # TODO
+        author = current_user.real_name # TODO
         published = datetime.now(pytz.timezone("Asia/Seoul")).date()
         attached = request.files["attached"]
         # NOTE: <form> 태그에 enctype="multipart/form-data"가 붙지 않으면
@@ -464,6 +464,7 @@ def register():
     portal_pw = request.form["portal-pw"]
     username = request.form["username"]
     password = request.form["password"]
+    real_name = request.form["real_name"]
     if portal_id[4]!="1":
         flash("신촌캠만 가입할 수 있습니다.")
         return redirect(request.referrer)
@@ -486,10 +487,10 @@ def register():
             flash("이미 사용 중인 ID입니다.")
             return redirect(request.referrer)
         query = """
-        INSERT INTO users (id, username, password, role)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO users (id, username, password, role, real_name)
+        VALUES (?, ?, ?, ?, ?)
         """
-        DB.execute(query, [portal_id, username, bcrypt.hashpw(password.encode(), bcrypt.gensalt()), "user"])
+        DB.execute(query, [portal_id, username, bcrypt.hashpw(password.encode(), bcrypt.gensalt()), "user", real_name])
         flask.flash("가입됐습니다! 이제 회원으로 로그인할 수 있습니다.")
         return redirect(request.referrer)
 
@@ -498,15 +499,15 @@ def login():
     password = request.form["password"]
     with sqlite3.connect("sql/users.db") as DB:
         query = """
-        SELECT id, username, role, password FROM users WHERE username=?
+        SELECT id, username, role, password, real_name FROM users WHERE username=?
         """
         fetched = DB.execute(query, [username]).fetchone()
         if fetched is None or not bcrypt.checkpw(password.encode(), fetched[3]):
             flash("없는 ID이거나, 비밀번호가 틀렸습니다.")
             return redirect(request.referrer)
-        id, username, role, _ = fetched
-        login_user(auth.User(id, username, role), remember=True)
-        flask.flash(f"{username}님 환영합니다.")
+        id, username, role, _, real_name = fetched
+        login_user(auth.User(id, username, role, real_name), remember=True)
+        flask.flash(f"{real_name}님 환영합니다.")
         return redirect(request.referrer)
 
 @login_required
