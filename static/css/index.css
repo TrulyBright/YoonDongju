@@ -42,6 +42,10 @@
 #recent-magazines a {
     display: contents;
 }
+#recent-magazines a img {
+    width: auto;
+    height: 100%;
+}
 @media only screen and (max-width: 480px) {
     #front-image-container {
         height: auto;
