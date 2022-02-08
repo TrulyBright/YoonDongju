@@ -15,8 +15,6 @@ from flask import abort, redirect, flash, send_from_directory, request
 from flask import current_app as app
 from werkzeug.datastructures import FileStorage
 
-NOT_FOUND = 404
-
 class UnableToSaveFile(Exception):
     """파일을 저장할 수 없는 오류."""
 
@@ -98,7 +96,7 @@ def write_post(no: int=None):
             query = f"SELECT no, title, content, published, attached FROM posts WHERE {condition}"
             fetched = DB.execute(query, [] if editing_about else [no]).fetchone()
             if not editing_about and fetched is None: # no번째 공지가 없음.
-                abort(NOT_FOUND)
+                abort(404)
             data = dict() if fetched is None else {key: fetched[i] for i, key in enumerate(("no", "title", "content", "published", "attached"))}
             return render_template(
                 "write.html",
@@ -150,7 +148,7 @@ def delete_post(no: int): # TODO: 권한
         WHERE no=?
         """
         DB.execute(query, [no])
-        return "meaningless dummy value" # 의미없이 그냥 리턴하는 값.
+        return "삭제 성공"
 
 def notices(no: Optional[int]=None):
     """`no`번째 공지를 열람합니다. `no==None`이면 공지 목록을 봅니다."""
@@ -159,7 +157,7 @@ def notices(no: Optional[int]=None):
             query = f"SELECT no, title, content, author, published, attached FROM posts WHERE no=? and type='notice'"
             fetched = DB.execute(query, [no]).fetchone()
             if fetched is None: # no번째 공지가 없음.
-                abort(NOT_FOUND)
+                abort(404)
             data = {key: fetched[i] for i, key in enumerate(("no", "title", "content", "author", "published", "attached"))}
             return render_template("post.html", categories={"공지":"notices"}, this_is="공지", data=data)
         else:
@@ -273,6 +271,8 @@ def classes(name: Optional[str]=None, no: Optional[int]=None):
         "합평반": "모요일 모 시",
         "독서반": "모요일 모 시",
     }
+    if name not in categories.values():
+        abort(404)
     if name is None:
         return render_template(
             "classes.html",
@@ -323,7 +323,7 @@ def classes(name: Optional[str]=None, no: Optional[int]=None):
         """
         row = DB.execute(query, [no]).fetchone()
         if row is None:
-            abort(NOT_FOUND)
+            abort(404)
         query = f"""
         SELECT name from "{no}"
         """
@@ -350,7 +350,7 @@ def write_class_activity(name: str, no: Optional[int]=None):
                 """
                 fetched = DB.execute(query, [no]).fetchone()
                 if fetched is None:
-                    abort(NOT_FOUND)
+                    abort(404)
                 data = {key:fetched[i] for i, key in enumerate(("no", "moderator", "conducted", "topic", "content"))}
                 query = f"""
                 SELECT name
@@ -406,13 +406,22 @@ def write_class_activity(name: str, no: Optional[int]=None):
             return redirect(f"/classes/{name}/{no if editing else cursor.lastrowid}")
 
 @login_required
+def delete_magazine(no: int):
+    if not current_user.is_mod:
+        abort(403)
+    with sqlite3.connect("sql/magazines.db") as DB, sqlite3.connect("sql/contents-per-magazines.db") as contentsDB:
+        DB.execute(f"DELETE FROM magazines WHERE no=?", [no])
+        contentsDB.execute(f"DROP TABLE '{no}'")
+        return "삭제 성공"
+
+@login_required
 def delete_class_activity(name: str, no: int):
     if not current_user.is_mod:
         abort(403)
     with sqlite3.connect("sql/class-archive.db") as DB, sqlite3.connect(f"sql/participants-{name}.db") as participantsDB:
         DB.execute(f"DELETE FROM {name} WHERE no=?", [no])
         participantsDB.execute(f"DROP TABLE '{no}'")
-        return "meaningless dummy value"
+        return "삭제 성공"
 
 @login_required
 def admin():

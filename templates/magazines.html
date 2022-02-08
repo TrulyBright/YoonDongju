@@ -16,6 +16,10 @@
         <div class="volume-item" id="vol{{volume['no']}}">
             <div class="item">
                 <img src="/uploaded/{{volume['cover']}}" alt="{{volume['published']}}에 발행된 문집 표지">
+                {%-if current_user.is_mod-%}
+                <button type="button"><a href="/magazines/{{volume['no']}}/edit">정보 수정</a></button>
+                <button type="button" onclick="delete_magazine({{volume['no']}})">삭제</button>
+                {%-endif-%}
             </div>
             <div class="content-info">
                 <h4>수록작</h4>
@@ -36,4 +40,12 @@
 {%-block scripts-%}
 <script src="/static/js/convert-hanja.js" type="module"></script>
 <script src="/static/js/magazines.js"></script>
+<script>
+    function delete_magazine(no) {
+        if (confirm("이 문집을 삭제합니다.")) {
+            fetch(location.href+`/${no}`, {method: "DELETE"})
+            .then(()=>{location.reload()});
+        }
+    }
+</script>
 {%-endblock-%}

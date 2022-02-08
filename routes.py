@@ -23,6 +23,7 @@ def setup_routes(app: Flask):
     app.add_url_rule("/classes/<name>/<int:no>/edit", view_func=views.write_class_activity, methods=["GET", "POST"])
     app.add_url_rule("/magazines", view_func=views.magazines)
     app.add_url_rule("/magazines/<int:no>", view_func=views.magazines)
+    app.add_url_rule("/magazines/<int:no>", view_func=views.delete_magazine, methods=["DELETE"])
     app.add_url_rule("/magazines/write", view_func=views.write_magazine, methods=["GET", "POST"])
     app.add_url_rule("/magazines/<int:no>/edit", view_func=views.write_magazine, methods=["GET", "POST"])
     app.add_url_rule("/uploaded/<filename>", view_func=views.uploaded)
