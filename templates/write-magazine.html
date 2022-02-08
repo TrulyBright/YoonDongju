@@ -40,4 +40,9 @@
 {%-endblock-%}
 {%-block scripts-%}
 <script src="/static/js/write-magazine.js"></script>
+{%-if editing-%}
+<script>
+    addRow.number = {{len(content_data)}};
+</script>
+{%-endif-%}
 {%-endblock-%}
