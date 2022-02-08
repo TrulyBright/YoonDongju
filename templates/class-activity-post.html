@@ -17,9 +17,13 @@
 <div class="markdown">
     <h3>참여자</h3>
     <ul>
-        {%-for p in data["participants"]-%}
-        <li class="convertable">{{p}}</li>
-        {%-endfor-%}
+        {%-if data["hide_participants"] and not current_user.is_mod-%}
+            <li>명단이 비공개되었습니다. 임원진만 볼 수 있습니다.</li>
+        {%-else-%}
+            {%-for p in data["participants"]-%}
+                <li class="convertable">{{p}}</li>
+            {%-endfor-%}
+        {%-endif-%}
     </ul>
 </div>
 <div class="markdown convertable">{{gfm(data["content"])|safe}}</div> <!--글쓴이를 신뢰하여 별다른 검사 없이 바로 "|safe"를 적용합니다.-->

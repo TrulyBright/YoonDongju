@@ -314,6 +314,8 @@ def classes(name: Optional[str]=None, no: Optional[int]=None):
                 skip=skip,
                 math=math
             )
+        elif not current_user.is_authenticated:
+            abort(401)
         query = f"""
         SELECT no, moderator, conducted, topic, content, hide_participants
         FROM {name}
