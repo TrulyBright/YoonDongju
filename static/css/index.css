@@ -39,6 +39,9 @@
     flex-direction: row;
     column-gap: 5px;
 }
+#recent-magazines a {
+    display: block;
+}
 @media only screen and (max-width: 480px) {
     #front-image-container {
         height: auto;
