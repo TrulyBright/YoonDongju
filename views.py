@@ -18,6 +18,8 @@ from werkzeug.datastructures import FileStorage
 class UnableToSaveFile(Exception):
     """파일을 저장할 수 없는 오류."""
 
+layout_data = {}
+
 def get_club_info():
     with sqlite3.connect("sql/clubInfo.db") as DB:
         query = """
@@ -34,8 +36,6 @@ def get_club_info():
             "president-name": president_name,
             "president-tel": president_tel
         }
-
-layout_data = get_club_info()
 
 def render_template(template_name_or_list: str, **context):
     # layout에 들어갈 데이터를 항상 주도록 커스터마이징
