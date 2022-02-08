@@ -107,4 +107,7 @@ button.current-index {
     .markdown blockquote {
         margin: unset;
     }
+    #list .head {
+        padding: 3px;
+    }
 }
