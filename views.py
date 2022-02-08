@@ -623,7 +623,7 @@ def edit_class_info():
         DB.execute("""
         UPDATE classInfo
         SET moderator=?,
-            schedult=?,
+            schedule=?,
             description=?
         WHERE name=?
         """, [mod, schedule, description, name])
