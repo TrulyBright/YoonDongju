@@ -9,7 +9,9 @@
 <h1 class="convertable">{{data["topic"]}}</h1>
 <div class="function-bar">
     <div class="author-date"><div class="convertable">분반장 {{data["moderator"]}}</div><div>활동일 {{data["conducted"]}}</div></div>
+    {%-if current_user.is_mod-%}
     <div><button type="button"><a href="/classes/{{categories[this_is]}}/{{data['no']}}/edit">수정</a></button><button type="button" id="delete-button">삭제</button></div>
+    {%-endif-%}
 </div>
 <hr>
 <div class="markdown">
