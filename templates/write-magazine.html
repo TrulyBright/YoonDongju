@@ -39,10 +39,10 @@
     </div><input type="submit" value="게시"></form>
 {%-endblock-%}
 {%-block scripts-%}
-<script src="/static/js/write-magazine.js"></script>
 {%-if editing-%}
 <script>
     addRow.number = {{len(content_data)}};
 </script>
 {%-endif-%}
+<script src="/static/js/write-magazine.js"></script>
 {%-endblock-%}
