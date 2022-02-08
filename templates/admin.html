@@ -7,7 +7,8 @@
     <h1>관리자 화면</h1>
     <div id="container">
         <div id="navigator">
-            <div><h3 class="users">회원 관리</h3></div>
+            <div><a href="#"><h3 class="club-info">동아리 정보</h3></a></div>
+            <div><a href="#"><h3 class="users">회원 관리</h3></a></div>
         </div>
         <div id="workspace">
             <div class="users">
@@ -45,6 +46,25 @@
                         
                     </select> 로 <button type="button">변경</button></label>
                 </div>
+            </div>
+            <div class="club-info working">
+                <h2>동아리 정보</h2>
+                <form action="/info" method="post">
+                    <input type="text" placeholder="위치" value="{{layout_data['location']}}" name="location">
+                    <input type="submit" value="변경">
+                </form>
+                <form action="/info" method="post">
+                    <input type="email" placeholder="이메일" value="{{layout_data['email']}}" name="email">
+                    <input type="submit" value="변경">
+                </form>
+                <form action="/info" method="post">
+                    <input type="text" placeholder="회장 이름" value="{{layout_data['president-name']}}" name="president-name">
+                    <input type="submit" value="변경">
+                </form>
+                <form action="/info" method="post">
+                    <input type="text" placeholder="회장 전화번호" value="{{layout_data['president-tel']}}" name="president-tel">
+                    <input type="submit" value="변경">
+                </form>
             </div>
         </div>
     </div>

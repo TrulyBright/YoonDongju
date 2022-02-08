@@ -18,14 +18,28 @@ from werkzeug.datastructures import FileStorage
 class UnableToSaveFile(Exception):
     """파일을 저장할 수 없는 오류."""
 
+def get_club_info():
+    with sqlite3.connect("sql/clubInfo.db") as DB:
+        query = """
+        SELECT location, email, president_name, president_tel FROM clubInfo
+        """
+        location, email, president_name, president_tel = DB.execute(query).fetchone() or DB.execute("""
+        INSERT INTO clubInfo
+        (location, email, president_name, president_tel)
+        VALUES (?, ?, ?, ?)
+        """, ["아직 설정되지 않음"]*4).execute(query).fetchone()
+        return {
+            "location": location,
+            "email": email,
+            "president-name": president_name,
+            "president-tel": president_tel
+        }
+
+layout_data = get_club_info()
+
 def render_template(template_name_or_list: str, **context):
     # layout에 들어갈 데이터를 항상 주도록 커스터마이징
-    layout_data = {
-        "location": "대강당 109호",
-        "email": "roompennoyeah@gmail.com",
-        "president-name": "서혜빈",
-        "president-tel": "010-5797-4309"
-    } # TODO: 하드코딩 제거
+    global layout_data
     return flask.render_template(
         template_name_or_list,
         datetime=datetime,
@@ -571,3 +585,19 @@ def modify_user(id: int):
             """
             DB.execute(query, [role, id])
             return "Dummy"
+
+@login_required
+def info():
+    if not current_user.is_mod: abort(403)
+    global layout_data
+    with sqlite3.connect("sql/clubInfo.db") as DB:
+        if location := request.form.get("location"):
+            DB.execute("UPDATE clubInfo SET location=?", [location])
+        if email := request.form.get("email"):
+            DB.execute("UPDATE clubInfo SET email=?", [email])
+        if president_name := request.form.get("president-name"):
+            DB.execute("UPDATE clubInfo SET president_name=?", [president_name])
+        if president_tel := request.form.get("president-tel"):
+            DB.execute("UPDATE clubInfo SET president_tel=?", [president_tel])
+    layout_data = get_club_info()
+    return redirect("/admin")

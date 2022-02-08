@@ -17,6 +17,12 @@
     border-radius: 15px;
     padding: 15px;
 }
+#workspace > div {
+    display: none;
+}
+#workspace > div.working {
+    display: block;
+}
 #user-list {
     width: fit-content;
     display: grid;
@@ -47,4 +53,10 @@
 .change-role .popup {
     display: none;
     position: absolute;
+}
+#workspace .club-info form {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 5px;
+    width: fit-content;
 }

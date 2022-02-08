@@ -41,6 +41,14 @@ query = {
             cover text not null,
             published date not null
         )
+    """,
+    "clubInfo": """
+        CREATE TABLE IF NOT EXISTS clubInfo (
+            location text not null ,
+            email text not null,
+            president_name text not null,
+            president_tel text not null
+        );
     """
 }
 

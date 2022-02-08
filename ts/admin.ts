@@ -17,3 +17,12 @@ function hide(id) {
     const popup = document.querySelector(`#change-role-popup${id}`) as HTMLElement;
     popup.style.removeProperty("display");
 }
+
+document.querySelectorAll("#navigator div h3").forEach((element)=>{
+    element.addEventListener("click", (event)=>{
+        document.querySelectorAll("#workspace > div").forEach((element)=>{
+            element.classList.remove("working");
+        });
+        document.querySelector(`#workspace .${element.className}`).classList.toggle("working");
+    });
+});

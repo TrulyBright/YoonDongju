@@ -32,3 +32,4 @@ def setup_routes(app: Flask):
     app.add_url_rule("/logout", view_func=views.logout)
     app.add_url_rule("/admin", view_func=views.admin)
     app.add_url_rule("/users/<int:id>/modify", view_func=views.modify_user)
+    app.add_url_rule("/info", view_func=views.info, methods=["POST"])
