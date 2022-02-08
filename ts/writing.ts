@@ -1,5 +1,6 @@
-import { convertToHanja } from "./convert-hanja.js";
-
+const convertToHanja = ()=> document.querySelectorAll(".convertable").forEach((element)=>{
+    element.innerHTML = element.innerHTML.replaceAll(new RegExp("([\u3400-\u9FBF]+)", "g"), '<span class="hanja">$1</span>');
+});
 const input = document.getElementsByName("content")[0];
 const preview = document.querySelector(".preview");
 // @ts-expect-error
@@ -13,7 +14,7 @@ input.addEventListener("input", (event)=>{
     preview.innerHTML = marked.parse(input.value);
     convertToHanja();
 });
-function addParticipant (event, first) {
+function addParticipant (event) {
     //@ts-expect-error
     if (addParticipant.number !== undefined) {
         //@ts-expect-error
@@ -30,26 +31,24 @@ function addParticipant (event, first) {
     newParticipant.name = "participant"+String(addParticipant.number);
     newParticipant.placeholder = "참여자";
     newParticipant.required = true;
-    newParticipant.addEventListener("keydown", (event)=>{
-        // BUG: keydown 이벤트가 첫 번째 input 이후로는 작동을 안 함.
-        if (event.key === "Tab") {
-            if (newParticipant === document.querySelectorAll("#participants input")[document.querySelectorAll("#participants input").length-1]) {
-                event.preventDefault();
-                addParticipant(null, false).focus();
-            }
-        }
-    });
+    // newParticipant.addEventListener("keydown", (event)=>{
+    //     // BUG: keydown 이벤트가 첫 번째 input 이후로는 작동을 안 함.
+    //     if (event.key === "Tab") {
+    //         if (newParticipant === document.querySelectorAll("#participants input")[document.querySelectorAll("#participants input").length-1]) {
+    //             event.preventDefault();
+    //             addParticipant(null).focus();
+    //         }
+    //     }
+    // });
     div.appendChild(newParticipant);
-    if (!first) {
-        removeThisParticipant.type = "button";
-        removeThisParticipant.textContent = "제거";
-        removeThisParticipant.addEventListener("click", (event)=>{
-            document.querySelector("#participants").removeChild(div);
-        });
-        div.innerHTML+="\n";
-        div.appendChild(removeThisParticipant);
-    }
+    removeThisParticipant.type = "button";
+    removeThisParticipant.textContent = "제거";
+    removeThisParticipant.addEventListener("click", (event)=>{
+        document.querySelector("#participants").removeChild(div);
+    });
+    div.innerHTML+="\n";
+    div.appendChild(removeThisParticipant);
     document.querySelector("#participants").appendChild(div);
     return newParticipant;
 }
-addParticipant(null, true);
+addParticipant(null);

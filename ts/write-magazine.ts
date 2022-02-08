@@ -46,11 +46,21 @@ function addRow (event) {
         }
     });
     div.appendChild(typeInput);
+    div.innerHTML+="\n";
     div.appendChild(titleInput);
+    div.innerHTML+="\n";
     div.appendChild(authorInput);
+    div.innerHTML+="\n";
     div.appendChild(languageInput);
+    div.innerHTML+="\n";
     div.appendChild(removeThisLine);
+    div.innerHTML+="\n";
     document.querySelector("#published-content-list").appendChild(div);
     return typeInput;
 }
 addRow(null);
+function removeLineNumber (no) {
+    document
+    .querySelector("#published-content-list")
+    .removeChild(document.querySelector(`#existing-content-${no}`));
+}

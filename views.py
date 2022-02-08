@@ -195,10 +195,26 @@ def write_magazine(no: int=None):
     editing = request.path.endswith("/edit")
     with sqlite3.connect("sql/magazines.db") as DB, sqlite3.connect("sql/contents-per-magazines.db") as contentsDB:
         if request.method == "GET":
-            return render_template("write-magazine.html")
+            if editing:
+                query = """
+                SELECT year, season, published FROM magazines WHERE no=?
+                """
+                year, season, published = DB.execute(query, [no]).fetchone()
+                volume_data = {"year": year, "season": season, "published": published}
+                query = f"""
+                SELECT type, author, title, language FROM '{no}'
+                """
+                content_data = [{
+                    "type": row[0],
+                    "author": row[1],
+                    "title": row[2],
+                    "language": row[3]
+                } for row in contentsDB.execute(query).fetchall()]
+                return render_template("write-magazine.html", editing=editing, volume_data=volume_data, content_data=content_data, enumerate=enumerate)
+            return render_template("write-magazine.html", editing=editing)
         elif request.method == "POST":
             year = request.form["year"]
-            season = {"sangbangi":1, "habangi": 2}[request.form["season"]]
+            season = request.form["season"]
             published = request.form["published"]
             cover = str(upload(request.files["cover"]))
             types = [type for key, type in request.form.items() if key.endswith("type")]
@@ -271,8 +287,6 @@ def classes(name: Optional[str]=None, no: Optional[int]=None):
         "합평반": "모요일 모 시",
         "독서반": "모요일 모 시",
     }
-    if name not in categories.values():
-        abort(404)
     if name is None:
         return render_template(
             "classes.html",
@@ -281,6 +295,8 @@ def classes(name: Optional[str]=None, no: Optional[int]=None):
             moderator=moderator,
             schedule=schedule,
         )
+    elif name not in categories.values():
+        abort(404)
     with sqlite3.connect("sql/class-archive.db") as DB, sqlite3.connect(f"sql/participants-{name}.db") as participantsDB:
         if no is None:
             skip = int(request.args.get("skip", 0))
@@ -364,7 +380,9 @@ def write_class_activity(name: str, no: Optional[int]=None):
                     data=data,
                     editing=editing,
                     for_class_activity=True,
-                    enumerate=enumerate
+                    enumerate=enumerate,
+                    len=len,
+                    str=str,
                 )
         return render_template("write.html", categories=categories, this_is={value:key for key, value in categories.items()}[name], editing=False, for_class_activity=True)
     elif request.method == "POST":

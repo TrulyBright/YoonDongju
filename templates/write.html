@@ -38,7 +38,7 @@
     <div class="for-class-activity" id="participants">
         <h3>참여자 명단</h3>
         <h5>분반장 이름도 적습니다.</h5>
-        <h6>추가는 Tab키로 합니다.</h6>
+        <button type="button" onclick="{{'addParticipant.number='+str(len(data['participants'])) if editing else ''}}; addParticipant(null)">추가</button>
         {%-if editing-%}
             {%-for i, p in enumerate(data["participants"])-%}
                 <div id="participant{{i+1}}">
@@ -141,5 +141,5 @@ _강조 문법은 **한꺼번에** 쓸 수 있습니다._
 </form>
 {% endblock %}
 {%-block scripts-%}
-<script src="/static/js/writing.js" type="module"></script>
+<script src="/static/js/writing.js"></script>
 {%-endblock-%}

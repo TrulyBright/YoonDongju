@@ -16,19 +16,32 @@
     {%-endif-%}
 " method="post" enctype="multipart/form-data">
     <h1>문집 {{"정보 수정" if editing else "추가"}}</h1>
-    <input type="number" name="year" placeholder="연도" required>
+    <input type="number" name="year" placeholder="연도" value="{{volume_data['year'] if editing else ''}}" required>
     <div>
         <label for="sangbangi">상반기</label>
-        <input type="radio" name="season" value="sangbangi" required>
+        <input type="radio" name="season" value="sangbangi" required {{"checked" if editing and volume_data['season']=="sangbangi" else ''}}>
         <label for="habangi">하반기</label>
-        <input type="radio" name="season" value="habangi">
+        <input type="radio" name="season" value="habangi" {{"checked" if editing and volume_data['season']=="habangi" else ''}}>
     </div>
-    <label for="published">발행일 <input type="date" name="published" required></label>
+    <label for="published">발행일 <input type="date" name="published" value="{{volume_data['published'] if editing else ''}}" required></label>
     <label for="cover">앞표지 <input type="file" name="cover" required></label>
     <div>
         <h3>수록작</h3>
-        <h6>추가는 Tab키로 합니다.</h6>
-        <div id="published-content-list"></div>
+        <h6>마지막 칸에서 Tab키를 눌러보세요.</h6>
+        <div id="published-content-list">
+            {%-if editing-%}
+                {%-for i, row in enumerate(content_data)-%}
+                <div class="published-content" id="existing-content-{{i}}">
+                    <input name="{{i}}-type" placeholder="시, 소설, 희곡, 수필, ···" required spellcheck="false" value="{{row['type']}}">
+                    <input name="{{i}}-title" placeholder="제목" required spellcheck="false" value="{{row['title']}}">
+                    <input name="2-author" placeholder="작가" required spellcheck="false" value="{{row['author']}}">
+                    <input name="2-language" placeholder="언어" required spellcheck="false" value="{{row['language']}}">
+                    <button type="button" onclick="removeLineNumber({{i}})">제거</button>
+                </div>
+                {%-endfor-%}
+            {%-endif-%}
+        </div>
+        <button type="button" onclick="addRow(null)">추가</button>
     </div><input type="submit" value="게시"></form>
 {%-endblock-%}
 {%-block scripts-%}
