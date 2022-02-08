@@ -246,7 +246,7 @@ def write_magazine(no: int=None):
                     "title": row[2],
                     "language": row[3]
                 } for row in contentsDB.execute(query).fetchall()]
-                return render_template("write-magazine.html", editing=editing, volume_data=volume_data, content_data=content_data, enumerate=enumerate)
+                return render_template("write-magazine.html", editing=editing, no=no, volume_data=volume_data, content_data=content_data, enumerate=enumerate)
             return render_template("write-magazine.html", editing=editing)
         elif request.method == "POST":
             year = request.form["year"]
