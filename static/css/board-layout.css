@@ -88,6 +88,9 @@ button.current-index {
     flex-direction: row;
     column-gap: 15px;
 }
+.this-is {
+    font-weight: bold;
+}
 @media only screen and (max-width: 480px) {
     #main {
         grid-template-columns: 1fr;

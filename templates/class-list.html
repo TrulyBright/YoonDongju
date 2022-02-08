@@ -6,10 +6,11 @@
 {%-endblock-%}
 {%-block categories-%}
 {%-for name, suburl in categories.items()-%}
-<li><a href="/classes/{{suburl}}">{{name}}</a></li>
+<li><a href="/classes/{{suburl}}" class="{{'this-is' if this_is==name else ''}}">{{name}}</a></li>
 {%-endfor-%}
 {%-endblock-%}
 {%-block content-%}
+<h2>{{this_is}}</h2>
 <div id="list">
     <div class="head">회차</div>
     <div class="head">주제</div>
@@ -42,7 +43,9 @@
             <button type="button"><a href="/classes/{{categories[this_is]}}?skip={{(list_range_start+1)*100}}">다음</a></button>
         {%-endif-%}
     </div>
+    {%-if current_user.is_mod-%}
     <button type="button"><a href="/classes/{{categories[this_is]}}/write">글쓰기</a></button>
+    {%-endif-%}
 </div>
 {%-endblock-%}
 {%-block scripts-%}
