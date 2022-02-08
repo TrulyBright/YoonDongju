@@ -620,5 +620,12 @@ def edit_class_info():
         (name, moderator, schedule, description)
         VALUES (?, ?, ?, ?)
         """, [name, mod, schedule, description])
+        DB.execute("""
+        UPDATE classInfo
+        SET moderator=?,
+            schedult=?,
+            description=?
+        WHERE name=?
+        """, [mod, schedule, description, name])
     class_info = get_class_info() # Refresh
     return redirect("/admin")
