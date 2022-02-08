@@ -35,13 +35,4 @@
 {%-endblock-%}
 {%-block scripts-%}
 <script src="/static/js/convert-hanja.js" type="module"></script>
-<script>
-    function setVolumeItemHeight (event) {
-        document.querySelectorAll(".volume-item").forEach((element)=>{
-            element.style.height = String(element.querySelector("img").clientHeight)+"px";
-        });
-    }
-    window.addEventListener("resize", setVolumeItemHeight);
-    window.addEventListener("load", setVolumeItemHeight);
-</script>
 {%-endblock-%}

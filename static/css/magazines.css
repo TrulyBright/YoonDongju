@@ -15,12 +15,14 @@
 }
 .volume-item {
     overflow: auto;
+    height: 360px;
 }
 .item {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    height: 100%;
 }
 .item > p {
     text-align: center;
