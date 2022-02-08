@@ -31,13 +31,7 @@
         <div id="published-content-list">
             {%-if editing-%}
                 {%-for i, row in enumerate(content_data)-%}
-                <div class="published-content" id="existing-content-{{i}}">
-                    <input name="{{i}}-type" placeholder="시, 소설, 희곡, 수필, ···" required spellcheck="false" value="{{row['type']}}">
-                    <input name="{{i}}-title" placeholder="제목" required spellcheck="false" value="{{row['title']}}">
-                    <input name="2-author" placeholder="작가" required spellcheck="false" value="{{row['author']}}">
-                    <input name="2-language" placeholder="언어" required spellcheck="false" value="{{row['language']}}">
-                    <button type="button" onclick="removeLineNumber({{i}})">제거</button>
-                </div>
+                <div class="published-content" id="existing-content-{{i}}"><input name="{{i}}-type" placeholder="시, 소설, 희곡, 수필, ···" required spellcheck="false" value="{{row['type']}}"><input name="{{i}}-title" placeholder="제목" required spellcheck="false" value="{{row['title']}}"><input name="2-author" placeholder="작가" required spellcheck="false" value="{{row['author']}}"><input name="2-language" placeholder="언어" required spellcheck="false" value="{{row['language']}}"><button type="button" onclick="removeLineNumber({{i}})">제거</button></div>
                 {%-endfor-%}
             {%-endif-%}
         </div>

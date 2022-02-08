@@ -6,3 +6,6 @@
 #board form > * {
     width: fit-content;
 }
+.published-content > input {
+    margin: auto 3px;
+}
