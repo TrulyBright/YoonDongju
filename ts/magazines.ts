@@ -4,8 +4,4 @@ document.querySelectorAll(".item").forEach((element)=>{
         info.style.display = "block";
         element.classList.toggle("hidden");
     });
-    info.addEventListener("click", (event)=>{
-        info.style.removeProperty("display");
-        element.classList.toggle("hidden");
-    });
 });
