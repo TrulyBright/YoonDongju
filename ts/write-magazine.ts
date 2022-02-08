@@ -4,12 +4,9 @@ function removeLineNumber (no) {
     .removeChild(document.querySelector(`#existing-content-${no}`));
 }
 function addRow (event) {
-    //@ts-expect-error
     if (addRow.number !== undefined) {
-        //@ts-expect-error
         addRow.number +=1
     } else {
-        //@ts-expect-error
         addRow.number = 0;
     }
     const div = document.createElement("div");
@@ -18,7 +15,6 @@ function addRow (event) {
     const titleInput = document.createElement("input");
     const languageInput = document.createElement("input");
     const removeThisLine = document.createElement("button");
-    //@ts-expect-error
     const number = String(addRow.number);
     typeInput.name = number + "-type";
     authorInput.name = number + "-author";
@@ -58,4 +54,5 @@ function addRow (event) {
     document.querySelector("#published-content-list").appendChild(div);
     return typeInput;
 }
+addRow.number = document.querySelectorAll(".published-content").length;
 addRow(null);

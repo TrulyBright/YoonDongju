@@ -31,7 +31,7 @@
         <div id="published-content-list">
             {%-if editing-%}
                 {%-for i, row in enumerate(content_data)-%}
-                <div class="published-content" id="existing-content-{{i}}"><input name="{{i}}-type" placeholder="시, 소설, 희곡, 수필, ···" required spellcheck="false" value="{{row['type']}}"><input name="{{i}}-title" placeholder="제목" required spellcheck="false" value="{{row['title']}}"><input name="2-author" placeholder="작가" required spellcheck="false" value="{{row['author']}}"><input name="2-language" placeholder="언어" required spellcheck="false" value="{{row['language']}}"><button type="button" onclick="removeLineNumber({{i}})">제거</button></div>
+                <div class="published-content" id="existing-content-{{i}}"><input name="{{i}}-type" placeholder="시, 소설, 희곡, 수필, ···" required spellcheck="false" value="{{row['type']}}"><input name="{{i}}-title" placeholder="제목" required spellcheck="false" value="{{row['title']}}"><input name="{{i}}-author" placeholder="작가" required spellcheck="false" value="{{row['author']}}"><input name="{{i}}-language" placeholder="언어" required spellcheck="false" value="{{row['language']}}"><button type="button" onclick="removeLineNumber({{i}})">제거</button></div>
                 {%-endfor-%}
             {%-endif-%}
         </div>
@@ -39,10 +39,5 @@
     </div><input type="submit" value="게시"></form>
 {%-endblock-%}
 {%-block scripts-%}
-{%-if editing-%}
-<script>
-    addRow.number = {{len(content_data)}};
-</script>
-{%-endif-%}
 <script src="/static/js/write-magazine.js"></script>
 {%-endblock-%}
