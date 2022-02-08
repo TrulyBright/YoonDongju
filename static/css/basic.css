@@ -296,3 +296,8 @@ footer a:hover {
         width: 90%;
     }
 }
+@media only screen and (min-width: 481px) and (max-width: 1024px) {
+    .modal {
+        padding: 30px;
+    }
+}
