@@ -9,6 +9,7 @@
         <div id="navigator">
             <div><a href="#"><h3 class="club-info">동아리 정보</h3></a></div>
             <div><a href="#"><h3 class="users">회원 관리</h3></a></div>
+            <div><a href="#"><h3 class="class-info">분반 정보</h3></a></div>
         </div>
         <div id="workspace">
             <div class="users">
@@ -29,7 +30,7 @@
                                 <button type="button" class="trigger" onclick="show({{user['id']}})">직책 변경</button>
                                 <div id="change-role-popup-{{user['id']}}" class="popup">
                                     <label for="role"><select name="role" onchange="setPotentialRole(event.target.value)">
-                                        <option value="user">user(정회원)</option>
+                                        <option value="user">user(회원)</option>
                                         <option value="board">board(임원)</option>
                                         <option value="president">president(회장)</option>
                                     </select> 로 <button type="button" onclick="changeRole({{user['id']}})">변경</button></label>
@@ -65,6 +66,26 @@
                     <input type="text" placeholder="회장 전화번호" value="{{layout_data['president-tel']}}" name="president-tel">
                     <input type="submit" value="변경">
                 </form>
+            </div>
+            <div class="class-info">
+                <h2>분반 정보</h2>
+                {%-for class_name, class_code in class_categories.items()-%}
+                <div>
+                    <h3>{{class_name}}</h3>
+                    <form action="/class-info?class={{class_code}}" method="post">
+                        <input type="text" placeholder="{{class_name}} 운영 요일/시간" spellcheck="false" name="schedule" value="{{class_info[class_code]['schedule']}}" required>
+                        <input type="submit" value="변경">
+                    </form>
+                    <form action="/class-info?class={{class_code}}" method="post">
+                        <textarea name="description" placeholder="{{class_name}} 설명" spellcheck="false" rows="4" required>{{class_info[class_code]['description']}}</textarea>
+                        <input type="submit" value="변경">
+                    </form>
+                    <form action="/class-info?class={{class_code}}" method="post">
+                        <input type="text" placeholder="{{class_name}}장 이름" name="moderator" spellcheck="false" value="{{class_info[class_code]['moderator']}}" required>
+                        <input type="submit" value="변경">
+                    </form>
+                </div>
+                {%-endfor-%}
             </div>
         </div>
     </div>

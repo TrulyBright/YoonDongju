@@ -19,6 +19,8 @@ class UnableToSaveFile(Exception):
     """파일을 저장할 수 없는 오류."""
 
 layout_data = {}
+class_info = {}
+class_categories = {"시반": "poetry", "소설반": "novel", "합평반": "critique", "독서반": "reading"}
 
 def get_club_info():
     with sqlite3.connect("sql/clubInfo.db") as DB:
@@ -36,6 +38,26 @@ def get_club_info():
             "president-name": president_name,
             "president-tel": president_tel
         }
+
+def get_class_info():
+    with sqlite3.connect("sql/classInfo.db") as DB:
+        query = """
+        SELECT name, moderator, schedule, description FROM classInfo
+        """
+        data = {
+            row[0]: {
+                "moderator": row[1],
+                "schedule": row[2],
+                "description": row[3]
+            }
+        for row in DB.execute(query).fetchall()}
+        for code in class_categories.values():
+            data.setdefault(code, {
+                "moderator": "",
+                "schedule": "",
+                "description": ""
+            })
+        return data
 
 def render_template(template_name_or_list: str, **context):
     # layout에 들어갈 데이터를 항상 주도록 커스터마이징
@@ -282,32 +304,13 @@ def classes(name: Optional[str]=None, no: Optional[int]=None):
     `name`도 `None`이면 분반 목록을 봅니다.
     """
     # TODO: 하드코딩 제거
-    categories = {"시반": "poetry", "소설반": "novel", "합평반": "critique", "독서반": "reading"}
-    description = {
-        "시반": "시를 씁니다.",
-        "소설반": "소설을 씁니다.",
-        "합평반": "회원이 쓴 작품을 합평합니다. 회원들이 평을 하는 동안 작가는 단 한 마디도 할 수 없습니다.",
-        "독서반": "기성 작가가 쓴 작품을 읽고 감상을 나눕니다.",
-    }
-    moderator = {
-        "시반": "이상명",
-        "소설반": "이주한",
-        "합평반": "석범진",
-        "독서반": "이진명",
-    }
-    schedule = {
-        "시반": "모요일 모 시",
-        "소설반": "모요일 모 시",
-        "합평반": "모요일 모 시",
-        "독서반": "모요일 모 시",
-    }
+    global class_categories
+    categories = class_categories
     if name is None:
         return render_template(
             "classes.html",
             categories=categories,
-            description=description,
-            moderator=moderator,
-            schedule=schedule,
+            class_info=class_info,
         )
     elif name not in categories.values():
         abort(404)
@@ -466,7 +469,7 @@ def admin():
             {"id": row[0], "real_name": row[1], "username": row[2], "role": row[3]}
             for row in fetched
         ]
-        return render_template("admin.html", users=users)
+        return render_template("admin.html", users=users, class_categories=class_categories, class_info=class_info)
 
 def uploaded(filename: str):
     return send_from_directory(app.config["UPLOAD_DIR"], filename)
@@ -587,7 +590,7 @@ def modify_user(id: int):
             return "Dummy"
 
 @login_required
-def info():
+def edit_club_info():
     if not current_user.is_mod: abort(403)
     global layout_data
     with sqlite3.connect("sql/clubInfo.db") as DB:
@@ -599,5 +602,23 @@ def info():
             DB.execute("UPDATE clubInfo SET president_name=?", [president_name])
         if president_tel := request.form.get("president-tel"):
             DB.execute("UPDATE clubInfo SET president_tel=?", [president_tel])
-    layout_data = get_club_info()
+    layout_data = get_club_info() # Refresh
+    return redirect("/admin")
+
+@login_required
+def edit_class_info():
+    if not current_user.is_mod: abort(403)
+    global class_info
+    global layout_data
+    name = request.args["class"]
+    mod = request.form.get("moderator", class_info[name]["moderator"])
+    schedule = request.form.get("schedule", class_info[name]["schedule"])
+    description = request.form.get("description", class_info[name]["description"])
+    with sqlite3.connect("sql/classInfo.db") as DB:
+        DB.execute("""
+        INSERT OR IGNORE INTO classInfo
+        (name, moderator, schedule, description)
+        VALUES (?, ?, ?, ?)
+        """, [name, mod, schedule, description])
+    class_info = get_class_info() # Refresh
     return redirect("/admin")

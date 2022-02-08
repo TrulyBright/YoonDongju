@@ -60,3 +60,8 @@
     gap: 5px;
     width: fit-content;
 }
+#workspace .class-info form input[type="text"],
+#workspace .class-info form textarea {
+    width: 200px;
+    padding: 0;
+}

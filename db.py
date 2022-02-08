@@ -49,6 +49,14 @@ query = {
             president_name text not null,
             president_tel text not null
         );
+    """,
+    "classInfo": """
+        CREATE TABLE IF NOT EXISTS classInfo (
+            name text not null unique,
+            moderator text not null,
+            schedule text not null,
+            description text not null
+        )
     """
 }
 

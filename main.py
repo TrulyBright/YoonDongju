@@ -12,6 +12,7 @@ middlewares.add_middlewares(app)
 auth.setup_auth(app)
 routes.setup_routes(app)
 views.layout_data = views.get_club_info()
+views.class_info = views.get_class_info()
 
 if __name__ == "__main__": # 로컬에서 실행
     app.run(debug=True)

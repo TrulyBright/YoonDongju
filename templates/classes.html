@@ -7,9 +7,9 @@
     {%-for category_name, category_code in categories.items()-%}
     <a href="/classes/{{category_code}}">
         <h2>{{category_name}}</h2>
-        <div>{{schedule[category_name]}}</div>
-        <div class="convertable">{{description[category_name]}}</div>
-        <div class="convertable">분반장: {{moderator[category_name]}}</div>
+        <div>{{class_info[category_code]["schedule"]}}</div>
+        <div class="convertable">{{class_info[category_code]["description"]}}</div>
+        <div class="convertable">분반장: {{class_info[category_code]["moderator"]}}</div>
     </a>
     {%-endfor-%}
 </div>
