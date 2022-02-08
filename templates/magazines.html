@@ -6,7 +6,7 @@
 <div id="main">
     <h1>문집 『연세문학』</h1>
     <h5>연 2회 발행됩니다.</h5>
-    <h6>표지에 커서를 올려보세요.</h6>
+    <h6>표지를 눌러보세요.</h6>
     <!-- TODO: 관리자에게만 보이도록 -->
     {%-if current_user.is_mod-%}
     <div class="function-bar"><button type="button"><a href="/magazines/write">새 문집 추가</a></button></div>
@@ -35,4 +35,5 @@
 {%-endblock-%}
 {%-block scripts-%}
 <script src="/static/js/convert-hanja.js" type="module"></script>
+<script src="/static/js/magazines.js"></script>
 {%-endblock-%}

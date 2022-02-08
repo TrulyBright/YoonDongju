@@ -23,6 +23,7 @@
     justify-content: center;
     align-items: center;
     height: 100%;
+    cursor: pointer;
 }
 .item > p {
     text-align: center;
@@ -30,12 +31,6 @@
 div.content-info {
     display: none;
     overflow: auto;
-}
-.volume-item:hover > .item {
-    display: none;
-}
-.volume-item:hover > .content-info {
-    display: block;
 }
 .content-info h4 {
     text-align: center;
