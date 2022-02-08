@@ -34,6 +34,7 @@ div.content-info {
     display: none;
     overflow: auto;
     position: relative;
+    z-index: 50;
 }
 .content-info h4 {
     text-align: center;
