@@ -274,11 +274,10 @@ def write_magazine(no: int=None):
                 DB.execute(query, [year, season, published, cover, no])
             else:
                 cursor = DB.execute(query, [year, season, published, cover])
-            if editing:
-                query = f"""
-                DROP TABLE IF EXISTS "{no}"
-                """
-                contentsDB.execute(query)
+            query = f"""
+            DROP TABLE IF EXISTS "{no if editing else DB.execute(f"SELECT COUNT(0) FROM magazines").fetchone()[0]}"
+            """
+            contentsDB.execute(query)
             query = f"""
             CREATE TABLE "{no if editing else DB.execute(f"SELECT COUNT(0) FROM magazines").fetchone()[0]}" (
                 type text not null,
