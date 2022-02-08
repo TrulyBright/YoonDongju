@@ -276,7 +276,7 @@ def write_magazine(no: int=None):
                 cursor = DB.execute(query, [year, season, published, cover])
             if editing:
                 query = f"""
-                DROP TABLE IF EXISTS {no}
+                DROP TABLE IF EXISTS "{no}"
                 """
                 contentsDB.execute(query)
             query = f"""
