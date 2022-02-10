@@ -10,7 +10,7 @@
 {%-endfor-%}
 {%-endblock-%}
 {% block content %}
-<form action="/rules/write" method="post" enctype="multipart/form-data">
+<form action="/rules/{{'edit' if editing else 'write'}}" method="post" enctype="multipart/form-data">
     <h1><input type="text" name="title" placeholder="제목" value="{{data['title']}}" rows="1" spellcheck="false" autofocus required></h1>
     <hr>
     <textarea name="content" spellcheck="false" placeholder="조문" required>{{data["content"] if editing else '# 제목
