@@ -4,10 +4,6 @@ const registerModal = document.querySelector("#register-modal");
 const modalOverlay = document.querySelector("#overlay-on-modal-up");
 const seeMore = document.querySelector("#see-more");
 
-document.querySelector("#join-link").addEventListener("click", (event)=>{
-    joinModal.classList.toggle("hidden");
-    modalOverlay.classList.toggle("hidden");
-});
 document.querySelector("#register").addEventListener("click", (event)=>{
     registerModal.classList.toggle("hidden");
     modalOverlay.classList.toggle("hidden");
@@ -23,5 +19,9 @@ seeMore.addEventListener("click", (event)=>{
 });
 document.querySelector("#login").addEventListener("click", (event)=>{
     loginModal.classList.toggle("hidden");
+    modalOverlay.classList.toggle("hidden");
+});
+document.querySelector("#join-link").addEventListener("click", (event)=>{
+    joinModal.classList.toggle("hidden");
     modalOverlay.classList.toggle("hidden");
 });
