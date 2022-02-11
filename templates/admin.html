@@ -55,7 +55,7 @@
                     <input type="submit" value="변경">
                 </form>
                 <form action="/info" method="post">
-                    <input type="email" placeholder="이메일" value="{{layout_data['email']}}" name="email">
+                    <input type="email" placeholder="이메일" value="{{layout_data['email']}}" name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
                     <input type="submit" value="변경">
                 </form>
                 <form action="/info" method="post">

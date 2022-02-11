@@ -217,6 +217,37 @@
         <input type="text" name="username" placeholder="ID" spellcheck="false" required>
         <input type="password" name="password" placeholder="비밀번호" required>
         <input type="submit" value="접속">
+        <a href="#" id="forgot-id"><small>ID를 모른다면</small></a>
+        <a href="#" id="forgot-pw"><small>비밀번호를 모른다면</small></a>
+    </form>
+</div>
+<div id="find-id-modal" class="hidden modal">
+    <button type="button" class="close-button">×</button>
+    <h1>ID 찾기</h1>
+    <div>
+        <p>10자리 학번과 연세포탈 비밀번호를 입력해주세요.</p>
+        <p>해당 학번으로 가입된 계정이 있고, 포탈 로그인이 가능하다면 ID를 알려드립니다.</p>
+    </div>
+    <form>
+        <input type="number" name="portal-id" placeholder="학번(10자리)" required>
+        <input type="password" name="portal-pw" placeholder="연세포탈 비밀번호" required>
+        <input type="submit" value="인증">
+    </form>
+    <div id="result"></div>
+</div>
+<div id="find-pw-modal" class="hidden modal">
+    <button type="button" class="close-button">×</button>
+    <h1>비밀번호 변경하기</h1>
+    <div>
+        <p>해당 학번으로 가입된 계정이 있고, 포탈 로그인이 가능하다면 비밀번호가 변경됩니다.</p>
+    </div>
+    <form action="/change-pw" method="post">
+        <input type="number" name="portal-id" placeholder="학번(10자리)" pattern="{{student_id_pattern}}" required>
+        <input type="password" name="portal-pw" placeholder="연세포탈 비밀번호" required>
+        <input id="new-password" type="password" name="new-pw" placeholder="새 비밀번호" pattern="{{password_pattern}}" required>
+        <input id="new-password-confirm" type="password" placeholder="새 비밀번호 재입력" required>
+        <p><small>비밀번호는 10자 이상에 숫자와 영문이 하나씩은 있어야 합니다.</small></p>
+        <input type="submit" value="변경">
     </form>
 </div>
 <div id="register-modal" class="hidden modal">
@@ -225,15 +256,17 @@
     <div>
         <p>동아리 가입은 따로 해야 합니다.</p>
         <p>홈페이지 비밀번호는 안전히 암호화되어 저장됩니다.</p>
-        <p>연세포탈 비밀번호는 신촌캠 재학생 인증에만 이용되며, 저장되지 않습니다. <em><small>연세문학회를 믿으세요.</small></em></p>
+        <p>연세포탈 비밀번호는 신촌캠 구성원 인증에만 이용되며, 저장되지 않습니다. <em><small>연세문학회를 믿으세요.</small></em></p>
     </div>
     <br>
     <form method="post" action="/register">
-        <input type="number" name="portal-id" placeholder="학번(10자리)" required>
+        <input type="number" name="portal-id" placeholder="학번(10자리)" pattern="{{student_id_pattern}}" required>
         <input type="password" name="portal-pw" placeholder="연세포탈 비밀번호" required>
         <input type="text" name="real_name" placeholder="이름(실명)" spellcheck="false" required>
         <input type="text" name="username" placeholder="사용할 ID" spellcheck="false" required>
-        <input type="password" name="password" placeholder="사용할 비밀번호" required>
+        <input id="register-pw" type="password" name="password" placeholder="사용할 비밀번호" pattern="{{password_pattern}}" required>
+        <input id="register-pw-confirm" type="password" placeholder="사용할 비밀번호 재입력" pattern="{{password_pattern}}" required>
+        <p><small>비밀번호는 10자 이상에 숫자와 영문이 하나씩은 있어야 합니다.</small></p>
         <input type="submit" value="가입">
     </form>
 </div>

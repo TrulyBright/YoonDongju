@@ -34,3 +34,5 @@ def setup_routes(app: Flask):
     app.add_url_rule("/users/<int:id>/modify", view_func=views.modify_user)
     app.add_url_rule("/info", view_func=views.edit_club_info, methods=["POST"])
     app.add_url_rule("/class-info", view_func=views.edit_class_info, methods=["POST"])
+    app.add_url_rule("/find-id", view_func=views.find_id, methods=["POST"])
+    app.add_url_rule("/change-pw", view_func=views.change_pw, methods=["POST"])

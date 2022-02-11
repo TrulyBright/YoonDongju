@@ -1,3 +1,4 @@
+import re
 import uuid
 import bcrypt
 from flask_login import current_user, login_required, login_user, logout_user
@@ -20,6 +21,8 @@ class UnableToSaveFile(Exception):
 
 layout_data = {}
 class_info = {}
+student_id_pattern = "^\d{10}$"
+password_pattern = "^(?=.*\d)(?=.*[a-zA-Z]).{10,}$"
 class_categories = {"시반": "poetry", "소설반": "novel", "합평반": "critique", "독서반": "reading"}
 
 def get_club_info():
@@ -67,6 +70,8 @@ def render_template(template_name_or_list: str, **context):
         datetime=datetime,
         layout_data=layout_data,
         current_user=current_user,
+        student_id_pattern=student_id_pattern,
+        password_pattern=password_pattern,
         gfm=gfm,
         **context
     )
@@ -522,34 +527,29 @@ def register():
     username = request.form["username"]
     password = request.form["password"]
     real_name = request.form["real_name"]
-    if portal_id[4]!="1":
+    if not re.match(student_id_pattern, portal_id):
+        flash("학번이 숫자 10자리가 아닙니다.")
+    elif portal_id[4]!="1":
         flash("신촌캠만 가입할 수 있습니다.")
-        return redirect(request.referrer)
-    portal_id = int(portal_id)
-    data = {
-        "loginType": "SSO",
-        "retUrl": "/relation/otherSiteSSO",
-        "type": "pmg",
-        "id": portal_id,
-        "password": portal_pw
-    }
-    if not httpx.post("https://library.yonsei.ac.kr/login", data=data, follow_redirects=True).url.path.endswith(data["retUrl"]):
-        flash("포탈 학번이나 비밀번호가 틀렸습니다.")
-        return redirect(request.referrer)
-    with sqlite3.connect("sql/users.db") as DB:
-        if DB.execute("SELECT id FROM users WHERE id=?", [portal_id]).fetchone() is not None:
-            flash("이미 이 학번으로 가입된 계정이 있습니다.")
-            return redirect(request.referrer)
-        elif DB.execute("SELECT id FROM users WHERE username=?", [username]).fetchone() is not None:
-            flash("이미 사용 중인 ID입니다.")
-            return redirect(request.referrer)
-        query = """
-        INSERT INTO users (id, username, password, role, real_name)
-        VALUES (?, ?, ?, ?, ?)
-        """
-        DB.execute(query, [portal_id, username, bcrypt.hashpw(password.encode(), bcrypt.gensalt()), "user", real_name])
-        flask.flash("가입됐습니다! 이제 회원으로 로그인할 수 있습니다.")
-        return redirect(request.referrer)
+    else:
+        portal_id = int(portal_id)
+        with sqlite3.connect("sql/users.db") as DB:
+            if not re.match(password_pattern, portal_pw):
+                flash("비밀번호가 안전하지 않습니다.")
+            elif (
+                is_yonsei_member(portal_id, portal_pw)
+                and DB.execute("SELECT * FROM users WHERE id=?", [portal_id]).fetchone() is None
+                and DB.execute("SELECT * FROM users WHERE username=?", [username]).fetchone() is None
+            ):
+                query = """
+                INSERT INTO users (id, username, password, role, real_name)
+                VALUES (?, ?, ?, ?, ?)
+                """
+                DB.execute(query, [portal_id, username, bcrypt.hashpw(password.encode(), bcrypt.gensalt()), "user", real_name])
+                flash("가입됐습니다! 이제 회원으로 접속할 수 있습니다.")
+            else:
+                flash("포탈 학번이나 비밀번호가 틀렸거나 이미 이 학번으로 가입된 계정이 있거나 이미 사용 중인 ID입니다.")
+    return redirect(request.referrer)
 
 def login():
     username = request.form["username"]
@@ -628,3 +628,47 @@ def edit_class_info():
         """, [mod, schedule, description, name])
     class_info = get_class_info() # Refresh
     return redirect("/admin")
+
+def is_yonsei_member(id, pw):
+    assert isinstance(id, int)
+    assert isinstance(pw, str)
+    data = {
+        "loginType": "SSO",
+        "retUrl": "/relation/otherSiteSSO",
+        "type": "pmg",
+        "id": id,
+        "password": pw
+    }
+    return httpx.post("https://library.yonsei.ac.kr/login", data=data, follow_redirects=True).url.path.endswith(data["retUrl"])
+
+def find_id():
+    portal_id = request.form["portal-id"]
+    portal_pw = request.form["portal-pw"]
+    if is_yonsei_member(int(portal_id), portal_pw):
+        with sqlite3.connect("sql/users.db") as DB:
+            if username := DB.execute("""
+            SELECT username FROM users WHERE id=?
+            """, [portal_id]).fetchone():
+                return {"ID": username}
+    return {"error": "없는 학번이거나, 포탈 비밀번호가 틀렸거나, 이 학번으로 가입된 계정이 없습니다."}
+
+def change_pw():
+    portal_id = request.form["portal-id"]
+    portal_pw = request.form["portal-pw"]
+    new_pw = request.form["new-pw"]
+    with sqlite3.connect("sql/users.db") as DB:
+        if not re.match(password_pattern, portal_pw):
+            flash("비밀번호가 안전하지 않습니다.")
+        elif (
+            is_yonsei_member(int(portal_id), portal_pw)
+            and DB.execute("SELECT * FROM users WHERE id=?", [portal_id]).fetchone() is not None
+        ):
+            DB.execute("""
+            UPDATE users
+            SET password=?
+            WHERE id=?
+            """, [bcrypt.hashpw(new_pw.encode(), bcrypt.gensalt()), portal_id])
+            flash("비밀번호가 무사히 변경됐습니다.")
+        else:
+            flash("없는 학번이거나, 포탈 비밀번호가 틀렸거나, 이 학번으로 가입된 계정이 없습니다.")
+    return redirect(request.referrer)
