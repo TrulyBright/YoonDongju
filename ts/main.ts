@@ -58,7 +58,7 @@ findIDModal.querySelector("form").addEventListener("submit", (event)=>{
     })
         .then(response=>response.json())
         .then(data=>{
-            findIDModal.querySelector("#result").textContent = `ID는 ${data["ID"]}입니다.` || data["error"];
+            findIDModal.querySelector("#result").textContent = "ID" in data ? `ID는 ${data["ID"]}입니다.` : data["error"];
         })
         .catch(error=>{
             alert(`알 수 없는 오류가 발생했습니다: ${error}`);
