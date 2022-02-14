@@ -546,7 +546,7 @@ def register():
                 VALUES (?, ?, ?, ?, ?)
                 """
                 DB.execute(query, [portal_id, username, bcrypt.hashpw(password.encode(), bcrypt.gensalt()), "user", real_name])
-                flash("가입됐습니다! 이제 회원으로 접속할 수 있습니다.")
+                flash("무사히 가입됐습니다! 이제 회원으로 접속할 수 있습니다.")
             else:
                 flash("포탈 학번이나 비밀번호가 틀렸거나 이미 이 학번으로 가입된 계정이 있거나 이미 사용 중인 ID입니다.")
     return redirect(request.referrer)
