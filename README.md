@@ -33,8 +33,6 @@
 * `class-archive.db`: 분반 기록 DB
 * `participants-분반이름.db`: 분반별 회차별 참여자 DB
 ## Notes
-## For Develoers
-* 개발자가 초보여서 코드가 그다지 잘 짜이지 않음.
 ### Copyright
 * 연세문학회 문집 더미에 파묻힌 강아지가 바깥으로 몸을 반쯤 내밀고 숨을 돌리는 대문 그림은 원저작자의 허락을 받아 사용함.
 * 서체
@@ -42,3 +40,6 @@
   * 한문 서체: Noto Serif Korean
 ## Contributors
 * [TrulyBright](https://github.com/TrulyBright)
+
+## Special Thanks to
+* The family of TrulyBright
