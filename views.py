@@ -28,18 +28,12 @@ class_categories = {"시반": "poetry", "소설반": "novel", "합평반": "crit
 def get_club_info():
     with sqlite3.connect("sql/clubInfo.db") as DB:
         query = """
-        SELECT location, email, president_name, president_tel FROM clubInfo
+        SELECT name, value FROM clubInfo
         """
-        location, email, president_name, president_tel = DB.execute(query).fetchone() or DB.execute("""
-        INSERT INTO clubInfo
-        (location, email, president_name, president_tel)
-        VALUES (?, ?, ?, ?)
-        """, ["아직 설정되지 않음"]*4).execute(query).fetchone()
+        rows = DB.execute(query).fetchall()
         return {
-            "location": location,
-            "email": email,
-            "president-name": president_name,
-            "president-tel": president_tel
+            row[0]: row[1]
+            for row in rows
         }
 
 def get_class_info():
@@ -593,14 +587,17 @@ def edit_club_info():
     if not current_user.is_mod: abort(403)
     global layout_data
     with sqlite3.connect("sql/clubInfo.db") as DB:
-        if location := request.form.get("location"):
-            DB.execute("UPDATE clubInfo SET location=?", [location])
-        if email := request.form.get("email"):
-            DB.execute("UPDATE clubInfo SET email=?", [email])
-        if president_name := request.form.get("president-name"):
-            DB.execute("UPDATE clubInfo SET president_name=?", [president_name])
-        if president_tel := request.form.get("president-tel"):
-            DB.execute("UPDATE clubInfo SET president_tel=?", [president_tel])
+        info_names = {
+            "location",
+            "email",
+            "president_name",
+            "president_tel",
+            "join_form_url"
+        }
+        for name in info_names:
+            if value := request.form.get(name):
+                DB.execute("DELETE FROM clubInfo WHERE name=?", [name])
+                DB.execute("INSERT INTO clubInfo (name, value) VALUES (?, ?)", [name, value])
     layout_data = get_club_info() # Refresh
     return redirect("/admin")
 

@@ -42,15 +42,15 @@
     <div>
         <h3>연락처</h3>
         <div>
-            <p>📌 {{layout_data["location"]}}</p>
-            <p>📧 <a href="mailto: {{layout_data['email']}}">{{layout_data['email']}}</a></p>
-            <p>📞 회장 {{layout_data["president-name"]}} <a href="tel: {{layout_data['president-tel'].replace('-', '')}}">{{layout_data["president-tel"]}}</a></p>
+            <p>📌 {{layout_data.get('location', '아직 설정되지 않음')}}</p>
+            <p>📧 <a href="mailto: {{layout_data.get('email', '아직 설정되지 않음')}}">{{layout_data.get('email', '아직 설정되지 않음')}}</a></p>
+            <p>📞 회장 {{layout_data.get("president_name", '아직 설정되지 않음')}} <a href="tel: {{layout_data.get('president_tel', '아직 설정되지 않음').replace('-', '')}}">{{layout_data.get("president_tel", '아직 설정되지 않음')}}</a></p>
         </div>
     </div>
     <div>
         <h3>가입</h3>
         <!-- <a id="join-link">동아리 회원가입</a> -->
-        <a href="https://forms.gle/3zcAoGgNSASqVUwS9">동아리 회원가입</a>
+        <a href="{{layout_data.get('join_form_url', '아직 설정되지 않음')}}">동아리 회원가입</a>
         <a class="clickable" id="register">홈페이지 회원가입</a>
     </div>
     <div>

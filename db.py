@@ -44,10 +44,8 @@ query = {
     """,
     "clubInfo": """
         CREATE TABLE IF NOT EXISTS clubInfo (
-            location text not null ,
-            email text not null,
-            president_name text not null,
-            president_tel text not null
+            name text not null unique,
+            value text not null
         );
     """,
     "classInfo": """
