@@ -158,7 +158,7 @@ def write_post(no: int=None):
             UPDATE posts
             SET title=?,
                 content=?,
-                author=?,
+                {'author=?,' if editing_about else ''}
                 published=?,
                 attached=?
             WHERE {condition}
@@ -168,7 +168,7 @@ def write_post(no: int=None):
             values (?, ?, ?, ?, ?, ?)
             """
             if editing:
-                DB.execute(query, [title, content, author, published, attached] if editing_about else [title, content, author, published, attached, no])
+                DB.execute(query, [title, content, author, published, attached] if editing_about else [title, content, published, attached, no])
             else:
                 cursor = DB.execute(query, ["about" if editing_about else "notice", title, content, author, published, attached])
             return redirect("/about" if editing_about else f"/notices/{no if editing else cursor.lastrowid}")
