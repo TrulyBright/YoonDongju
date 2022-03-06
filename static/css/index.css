@@ -29,9 +29,8 @@
 }
 #recent-notices li {
     border-bottom: 3px solid snow;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto;
 }
 #recent-magazines {
     overflow-x: auto;
