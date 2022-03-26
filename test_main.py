@@ -146,6 +146,10 @@ def test_posting():
     # unauthorized patch
     modified["token"] = "asdf"
     assert tested.patch(f"/notices/{no}", json=modified).status_code == 401
+    # forbidden patch
+    change_role(models.Role.member)
+    modified["token"] = my_token
+    assert tested.patch(f"/notices/{no}", json=modified).status_code == 403
     # delete
     response = tested.delete(f"/notices/{no}")
     assert response.status_code == 200
