@@ -21,7 +21,7 @@ class Member(Base):
     __tablename__ = "members"
     student_id = Column(Integer, primary_key=True, index=True)
     real_name = Column(String)
-    username = Column(String, unique=True)
+    username = Column(String, unique=True, index=True)
     password = Column(String)
     role = Column(String)
 
@@ -35,7 +35,14 @@ class Post(Base):
     published = Column(Date)
     modified = Column(Date, nullable=True)
     modifier = Column(String, nullable=True)
-    attached = Column(String, nullable=True) # 파일 경로
+    # attached_files = relationship("AttachedFile") TODO
+
+class AttachedFile(Base):
+    __tablename__ = "attachedFiles"
+    uuid = Column(String, primary_key=True)
+    post_no = Column(Integer, ForeignKey("posts.no"))
+    type = Column(String)
+    name = Column(String)
 
 class Class(Base):
     __tablename__ = "classes"

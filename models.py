@@ -2,6 +2,7 @@ from __future__ import annotations
 from datetime import date
 from enum import Enum
 from pydantic import BaseModel
+from fastapi import UploadFile
 
 class Role(str, Enum):
     president = "president"
@@ -19,6 +20,9 @@ class ClassName(str, Enum):
     critique = "critique"
     reading = "reading"
 
+class TokenData(BaseModel):
+    student_id: int | None = None
+
 class ClubInformationBase(BaseModel):
     address: str
     email: str
@@ -33,14 +37,17 @@ class ClubInformation(ClubInformationBase):
     pass
 
 class MemberBase(BaseModel):
-    stduent_id: int
-    real_name: str
     username: str
+    real_name: str
 
 class MemberCreate(MemberBase):
     password: str
 
+class MemberModify(BaseModel):
+    role: Role
+
 class Member(MemberBase):
+    student_id: int
     role: Role = Role.member
     class Config:
         orm_mode = True
@@ -50,16 +57,17 @@ class PostBase(BaseModel):
     content: str
 
 class PostCreate(PostBase):
-    attached: bytes | None = None
-    type: PostType
+    token: str
+    # attached: list[UploadFile]
 
 class Post(PostBase):
-    no: str
+    no: int
     author: str
     published: date
     modified: date | None = None
     modifier: str | None = None
-    attached: str | None = None
+    type: str
+    # attached: list[str]
 
     class Config:
         orm_mode = True

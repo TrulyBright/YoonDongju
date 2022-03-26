@@ -1,11 +1,14 @@
-from datetime import date
-from enum import Enum
+import re
+from functools import lru_cache
+from datetime import date, timedelta
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from pydantic import BaseModel, BaseSettings
 import models
 import crud
+import auth
 import schemas
 from database import SessionLocal, engine
 
@@ -31,11 +34,7 @@ def get_db():
 class RegisterForm(BaseModel):
     portal_id: int
     portal_pw: str
-    realname: str
-    username: str
-    password: str
-
-class LoginForm(BaseModel):
+    real_name: str
     username: str
     password: str
 
@@ -84,18 +83,35 @@ async def get_notice(no: int, db: Session=Depends(get_db)):
 
 @app.post("/notices", response_model=models.Post)
 async def create_notice(post: models.PostCreate, db: Session=Depends(get_db)):
-    return crud.create_post(db=db, post=post)
-
+    author = await auth.get_current_member(db=db, token=post.token)
+    if author.role in {
+        models.Role.board,
+        models.Role.president
+    }:
+        return await crud.create_post(db=db, post=post, author=author, type=models.PostType.notice)
+    raise HTTPException(
+            status_code=403,
+            detail="권한이 없습니다."
+        )
+    
 @app.patch("/notices/{no:int}", response_model=models.Post)
 async def update_notice(no: int, post: models.PostCreate, db: Session=Depends(get_db)):
-    updated = crud.update_post(db, models.PostType.notice, post, no)
-    if updated is None:
+    modifier = await auth.get_current_member(db=db, token=post.token)
+    if modifier.role in {
+        models.Role.board,
+        models.Role.president
+    }:
+        if updated := crud.update_post(db=db, post=post, modifier=modifier, type=models.PostType.notice, no=no):
+            return updated
         raise HTTPException(404, "그런 글이 없습니다.")
-    return updated
+    raise HTTPException(
+            status_code=403,
+            detail="권한이 없습니다."
+        )
 
 @app.delete("/notices/{no:int}")
 async def delete_notice(no: int, db: Session=Depends(get_db)):
-    if not crud.delete_post(db, models.PostType.notice, no):
+    if not crud.delete_post(db=db, type=models.PostType.notice, no=no):
         raise HTTPException(404, "그런 글이 없습니다.")
 
 @app.get("/members", response_model=list[models.Member])
@@ -109,15 +125,14 @@ async def get_member(student_id: int, db: Session=Depends(get_db)):
         raise HTTPException(404, "가입되지 않은 학번입니다.")
     return db_member
 
-@app.post("/members", response_model=models.Member)
-async def create_member(member: models.MemberCreate, db: Session=Depends(get_db)):
-    if crud.get_member(db, member.stduent_id):
-        raise HTTPException(400, "이미 가입된 학번입니다.")
-    return crud.create_member(db, member)
-
 @app.patch("/members/{student_id:int}", response_model=models.Member)
-async def update_member(student_id: int, member: models.MemberCreate):
-    pass
+async def update_member(student_id: int, token: str, member: models.MemberModify, db: Session=Depends(get_db)):
+    author = await auth.get_current_member(db=db, token=token)
+    if author.role in {
+        models.Role.board,
+        models.Role.president
+    }:
+        return await crud.update_member(db=db, student_id=student_id, member=member)
 
 @app.delete("/members/{student_id:int}")
 async def delete_member(student_id: int):
@@ -175,10 +190,56 @@ async def update_class_record(class_name: models.ClassName, id: int):
 async def delete_class_record(class_name: models.ClassName, id: int):
     pass
 
-@app.post("/register")
-async def register(form: RegisterForm):
-    return None
+@app.post("/register", response_model=models.Member)
+async def register(form: RegisterForm, db: Session=Depends(get_db)):
+    password_pattern = "^(?=.*[0-9])(?=.*[a-zA-Z]).{10,}$"
+    if str(form.portal_id)[4]!="1":
+        raise HTTPException(
+            status_code=403,
+            detail="신촌캠만 가입할 수 있습니다."
+        )
+    if not re.match(password_pattern, form.password):
+        raise HTTPException(
+            status_code=403,
+            detail="비밀번호가 안전하지 않습니다."
+        )
+    if crud.get_member_by_username(db=db, username=form.username):
+        raise HTTPException(
+            status_code=400,
+            detail="이미 있는 ID입니다."
+        )
+    if not auth.is_yonsei_member(int(form.portal_id), form.portal_pw):
+        raise HTTPException(
+            status_code=403,
+            detail="해당 ID와 비밀번호로 연세포탈에 로그인할 수 없습니다."
+        )
+    if crud.get_member(db=db, student_id=form.portal_id):
+        raise HTTPException(
+            status_code=400,
+            detail="이미 이 학번으로 가입된 계정이 있습니다."
+        )
+    return crud.create_member(
+        db=db,
+        student_id=form.portal_id,
+        member=models.MemberCreate(
+            real_name=form.real_name,
+            username=form.username,
+            password=form.password
+        )
+    )
 
 @app.post("/login")
-async def login(form: LoginForm):
-    pass
+async def login(form: OAuth2PasswordRequestForm=Depends(), db: Session=Depends(get_db)):
+    member = auth.authenticate(db, form.username, form.password)
+    if not member:
+        raise HTTPException(
+            status_code=401,
+            detail="ID나 비밀번호가 틀렸습니다.",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = auth.create_access_token(
+        data={"sub": member.username},
+        expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
