@@ -15,8 +15,8 @@
 ## Test
 1. `test.env` 파일을 최상위 디렉토리에 생성하고 다음 값을 넣습니다.
     - `test_portal_id=연세포탈 ID(즉 학번)`
-    - `test_portal_pw=연세포탈 비번`
-    - `test_real_name=이름 아무거나`
-    - `test_username=ID 아무거나`
-    - `test_password=비밀번호 아무거나`
+    - `test_portal_pw="연세포탈 비번"`
+    - `test_real_name="견본 실명"`
+    - `test_username="견본 ID"`
+    - `test_password="견본 비번"`
 1. 이후 `pytest`를 실행합니다.
