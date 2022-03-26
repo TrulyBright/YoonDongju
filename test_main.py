@@ -143,6 +143,9 @@ def test_posting():
     assert posted["modifier"] == settings.test_real_name
     assert posted["modified"] == today
     assert posted["no"] == no
+    # unauthorized patch
+    modified["token"] = "asdf"
+    assert tested.patch(f"/notices/{no}", json=modified).status_code == 401
     # delete
     response = tested.delete(f"/notices/{no}")
     assert response.status_code == 200
