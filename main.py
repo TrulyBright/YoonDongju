@@ -110,9 +110,19 @@ async def update_notice(no: int, post: models.PostCreate, db: Session=Depends(ge
         )
 
 @app.delete("/notices/{no:int}")
-async def delete_notice(no: int, db: Session=Depends(get_db)):
-    if not crud.delete_post(db=db, type=models.PostType.notice, no=no):
-        raise HTTPException(404, "그런 글이 없습니다.")
+async def delete_notice(no: int, token: str, db: Session=Depends(get_db)):
+    deleter = await auth.get_current_member(db=db, token=token)
+    if deleter.role in {
+        models.Role.board,
+        models.Role.president
+    }:
+        if not crud.delete_post(db=db, type=models.PostType.notice, no=no):
+            raise HTTPException(404, "그런 글이 없습니다.")
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail="권한이 없습니다."
+        )
 
 @app.get("/members", response_model=list[models.Member])
 async def get_members(skip: int, limit: int, db: Session=Depends(get_db)):

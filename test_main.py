@@ -80,26 +80,23 @@ def test_auth():
     my_token = response.json()["access_token"]
 
 def test_posting():
-    # a list with no post
     response = tested.get("/notices")
-    assert response.status_code == 200
+    assert tested.get("/notices").status_code == 200
     assert response.json() == []
-    # no such post 404
-    response = tested.get("/notices/1")
-    assert response.status_code == 404
-    # creation: unauthorized
+
+    assert tested.get("/notices/1").status_code == 404
+    
+    # creation
     initial = {
         "title": "tested-title",
         "content": "tested=content",
         "token": "asdf"
     }
-    response = tested.post("/notices", json=initial)
-    assert response.status_code == 401
-    # creation: forbidden
+    assert tested.post("/notices", json=initial).status_code == 401
+
     initial["token"] = my_token
-    response = tested.post("/notices", json=initial)
-    assert response.status_code == 403
-    # creation: authorized
+    assert tested.post("/notices", json=initial).status_code == 403
+    
     change_role(models.Role.board)
     response = tested.post("/notices", json=initial)
     assert response.status_code == 200
@@ -112,9 +109,10 @@ def test_posting():
     assert posted["modifier"] == None
     assert posted["modified"] == None
     no = posted["no"]
-    # confirm creation
+    
     response = tested.get(f"/notices/{no}")
     assert response.status_code == 200
+    
     # patch
     modified = {
         "title": "updated-title",
@@ -132,7 +130,7 @@ def test_posting():
     assert posted["modifier"] == settings.test_real_name
     assert posted["modified"] == today
     assert posted["no"] == no
-    # confirm patched
+    
     response = tested.get(f"/notices/{no}")
     assert response.status_code == 200
     posted: dict = response.json()
@@ -143,16 +141,27 @@ def test_posting():
     assert posted["modifier"] == settings.test_real_name
     assert posted["modified"] == today
     assert posted["no"] == no
-    # unauthorized patch
+    
     modified["token"] = "asdf"
     assert tested.patch(f"/notices/{no}", json=modified).status_code == 401
-    # forbidden patch
+    
     change_role(models.Role.member)
     modified["token"] = my_token
     assert tested.patch(f"/notices/{no}", json=modified).status_code == 403
+    
     # delete
-    response = tested.delete(f"/notices/{no}")
-    assert response.status_code == 200
-    # confirm deletion
-    response = tested.get(f"/notices/{no}")
-    assert response.status_code == 404
+    change_role(models.Role.board)
+    deletion_params = {
+        "token": my_token
+    }
+    assert tested.delete(f"/notices/{no}", params=deletion_params).status_code == 200
+    assert tested.get(f"/notices/{no}").status_code == 404
+    assert tested.delete(f"/notices/{no}", params=deletion_params).status_code == 404
+    no = tested.post("/notices", json=modified).json()["no"]
+    
+    deletion_params["token"] = "asdf"
+    assert tested.delete(f"/notices/{no}", params=deletion_params).status_code == 401
+    
+    change_role(models.Role.member)
+    deletion_params["token"] = my_token
+    assert tested.delete(f"/notices/{no}", params=deletion_params).status_code == 403
