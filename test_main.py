@@ -115,9 +115,11 @@ def test_get_club_information():
     assert response.json() == club_info
 
 def test_get_recent_notices():
-    posted = [test_create_notices() for _ in range(10)]
+    posted = [test_create_notices() for _ in range(10)][::-1]
     response = tested.get("/recent-notices")
     assert response.status_code == 200
+    assert response.json() == posted[:4]
+    response = tested.get("/recent-notices", params={"limit":10})
     assert response.json() == posted
 
 def test_get_recent_magazines():
