@@ -67,7 +67,6 @@ class Post(PostBase):
     published: date
     modified: date | None = None
     modifier: str | None = None
-    type: str
     # attached: list[str]
 
     class Config:

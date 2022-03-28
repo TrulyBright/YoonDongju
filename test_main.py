@@ -57,6 +57,10 @@ about_data = {
     "content": "us",
 }
 posted_posts = dict()
+rules = {
+    "title": "rules",
+    "content": "not that strict"
+}
 
 def change_role(into: models.Role):
     db: Session = TestingSessionLocal()
@@ -139,7 +143,6 @@ def test_update_about():
     assert posted["content"] == data["content"]
     assert posted["modified"] == datetime.today().date().strftime("%Y-%m-%d")
     assert posted["modifier"] == settings.test_real_name
-    assert posted["type"] == models.PostType.about
     
     response = tested.get("/about")
     assert response.json() == posted
@@ -150,16 +153,36 @@ def test_get_about():
     about = response.json()
     assert about["title"] == about_data["title"]
     assert about["content"] == about_data["content"]
-    assert about["type"] == models.PostType.about
+
+def test_update_rules():
+    requested = rules.copy()
+    requested["token"] = "asdf"
+    response = tested.put("/rules", json=requested)
+    assert response.status_code == 401
+    
+    change_role(models.Role.member)
+    requested["token"] = my_token
+    response = tested.put("/rules", json=requested)
+    assert response.status_code == 403
+
+    change_role(models.Role.board)
+    response = tested.put("/rules", json=requested)
+    assert response.status_code == 200
+    changed = response.json()
+    assert changed["title"] == requested["title"]
+    assert changed["content"] == requested["content"]
+    assert changed["published"] == datetime.today().date().strftime("%Y-%m-%d")
+    assert changed["author"] == "연세문학회"
+    test_get_rules()
 
 def test_get_rules():
     response = tested.get("/rules")
     assert response.status_code == 200
-
-def test_update_rules():
-    change_role(models.Role.member)
-    response = tested.patch("/rules")
-    assert response.status_code == 200
+    posted = response.json()
+    assert posted["title"] == rules["title"]
+    assert posted["content"] == rules["content"]
+    assert posted["published"] == datetime.today().date().strftime("%Y-%m-%d")
+    assert posted["author"] == "연세문학회"
 
 def test_get_recent_notices():
     for _ in range(10):
@@ -205,7 +228,6 @@ def test_create_notice():
     posted: dict = response.json()
     assert posted["title"] == data["title"]
     assert posted["content"] == data["content"]
-    assert posted["type"] == models.PostType.notice.value
     assert posted["author"] == settings.test_real_name
     assert posted["published"] == datetime.today().strftime("%Y-%m-%d")
     assert posted["modifier"] == None
@@ -221,7 +243,6 @@ def test_get_notice(data=None):
         posted: dict = response.json()
         assert posted["title"] == data["title"]
         assert posted["content"] == data["content"]
-        assert posted["type"] == models.PostType.notice.value
         assert posted["author"] == data["author"]
         assert posted["published"] == data["published"]
         assert posted["modifier"] == data["modifier"]
@@ -244,7 +265,6 @@ def test_update_notice():
     posted: dict = response.json()
     assert posted["title"] == modified["title"]
     assert posted["content"] == modified["content"]
-    assert posted["type"] == models.PostType.notice.value
     assert posted["author"] == settings.test_real_name
     assert posted["modifier"] == settings.test_real_name
     assert posted["modified"] == today

@@ -80,7 +80,13 @@ async def get_rules(db: Session=Depends(get_db)):
 
 @app.put("/rules", response_model=models.Post)
 async def update_rules(rules: models.PostCreate, db: Session=Depends(get_db)):
-    return crud.update_post(db=db, type=models.PostType.rules, post=rules)
+    modifier = await auth.get_current_member(db=db, token=rules.token)
+    if modifier.role in {
+        models.Role.board,
+        models.Role.president
+    }:
+        return crud.update_post(db=db, type=models.PostType.rules, post=rules, modifier=modifier)
+    raise HTTPException(status_code=403, detail="권한이 없습니다.")
 
 @app.get("/notices", response_model=list[models.Post])
 async def get_notices(skip: int=0, limit: int=100, db: Session=Depends(get_db)):
