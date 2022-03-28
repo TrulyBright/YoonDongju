@@ -9,14 +9,28 @@ import uuid
 import models
 import schemas
 
-def get_member(db: Session, student_id: int) -> schemas.Member:
-    return db.query(schemas.Member).filter(schemas.Member.student_id==student_id).first()
+def make_member_model_from_schema(queried: schemas.Member):
+    return models.Member(
+        username=queried.username,
+        real_name=queried.real_name,
+        student_id=queried.student_id,
+        role=models.Role[queried.role]
+    ) if queried else None
 
-def get_member_by_username(db: Session, username: str) -> schemas.Member:
-    return db.query(schemas.Member).filter(schemas.Member.username==username).first()
+def get_member(db: Session, student_id: int):
+    queried: schemas.Member = db.query(schemas.Member).filter(schemas.Member.student_id==student_id).first()
+    return make_member_model_from_schema(queried)
 
-def get_members(db: Session, skip: int=0, limit: int=100):
-    return db.query(schemas.Member).offset(skip).limit(limit).all()
+def get_member_scheme_by_username(db: Session, username: str):
+    queried: schemas.Member = db.query(schemas.Member).filter(schemas.Member.username==username).first()
+    return queried
+
+def get_members(db: Session, skip: int=0, limit: int=100) -> list[models.Member]:
+    return [
+        make_member_model_from_schema(queried)
+        for queried
+        in db.query(schemas.Member).offset(skip).limit(limit).all()
+    ]
 
 def create_member(db: Session, student_id: int, member: models.MemberCreate):
     db_member = schemas.Member(
@@ -122,3 +136,15 @@ def delete_post(db: Session, type: models.PostType, no: int):
     deleted.delete()
     db.commit()
     return victim is not None
+
+def get_club_information(db: Session):
+    data = {key:value for key, value in db.query(schemas.ClubInformation).all()}
+    return models.ClubInformation(**data)
+
+def update_club_information(db: Session, info: models.ClubInformationCreate):
+    token_excluded = models.ClubInformation(**info.dict())
+    for key, value in token_excluded.dict():
+        db.query(schemas.ClubInformation).filter_by(**{key:value}).update({"value":value})
+    db.commit()
+    db.refresh(db.query(schemas.ClubInformation).all())
+    return token_excluded

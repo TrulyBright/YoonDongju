@@ -28,7 +28,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 app = FastAPI()
 
 def authenticate(db: Session, username: str, password: str):
-    member = crud.get_member_by_username(db, username)
+    member = crud.get_member_scheme_by_username(db, username)
     if not member:
         return False
     if not pwd_context.verify(password, member.password):
@@ -58,7 +58,7 @@ async def get_current_member(db, token: str=Depends(oauth2_scheme)):
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    member = crud.get_member_by_username(db, username=token_data.username)
+    member = crud.get_member_scheme_by_username(db, username=token_data.username)
     if member is None:
         raise credentials_exception
     return member

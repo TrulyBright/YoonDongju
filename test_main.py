@@ -45,6 +45,13 @@ settings = Settings()
 
 my_token = str()
 last_post_no = -1
+club_info = {
+    "address": "somewhere",
+    "email": "someone@some.where",
+    "president_name": "john doe",
+    "president_tel": "010-0000-0000",
+    "join_form_url": "https://example.com"
+}
 
 def change_role(into: models.Role):
     db: Session = TestingSessionLocal()
@@ -83,12 +90,14 @@ def test_login():
     assert response.status_code == 200
     my_token = response.json()["access_token"]
 
+def test_update_club_information():
+    info = club_info.copy()
+    info["token"] = "asdf"
+    response = tested.patch("/club-information", json=info)
+    assert response.status_code == 401
+
 def test_get_club_information():
     response = tested.get("/club-information")
-    assert response.status_code == 200
-
-def test_update_club_information():
-    response = tested.patch("/club-information")
     assert response.status_code == 200
 
 def test_get_recent_notices():

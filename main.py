@@ -39,12 +39,18 @@ class RegisterForm(BaseModel):
     password: str
 
 @app.get("/club-information", response_model=models.ClubInformation)
-async def get_club_information():
-    pass
+async def get_club_information(db: Session=Depends(get_db)):
+    return crud.get_club_information(db=db)
 
 @app.patch("/club-information", response_model=models.ClubInformation)
-async def update_club_information(info: models.ClubInformation):
-    pass
+async def update_club_information(info: models.ClubInformationCreate, db: Session=Depends(get_db)):
+    updater = await auth.get_current_member(db=db, token=info.token)
+    if updater.role in {
+        models.Role.board,
+        models.Role.president
+    }:
+        return crud.update_club_information(db=db, info=info)
+    raise HTTPException(status_code=403, detail="권한이 없습니다.")
 
 @app.get("/recent-notices", response_model=list[models.Post])
 async def get_recent_notices(limit: int=4, db: Session=Depends(get_db)):
@@ -213,7 +219,7 @@ async def register(form: RegisterForm, db: Session=Depends(get_db)):
             status_code=403,
             detail="비밀번호가 안전하지 않습니다."
         )
-    if crud.get_member_by_username(db=db, username=form.username):
+    if crud.get_member_scheme_by_username(db=db, username=form.username):
         raise HTTPException(
             status_code=400,
             detail="이미 있는 ID입니다."

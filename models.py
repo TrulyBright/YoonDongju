@@ -31,7 +31,7 @@ class ClubInformationBase(BaseModel):
     join_form_url: str
 
 class ClubInformationCreate(BaseModel):
-    pass
+    token: str
 
 class ClubInformation(ClubInformationBase):
     pass
