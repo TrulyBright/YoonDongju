@@ -52,12 +52,17 @@ def create_member(db: Session, student_id: int, member: models.MemberCreate):
 
 def update_member(db: Session, student_id: int, member: models.MemberModify):
     updated = db.query(schemas.Member).filter(schemas.Member.student_id==student_id)
-    actual_object = updated.first()
+    actual_object: schemas.Member = updated.first()
     to = member.dict()
     updated.update(to)
     db.commit()
     db.refresh(actual_object)
-    return actual_object
+    return models.Member(
+        username=actual_object.username,
+        real_name=actual_object.real_name,
+        student_id=actual_object.student_id,
+        role=models.Role[actual_object.role]
+    )
 
 def get_posts(db: Session, type: models.PostType, skip: int=0, limit: int=100):
     return db.query(schemas.Post).filter(schemas.Post.type==type.value).offset(skip).limit(limit).all()
@@ -98,7 +103,6 @@ async def create_post(db: Session, author: models.Member, post: models.PostCreat
     )
     db.add(db_post)
     db.commit()
-    db.refresh(db_post)
     return models.Post(
         title=db_post.title,
         content=db_post.content,
@@ -126,7 +130,6 @@ def update_post(db: Session, type: models.PostType, post: models.PostCreate, mod
     )
     updated.update(modified.dict())
     db.commit()
-    db.refresh(original)
     return modified
 
 def delete_post(db: Session, type: models.PostType, no: int):
@@ -143,8 +146,7 @@ def get_club_information(db: Session):
 
 def update_club_information(db: Session, info: models.ClubInformationCreate):
     token_excluded = models.ClubInformation(**info.dict())
-    for key, value in token_excluded.dict():
-        db.query(schemas.ClubInformation).filter_by(**{key:value}).update({"value":value})
+    for key, value in token_excluded.dict().items():
+        db.query(schemas.ClubInformation).filter(schemas.ClubInformation.key==key).update({"value":value})
     db.commit()
-    db.refresh(db.query(schemas.ClubInformation).all())
     return token_excluded

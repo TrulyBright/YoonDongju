@@ -95,6 +95,14 @@ def test_update_club_information():
     info["token"] = "asdf"
     response = tested.patch("/club-information", json=info)
     assert response.status_code == 401
+    info["token"] = my_token
+    response = tested.patch("/club-information", json=info)
+    assert response.status_code == 403
+    change_role(models.Role.board)
+    response = tested.patch("/club-information", json=info)
+    assert response.status_code == 200
+    updated: dict = response.json()
+    assert updated == club_info
 
 def test_get_club_information():
     response = tested.get("/club-information")
@@ -113,6 +121,7 @@ def test_get_about():
     assert response.status_code == 200
 
 def test_update_about():
+    change_role(models.Role.member)
     response = tested.patch("/about")
     assert response.status_code == 200
 
@@ -121,6 +130,7 @@ def test_get_rules():
     assert response.status_code == 200
 
 def test_update_rules():
+    change_role(models.Role.member)
     response = tested.patch("/rules")
     assert response.status_code == 200
 
@@ -130,6 +140,7 @@ def test_get_notices():
     assert response.json() == []
 
 def test_create_notices():
+    change_role(models.Role.member)
     global last_post_no
     data = {
         "title": "tested-title",
@@ -171,6 +182,7 @@ def test_get_notice(data=None):
         assert posted["modified"] == data["modified"]
 
 def test_update_notice():
+    change_role(models.Role.member)
     modified = {
         "title": "updated-title",
         "content": "updated=content",
@@ -196,6 +208,7 @@ def test_update_notice():
     assert tested.patch(f"/notices/{last_post_no}", json=modified).status_code == 403
 
 def test_delete_notice():
+    change_role(models.Role.member)
     deletion_params = {
         "token": "asdf"
     }
@@ -220,10 +233,12 @@ def test_get_member():
     assert response.status_code == 200
 
 def test_patch_member():
+    change_role(models.Role.member)
     response = tested.patch(f"/members/{settings.test_portal_id}")
     assert response.status_code == 200
 
 def test_delete_member():
+    change_role(models.Role.member)
     response = tested.delete(f"/members/{settings.test_portal_id}")
     assert response.status_code == 200
 
@@ -232,6 +247,7 @@ def test_get_magazines():
     assert response.status_code == 200
 
 def test_create_magazine():
+    change_role(models.Role.member)
     response = tested.post("/magazines")
     assert response.status_code == 200
 
@@ -240,10 +256,12 @@ def test_get_magazine():
     assert response.status_code == 200
 
 def test_update_magazine():
+    change_role(models.Role.member)
     response = tested.patch("/magazines/2022-01-01")
     assert response.status_code == 200
 
 def test_delete_magazine():
+    change_role(models.Role.member)
     response = tested.delete("/magazines/2022-01-01")
     assert response.status_code == 200
 
@@ -256,6 +274,7 @@ def test_get_class():
     assert response.status_code == 200
 
 def test_update_class():
+    change_role(models.Role.member)
     response = tested.patch("/classes/poetry")
     assert response.status_code == 200
 
@@ -264,6 +283,7 @@ def test_get_class_records():
     assert response.status_code == 200
 
 def test_create_class_record():
+    change_role(models.Role.member)
     response = tested.post("/classes/poetry/records")
     assert response.status_code == 200
 
@@ -272,9 +292,11 @@ def test_get_class_record():
     assert response.status_code == 200
 
 def test_update_class_record():
+    change_role(models.Role.member)
     response = tested.patch("/classes/poetry/records/1")
     assert response.status_code == 200
 
 def test_delete_class_record():
+    change_role(models.Role.member)
     response = tested.patch("/classes/poetry/records/1")
     assert response.status_code == 200

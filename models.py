@@ -30,7 +30,7 @@ class ClubInformationBase(BaseModel):
     president_tel: str
     join_form_url: str
 
-class ClubInformationCreate(BaseModel):
+class ClubInformationCreate(ClubInformationBase):
     token: str
 
 class ClubInformation(ClubInformationBase):
@@ -44,7 +44,7 @@ class MemberCreate(MemberBase):
     password: str
 
 class MemberModify(BaseModel):
-    role: Role
+    role: Role | None = None
 
 class Member(MemberBase):
     student_id: int
