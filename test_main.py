@@ -44,6 +44,7 @@ class Settings(BaseSettings):
 settings = Settings()
 
 my_token = str()
+last_post_no = -1
 
 def change_role(into: models.Role):
     db: Session = TestingSessionLocal()
@@ -55,8 +56,8 @@ def change_role(into: models.Role):
     assert crud.get_member(db=db, student_id=settings.test_portal_id).role == into.value
     db.close()
 
-def test_auth():
-    global my_token
+
+def test_register():
     data = {
         "portal_id": settings.test_portal_id,
         "portal_pw": settings.test_portal_pw,
@@ -71,6 +72,9 @@ def test_auth():
     assert created["real_name"] == settings.test_real_name
     assert created["username"] == settings.test_username
     assert created["role"] == models.Role.member.value
+
+def test_login():
+    global my_token
     data = {
         "username": settings.test_username,
         "password": settings.test_password,
@@ -79,48 +83,83 @@ def test_auth():
     assert response.status_code == 200
     my_token = response.json()["access_token"]
 
-def test_posting():
+def test_get_club_information():
+    response = tested.get("/club-information")
+    assert response.status_code == 200
+
+def test_update_club_information():
+    response = tested.patch("/club-information")
+    assert response.status_code == 200
+
+def test_get_recent_notices():
+    response = tested.get("/recent-notices")
+    assert response.status_code == 200
+
+def test_get_recent_magazines():
+    response = tested.get("/recent-magazines")
+    assert response.status_code == 200
+
+def test_get_about():
+    response = tested.get("/about")
+    assert response.status_code == 200
+
+def test_update_about():
+    response = tested.patch("/about")
+    assert response.status_code == 200
+
+def test_get_rules():
+    response = tested.get("/rules")
+    assert response.status_code == 200
+
+def test_update_rules():
+    response = tested.patch("/rules")
+    assert response.status_code == 200
+
+def test_get_notices():
     response = tested.get("/notices")
-    assert tested.get("/notices").status_code == 200
+    assert response.status_code == 200
     assert response.json() == []
 
-    assert tested.get("/notices/1").status_code == 404
-    
-    # creation
-    initial = {
+def test_create_notices():
+    global last_post_no
+    data = {
         "title": "tested-title",
         "content": "tested=content",
         "token": "asdf"
     }
-    assert tested.post("/notices", json=initial).status_code == 401
+    response = tested.post("/notices", json=data)
+    assert response.status_code == 401
 
-    initial["token"] = my_token
-    assert tested.post("/notices", json=initial).status_code == 403
-    
+    data["token"] = my_token
+    response = tested.post("/notices", json=data)
+    assert response.status_code == 403
+
     change_role(models.Role.board)
-    response = tested.post("/notices", json=initial)
+    response = tested.post("/notices", json=data)
     assert response.status_code == 200
     posted: dict = response.json()
-    assert posted["title"] == initial["title"]
-    assert posted["content"] == initial["content"]
+    assert posted["title"] == data["title"]
+    assert posted["content"] == data["content"]
     assert posted["type"] == models.PostType.notice.value
     assert posted["author"] == settings.test_real_name
     assert posted["published"] == datetime.today().strftime("%Y-%m-%d")
     assert posted["modifier"] == None
     assert posted["modified"] == None
-    no = posted["no"]
-    
-    response = tested.get(f"/notices/{no}")
+    last_post_no = posted["no"]
+
+def test_get_notice(no=None):
+    response = tested.get(f"/notices/{no or last_post_no}")
     assert response.status_code == 200
-    
-    # patch
+    return response
+
+def test_update_notice():
     modified = {
         "title": "updated-title",
         "content": "updated=content",
         "token": my_token
     }
-    response = tested.patch(f"/notices/{no}", json=modified)
     today = datetime.today().strftime("%Y-%m-%d")
+    response = tested.patch(f"/notices/{last_post_no}", json=modified)
     assert response.status_code == 200
     posted: dict = response.json()
     assert posted["title"] == modified["title"]
@@ -129,39 +168,95 @@ def test_posting():
     assert posted["author"] == settings.test_real_name
     assert posted["modifier"] == settings.test_real_name
     assert posted["modified"] == today
-    assert posted["no"] == no
-    
-    response = tested.get(f"/notices/{no}")
-    assert response.status_code == 200
-    posted: dict = response.json()
-    assert posted["title"] == modified["title"]
-    assert posted["content"] == modified["content"]
-    assert posted["type"] == models.PostType.notice.value
-    assert posted["author"] == settings.test_real_name
-    assert posted["modifier"] == settings.test_real_name
-    assert posted["modified"] == today
-    assert posted["no"] == no
-    
+    assert posted["no"] == last_post_no
+    test_get_notice(last_post_no)
     modified["token"] = "asdf"
-    assert tested.patch(f"/notices/{no}", json=modified).status_code == 401
+    assert tested.patch(f"/notices/{last_post_no}", json=modified).status_code == 401
     
     change_role(models.Role.member)
     modified["token"] = my_token
-    assert tested.patch(f"/notices/{no}", json=modified).status_code == 403
-    
-    # delete
-    change_role(models.Role.board)
+    assert tested.patch(f"/notices/{last_post_no}", json=modified).status_code == 403
+
+def test_delete_notice():
     deletion_params = {
-        "token": my_token
+        "token": "asdf"
     }
-    assert tested.delete(f"/notices/{no}", params=deletion_params).status_code == 200
-    assert tested.get(f"/notices/{no}").status_code == 404
-    assert tested.delete(f"/notices/{no}", params=deletion_params).status_code == 404
-    no = tested.post("/notices", json=modified).json()["no"]
-    
-    deletion_params["token"] = "asdf"
-    assert tested.delete(f"/notices/{no}", params=deletion_params).status_code == 401
-    
-    change_role(models.Role.member)
+    assert tested.delete(f"/notices/{last_post_no}", params=deletion_params).status_code == 401
+    assert tested.get(f"/notices/{last_post_no}").status_code == 200
+
     deletion_params["token"] = my_token
-    assert tested.delete(f"/notices/{no}", params=deletion_params).status_code == 403
+    assert tested.delete(f"/notices/{last_post_no}", params=deletion_params).status_code == 403
+    assert tested.get(f"/notices/{last_post_no}").status_code == 200
+
+    change_role(models.Role.board)
+    assert tested.delete(f"/notices/{last_post_no}", params=deletion_params).status_code == 200
+    assert tested.get(f"/notices/{last_post_no}").status_code == 404
+    assert tested.delete(f"/notices/{last_post_no}", params=deletion_params).status_code == 404
+
+def test_get_members():
+    response = tested.get("/members")
+    assert response.status_code == 200
+
+def test_get_member():
+    response = tested.get(f"/members/{settings.test_portal_id}")
+    assert response.status_code == 200
+
+def test_patch_member():
+    response = tested.patch(f"/members/{settings.test_portal_id}")
+    assert response.status_code == 200
+
+def test_delete_member():
+    response = tested.delete(f"/members/{settings.test_portal_id}")
+    assert response.status_code == 200
+
+def test_get_magazines():
+    response = tested.get("/magazines")
+    assert response.status_code == 200
+
+def test_create_magazine():
+    response = tested.post("/magazines")
+    assert response.status_code == 200
+
+def test_get_magazine():
+    response = tested.get(f"/magazines/2022-01-01")
+    assert response.status_code == 200
+
+def test_update_magazine():
+    response = tested.patch("/magazines/2022-01-01")
+    assert response.status_code == 200
+
+def test_delete_magazine():
+    response = tested.delete("/magazines/2022-01-01")
+    assert response.status_code == 200
+
+def test_get_classes():
+    response = tested.get("/classes")
+    assert response.status_code == 200
+
+def test_get_class():
+    response = tested.get("/classes/poetry")
+    assert response.status_code == 200
+
+def test_update_class():
+    response = tested.patch("/classes/poetry")
+    assert response.status_code == 200
+
+def test_get_class_records():
+    response = tested.get("/classes/poetry/records")
+    assert response.status_code == 200
+
+def test_create_class_record():
+    response = tested.post("/classes/poetry/records")
+    assert response.status_code == 200
+
+def test_get_class_record():
+    response = tested.get("/classes/poetry/records/1")
+    assert response.status_code == 200
+
+def test_update_class_record():
+    response = tested.patch("/classes/poetry/records/1")
+    assert response.status_code == 200
+
+def test_delete_class_record():
+    response = tested.patch("/classes/poetry/records/1")
+    assert response.status_code == 200
