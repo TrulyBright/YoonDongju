@@ -146,11 +146,20 @@ def test_create_notices():
     assert posted["modifier"] == None
     assert posted["modified"] == None
     last_post_no = posted["no"]
+    test_get_notice(posted)
 
-def test_get_notice(no=None):
-    response = tested.get(f"/notices/{no or last_post_no}")
+def test_get_notice(data=None):
+    response = tested.get(f"/notices/{data['no'] if data else last_post_no}")
     assert response.status_code == 200
-    return response
+    if data:
+        posted: dict = response.json()
+        assert posted["title"] == data["title"]
+        assert posted["content"] == data["content"]
+        assert posted["type"] == models.PostType.notice.value
+        assert posted["author"] == data["author"]
+        assert posted["published"] == data["published"]
+        assert posted["modifier"] == data["modifier"]
+        assert posted["modified"] == data["modified"]
 
 def test_update_notice():
     modified = {
