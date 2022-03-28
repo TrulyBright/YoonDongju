@@ -56,6 +56,7 @@ about_data = {
     "title": "about",
     "content": "us",
 }
+posted_posts = dict()
 
 def change_role(into: models.Role):
     db: Session = TestingSessionLocal()
@@ -114,14 +115,6 @@ def test_get_club_information():
     assert response.status_code == 200
     assert response.json() == club_info
 
-def test_get_recent_notices():
-    posted = [test_create_notices() for _ in range(10)][::-1]
-    response = tested.get("/recent-notices")
-    assert response.status_code == 200
-    assert response.json() == posted[:4]
-    response = tested.get("/recent-notices", params={"limit":10})
-    assert response.json() == posted
-
 def test_get_recent_magazines():
     response = tested.get("/recent-magazines")
     assert response.status_code == 200
@@ -168,12 +161,30 @@ def test_update_rules():
     response = tested.patch("/rules")
     assert response.status_code == 200
 
-def test_get_notices():
-    response = tested.get("/notices")
+def test_get_recent_notices():
+    for _ in range(10):
+        test_create_notice()
+    response = tested.get("/recent-notices")
     assert response.status_code == 200
-    assert response.json() == []
+    assert response.json() == list(posted_posts.values())[::-1][:4]
+    response = tested.get("/recent-notices", params={"limit":10})
+    assert response.json() == list(posted_posts.values())[::-1]
 
-def test_create_notices():
+def test_get_notices():
+    for _ in range(100):
+        test_create_notice()
+    span = {
+        "skip": 0,
+        "limit": 50
+    }
+    response = tested.get("/notices", params=span)
+    assert response.status_code == 200
+    assert response.json() == list(posted_posts.values())[::-1][span["skip"]:span["skip"]+span["limit"]]
+    span["skip"] = 17
+    response = tested.get("/notices", params=span)
+    assert response.json() == list(posted_posts.values())[::-1][span["skip"]:span["skip"]+span["limit"]]
+
+def test_create_notice():
     change_role(models.Role.member)
     global last_post_no
     data = {
@@ -201,7 +212,7 @@ def test_create_notices():
     assert posted["modified"] == None
     last_post_no = posted["no"]
     test_get_notice(posted)
-    return posted
+    posted_posts[posted["no"]] = posted
 
 def test_get_notice(data=None):
     response = tested.get(f"/notices/{data['no'] if data else last_post_no}")
@@ -243,6 +254,8 @@ def test_update_notice():
     modified["token"] = "asdf"
     assert tested.patch(f"/notices/{last_post_no}", json=modified).status_code == 401
 
+    posted_posts[posted["no"]] = posted
+
 def test_delete_notice():
     change_role(models.Role.member)
     deletion_params = {
@@ -259,6 +272,7 @@ def test_delete_notice():
     assert tested.delete(f"/notices/{last_post_no}", params=deletion_params).status_code == 200
     assert tested.get(f"/notices/{last_post_no}").status_code == 404
     assert tested.delete(f"/notices/{last_post_no}", params=deletion_params).status_code == 404
+    del posted_posts[last_post_no]
 
 def test_get_members():
     response = tested.get("/members")

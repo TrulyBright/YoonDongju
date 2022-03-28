@@ -42,20 +42,10 @@ def update_member(db: Session, student_id: int, member: models.MemberModify):
     return actual_object
 
 def get_posts(db: Session, type: models.PostType, skip: int=0, limit: int=100):
-    return db.query(schemas.Post).filter(schemas.Post.type==type.value).offset(skip).limit(limit).all()
+    return db.query(schemas.Post).filter(schemas.Post.type==type.value).order_by(schemas.Post.no.desc()).offset(skip).limit(limit).all()
 
 def get_post(db: Session, type: models.PostType, no: int=None):
     return db.query(schemas.Post).filter((type != models.PostType.notice or schemas.Post.no==no) and schemas.Post.type==type.value).first()
-
-def get_recent_notices(db: Session, limit: int=4):
-    return (
-        db
-        .query(schemas.Post)
-        .filter(schemas.Post.type == models.PostType.notice)
-        .order_by(schemas.Post.no.desc())
-        .limit(limit)
-        .all()
-    )
 
 async def create_post(db: Session, author: models.Member, post: models.PostCreate, type: models.PostType):
     # Path("sql").mkdir(exist_ok=True)

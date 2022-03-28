@@ -54,7 +54,7 @@ async def update_club_information(info: models.ClubInformationCreate, db: Sessio
 
 @app.get("/recent-notices", response_model=list[models.Post])
 async def get_recent_notices(limit: int=4, db: Session=Depends(get_db)):
-    return crud.get_recent_notices(db=db, limit=limit)
+    return crud.get_posts(db=db, type=models.PostType.notice, limit=limit)
 
 @app.get("/recent-magazines", response_model=list[models.Magazine])
 async def get_recent_magazines():
