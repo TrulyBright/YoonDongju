@@ -93,20 +93,20 @@ def test_login():
 def test_update_club_information():
     info = club_info.copy()
     info["token"] = "asdf"
-    response = tested.patch("/club-information", json=info)
+    response = tested.put("/club-information", json=info)
     assert response.status_code == 401
     info["token"] = my_token
-    response = tested.patch("/club-information", json=info)
+    response = tested.put("/club-information", json=info)
     assert response.status_code == 403
     change_role(models.Role.board)
-    response = tested.patch("/club-information", json=info)
+    response = tested.put("/club-information", json=info)
     assert response.status_code == 200
     updated: dict = response.json()
     assert updated == club_info
 
 def test_get_club_information():
     response = tested.get("/club-information")
-    assert response.status_code == 200
+    assert response.json() == club_info
 
 def test_get_recent_notices():
     response = tested.get("/recent-notices")
@@ -188,6 +188,10 @@ def test_update_notice():
         "content": "updated=content",
         "token": my_token
     }
+    modified["token"] = my_token
+    assert tested.patch(f"/notices/{last_post_no}", json=modified).status_code == 403
+
+    change_role(models.Role.board)
     today = datetime.today().strftime("%Y-%m-%d")
     response = tested.patch(f"/notices/{last_post_no}", json=modified)
     assert response.status_code == 200
@@ -199,13 +203,10 @@ def test_update_notice():
     assert posted["modifier"] == settings.test_real_name
     assert posted["modified"] == today
     assert posted["no"] == last_post_no
-    test_get_notice(last_post_no)
+    test_get_notice(posted)
+
     modified["token"] = "asdf"
     assert tested.patch(f"/notices/{last_post_no}", json=modified).status_code == 401
-    
-    change_role(models.Role.member)
-    modified["token"] = my_token
-    assert tested.patch(f"/notices/{last_post_no}", json=modified).status_code == 403
 
 def test_delete_notice():
     change_role(models.Role.member)

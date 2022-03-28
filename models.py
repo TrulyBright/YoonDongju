@@ -34,7 +34,8 @@ class ClubInformationCreate(ClubInformationBase):
     token: str
 
 class ClubInformation(ClubInformationBase):
-    pass
+    class Config:
+        orm_mode = True
 
 class MemberBase(BaseModel):
     username: str
@@ -82,7 +83,8 @@ class ClassCreate(ClassBase):
     pass
 
 class Class(ClassBase):
-    pass
+    class Config:
+        orm_mode = True
 
 class ClassParticipantBase(BaseModel):
     name: str
@@ -91,7 +93,8 @@ class ClassParticipantCreate(ClassParticipantBase):
     pass
 
 class ClassParticipant(ClassParticipantBase):
-    pass
+    class Config:
+        orm_mode = True
 
 class ClassRecordBase(BaseModel):
     conducted: date
