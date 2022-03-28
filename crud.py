@@ -84,15 +84,29 @@ async def create_post(db: Session, author: models.Member, post: models.PostCreat
 
 def update_post(db: Session, type: models.PostType, post: models.PostCreate, modifier: models.Member, no: int=None):
     """변경된 `Post`를 반환합니다."""
-    updated = db.query(schemas.Post).filter(schemas.Post.no==no if no else schemas.Post.type==type.value)
-    updated.update({
-        "title": post.title,
-        "content": post.content,
-        "modified": datetime.today().date(),
-        "modifier": modifier.real_name,
-    })
+    if no:
+        updated = db.query(schemas.Post).filter(schemas.Post.no==no)
+        updated.update({
+            "title": post.title,
+            "content": post.content,
+            "modified": datetime.today().date(),
+            "modifier": modifier.real_name,
+        })
+        db.commit()
+        return updated.first()    
+    db.query(schemas.Post).filter(schemas.Post.type==type.value).delete()
+    new = schemas.Post(
+        type=type.value,
+        title=post.title,
+        author="연세문학회",
+        content=post.content,
+        published=datetime.today().date(),
+        modified=datetime.today().date(),
+        modifier=modifier.real_name
+    )
+    db.add(new)
     db.commit()
-    return updated.first()
+    return new
 
 def delete_post(db: Session, type: models.PostType, no: int):
     """삭제에 성공하면 `True`, 못 하면 `False`"""

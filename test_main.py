@@ -52,6 +52,10 @@ club_info = {
     "president_tel": "010-0000-0000",
     "join_form_url": "https://example.com"
 }
+about_data = {
+    "title": "about",
+    "content": "us",
+}
 
 def change_role(into: models.Role):
     db: Session = TestingSessionLocal()
@@ -91,6 +95,7 @@ def test_login():
     my_token = response.json()["access_token"]
 
 def test_update_club_information():
+    change_role(models.Role.member)
     info = club_info.copy()
     info["token"] = "asdf"
     response = tested.put("/club-information", json=info)
@@ -106,24 +111,51 @@ def test_update_club_information():
 
 def test_get_club_information():
     response = tested.get("/club-information")
+    assert response.status_code == 200
     assert response.json() == club_info
 
 def test_get_recent_notices():
+    posted = [test_create_notices() for _ in range(10)]
     response = tested.get("/recent-notices")
     assert response.status_code == 200
+    assert response.json() == posted
 
 def test_get_recent_magazines():
     response = tested.get("/recent-magazines")
     assert response.status_code == 200
 
+def test_update_about():
+    change_role(models.Role.member)
+    
+    data = about_data.copy()
+    data["token"] = "asdf"
+    response = tested.put("/about", json=data)
+    assert response.status_code == 401
+
+    data["token"] = my_token
+    response = tested.put("/about", json=data)
+    assert response.status_code == 403
+    
+    change_role(models.Role.board)
+    response = tested.put("/about", json=data)
+    assert response.status_code == 200
+    posted = response.json()
+    assert posted["title"] == data["title"]
+    assert posted["content"] == data["content"]
+    assert posted["modified"] == datetime.today().date().strftime("%Y-%m-%d")
+    assert posted["modifier"] == settings.test_real_name
+    assert posted["type"] == models.PostType.about
+    
+    response = tested.get("/about")
+    assert response.json() == posted
+
 def test_get_about():
     response = tested.get("/about")
     assert response.status_code == 200
-
-def test_update_about():
-    change_role(models.Role.member)
-    response = tested.patch("/about")
-    assert response.status_code == 200
+    about = response.json()
+    assert about["title"] == about_data["title"]
+    assert about["content"] == about_data["content"]
+    assert about["type"] == models.PostType.about
 
 def test_get_rules():
     response = tested.get("/rules")
@@ -167,6 +199,7 @@ def test_create_notices():
     assert posted["modified"] == None
     last_post_no = posted["no"]
     test_get_notice(posted)
+    return posted
 
 def test_get_notice(data=None):
     response = tested.get(f"/notices/{data['no'] if data else last_post_no}")

@@ -64,15 +64,21 @@ async def get_recent_magazines():
 async def get_about(db: Session=Depends(get_db)):
     return crud.get_post(db=db, type=models.PostType.about)
 
-@app.patch("/about", response_model=models.Post)
+@app.put("/about", response_model=models.Post)
 async def update_about(about: models.PostCreate, db: Session=Depends(get_db)):
-    return crud.update_post(db=db, type=models.PostType.about, post=about)
+    modifier = await auth.get_current_member(db=db, token=about.token)
+    if modifier.role in {
+        models.Role.board,
+        models.Role.president
+    }:
+        return crud.update_post(db=db, type=models.PostType.about, post=about, modifier=modifier)
+    raise HTTPException(status_code=403, detail="권한이 없습니다.")
 
 @app.get("/rules", response_model=models.Post)
 async def get_rules(db: Session=Depends(get_db)):
     return crud.get_post(db=db,type=models.PostType.rules)
 
-@app.patch("/rules", response_model=models.Post)
+@app.put("/rules", response_model=models.Post)
 async def update_rules(rules: models.PostCreate, db: Session=Depends(get_db)):
     return crud.update_post(db=db, type=models.PostType.rules, post=rules)
 
