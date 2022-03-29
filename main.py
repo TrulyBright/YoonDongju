@@ -46,8 +46,8 @@ async def get_recent_notices(limit: int=4, db: Session=Depends(get_db)):
     return crud.get_posts(db=db, type=models.PostType.notice, limit=limit)
 
 @app.get("/recent-magazines", response_model=list[models.Magazine])
-async def get_recent_magazines():
-    raise NotImplementedError
+async def get_recent_magazines(limit: int=4, db: Session=Depends(get_db)):
+    return crud.get_magazines(db=db, skip=0, limit=limit)
 
 @app.get("/about", response_model=models.Post)
 async def get_about(db: Session=Depends(get_db)):

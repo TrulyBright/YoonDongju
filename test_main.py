@@ -122,10 +122,6 @@ def test_get_club_information():
     assert response.status_code == 200
     assert response.json() == club_info
 
-def test_get_recent_magazines():
-    response = tested.get("/recent-magazines")
-    assert response.status_code == 200
-
 def test_update_about():
     change_role(models.Role.member)
     response = tested.put("/about", json=about_data, headers=get_jwt_header(True))
@@ -378,6 +374,12 @@ def test_create_magazine():
     response = tested.post("/magazines", headers=get_jwt_header(), json=data)
     assert response.status_code == 200
     assert response.json() == data
+
+def test_get_recent_magazines():
+    params = {"limit": 8}
+    response = tested.get("/recent-magazines", params=params)
+    assert response.status_code == 200
+    assert len(response.json()) == params["limit"]
 
 def test_create_uploaded_file():
     with open("main.py", "rb") as f:
