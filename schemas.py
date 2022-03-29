@@ -37,11 +37,9 @@ class Post(Base):
     modifier = Column(String, nullable=True)
     # attached_files = relationship("AttachedFile") TODO
 
-class AttachedFile(Base):
-    __tablename__ = "attachedFiles"
+class UploadedFile(Base):
+    __tablename__ = "uploadedFiles"
     uuid = Column(String, primary_key=True)
-    post_no = Column(Integer, ForeignKey("posts.no"))
-    type = Column(String)
     name = Column(String)
 
 class Class(Base):

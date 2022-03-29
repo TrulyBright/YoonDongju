@@ -73,7 +73,7 @@ async def create_post(db: Session, author: models.Member, post: models.PostCreat
     return db_post
 
 def update_post(db: Session, type: models.PostType, post: models.PostCreate, modifier: models.Member, no: int=None):
-    """변경된 `Post`를 반환합니다."""
+    """`no`가 있으면 `no`번 `Post`를, 없으면 `type`이 `type`인 `Post`를 수정합니다."""
     if no:
         updated = db.query(schemas.Post).filter(schemas.Post.no==no)
         updated.update({
@@ -115,3 +115,20 @@ def update_club_information(db: Session, info: models.ClubInformationCreate):
     db.add_all([schemas.ClubInformation(key=key, value=value) for key, value in token_excluded.items()])
     db.commit()
     return get_club_information(db)
+
+def get_uploaded_file(db: Session, uuid: uuid.UUID) -> schemas.UploadedFile:
+    return db.query(schemas.UploadedFile).filter(schemas.UploadedFile.uuid==str(uuid)).first()
+
+async def create_uploaded_file(db: Session, file: UploadFile):
+    name = file.filename
+    internal_uuid = uuid.uuid4()
+    Path("uploaded").mkdir(exist_ok=True)
+    with open(f"uploaded/{internal_uuid}", "wb") as f:
+        f.write(await file.read())
+    row = schemas.UploadedFile(
+        uuid=str(internal_uuid),
+        name=name
+    )
+    db.add(row)
+    db.commit()
+    return row

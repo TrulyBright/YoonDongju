@@ -1,6 +1,8 @@
 from __future__ import annotations
 from datetime import date
 from enum import Enum
+import json
+from uuid import UUID
 from pydantic import BaseModel
 from fastapi import UploadFile
 
@@ -127,11 +129,20 @@ class MagazineBase(BaseModel):
     season: int
     cover: str
     published: date
-    contents: list[MagazineContent]
 
 class MagazineCreate(MagazineBase):
+    contents: list[MagazineContentCreate]
     class Config:
         orm_mode = True
 
 class Magazine(MagazineBase):
+    contents: list[MagazineContent]
+
+class UploadedFileBase(BaseModel):
+    name: str
+
+class UploadedFileCreate(UploadedFileBase):
     pass
+
+class UploadedFile(UploadedFileBase):
+    uuid: UUID

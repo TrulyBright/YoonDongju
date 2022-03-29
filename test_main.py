@@ -1,4 +1,6 @@
 from datetime import datetime
+import json
+import uuid
 from fastapi import Depends
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
@@ -188,7 +190,7 @@ def test_get_recent_notices():
     assert response.json() == list(posted_posts.values())[::-1]
 
 def test_get_notices():
-    for _ in range(100):
+    for _ in range(10):
         test_create_notice()
     span = {
         "skip": 0,
@@ -306,11 +308,57 @@ def test_delete_member():
 def test_get_magazines():
     response = tested.get("/magazines")
     assert response.status_code == 200
+    assert response.json() == []
 
 def test_create_magazine():
-    change_role(models.Role.member)
     response = tested.post("/magazines")
+    assert response.status_code == 401
+
+    change_role(models.Role.member)
+    response = tested.post("/magazines", headers=get_jwt_header())
+    assert response.status_code == 403
+    
+    data = {
+        "magazine": {
+            "year": 2022,
+            "season": 1,
+            "published": "2022-01-01",
+            "contents": [
+                models.MagazineContentCreate(
+                    type="시",
+                    title="「형」",
+                    author="심보선",
+                    language="한국어"
+                ).dict()],
+        },
+    }
+    change_role(models.Role.board)
+    response = tested.post("/magazines", headers=get_jwt_header(), data=data, files={"cover": ("main.py", open("main.py", "rb"), "text/plain")})
+    print(response.json())
     assert response.status_code == 200
+
+def test_create_uploaded_file():
+    with open("main.py", "rb") as f:
+        response = tested.post("/uploaded", headers=get_jwt_header(True), files={"uploaded": ("asdf.asdf", b"wer", "text/plain")})
+        assert response.status_code == 401
+        change_role(models.Role.member)
+        response = tested.post("/uploaded", headers=get_jwt_header(), files={"uploaded": ("asdf.asdf", b"awe", "text/plain")})
+        assert response.status_code == 403
+        change_role(models.Role.board)
+        response = tested.post("/uploaded", headers=get_jwt_header(), files={"uploaded":("main.py", f, "text/plain")})
+        assert response.status_code == 200
+        data = response.json()
+        assert data["name"] == "main.py"
+        uuid = data["uuid"]
+    with open("main.py", "rb") as f:
+        response = tested.get(f"/uploaded/{uuid}")
+        assert response.status_code == 200
+        assert response.headers["content-disposition"].endswith(f'"{data["name"]}"')
+        assert response.content == f.read()
+
+def test_get_uploaded_file():
+    response = tested.get(f"uploaded/{uuid.uuid4()}")
+    assert response.status_code == 404
 
 def test_get_magazine():
     response = tested.get(f"/magazines/2022-01-01")

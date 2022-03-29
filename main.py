@@ -1,11 +1,13 @@
 import re
 from functools import lru_cache
 from datetime import date, timedelta
-from fastapi import Depends, FastAPI, HTTPException
+from uuid import UUID
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, BaseSettings
+from pydantic import UUID5, BaseModel, BaseSettings
 import models
 import crud
 import auth
@@ -107,6 +109,17 @@ async def update_member(student_id: int, member: models.MemberModify, db: Sessio
 @app.delete("/members/{student_id:int}")
 async def delete_member(student_id: int, deleter: schemas.Member=Depends(auth.get_current_member_board_only)):
     raise NotImplementedError
+
+@app.get("/uploaded/{uuid}")
+async def get_uploaded_file(uuid: UUID, db: Session=Depends(get_db)):
+    if uploaded := crud.get_uploaded_file(db=db, uuid=uuid):
+        return FileResponse("uploaded/"+str(uuid), filename=uploaded.name)
+    raise HTTPException(404)
+
+@app.post("/uploaded", response_model=models.UploadedFile)
+async def create_uploaded_file(uploaded: UploadFile, db: Session=Depends(get_db), uploader=Depends(auth.get_current_member_board_only)):
+    internal = await crud.create_uploaded_file(db=db, file=uploaded)
+    return models.UploadedFile(name=internal.name, uuid=internal.uuid)
 
 @app.get("/magazines", response_model=list[models.Magazine])
 async def get_magazines():
