@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 import json
 import uuid
 from fastapi import Depends
@@ -305,11 +305,6 @@ def test_delete_member():
     response = tested.delete(f"/members/{settings.test_portal_id}")
     assert response.status_code == 200
 
-def test_get_magazines():
-    response = tested.get("/magazines")
-    assert response.status_code == 200
-    assert response.json() == []
-
 def test_create_magazine():
     data = {
         "year": 2022,
@@ -336,6 +331,54 @@ def test_create_magazine():
     assert response.status_code == 200
     assert response.json() == data
 
+def test_get_magazine():
+    dummy = {
+        "year": 1984,
+        "season": 1,
+        "cover": str(uuid.uuid4()),
+        "published": date(year=1984, month=1, day=1).strftime("%Y-%m-%d"),
+        "contents": [
+            models.MagazineContentCreate(
+                type="소설",
+                title="1984",
+                author="조지 오웰",
+                language="영어"
+            ).dict()]
+    }
+    change_role(models.Role.board)
+    tested.post("/magazines", json=dummy, headers=get_jwt_header())
+    response = tested.get(f"/magazines/{dummy['published']}")
+    assert response.status_code == 200
+    assert response.json() == dummy
+
+def test_get_magazine():
+    dummies = [{
+        "year": i,
+        "season": i,
+        "cover": str(uuid.uuid4()),
+        "published": date(year=i, month=1, day=1).strftime("%Y-%m-%d"),
+        "contents": [
+            models.MagazineContentCreate(
+                type="시",
+                title="서시",
+                author="윤동주",
+                language="한국어"
+            ).dict() for _ in range(37)]
+    } for i in range(1, 129)]
+    change_role(models.Role.board)
+    for d in dummies:
+        tested.post("/magazines", json=d, headers=get_jwt_header())
+    response = tested.get("/magazines")
+    assert response.status_code == 200
+    assert response.json() == dummies[::-1][:100]
+    params = {
+        "skip": 3,
+        "limit": 11
+    }
+    response = tested.get("/magazines", params=params)
+    assert response.status_code == 200
+    assert response.json() == dummies[::-1][params["skip"]:params["skip"]+params["limit"]]
+
 def test_create_uploaded_file():
     with open("main.py", "rb") as f:
         response = tested.post("/uploaded", headers=get_jwt_header(True), files={"uploaded": ("asdf.asdf", b"wer", "text/plain")})
@@ -361,10 +404,6 @@ def test_get_uploaded_file():
     assert response.status_code == 404
     response = tested.get("uploaded/../requirements.txt")
     assert response.status_code == 404
-
-def test_get_magazine():
-    response = tested.get(f"/magazines/2022-01-01")
-    assert response.status_code == 200
 
 def test_update_magazine():
     change_role(models.Role.member)

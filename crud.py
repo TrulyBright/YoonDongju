@@ -138,6 +138,9 @@ async def create_uploaded_file(db: Session, file: UploadFile):
 def get_magazine(db: Session, published: date):
     return db.query(schemas.Magazine).filter(schemas.Magazine.published==published).first()
 
+def get_magazines(db: Session, skip: int=0, limit: int=100):
+    return db.query(schemas.Magazine).order_by(schemas.Magazine.published.desc()).offset(skip).limit(limit).all()
+
 def create_magazine(db: Session, magazine: models.MagazineCreate):
     db_magazine = schemas.Magazine(
         year=magazine.year,

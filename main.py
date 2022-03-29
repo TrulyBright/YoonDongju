@@ -121,12 +121,12 @@ async def create_uploaded_file(uploaded: UploadFile, db: Session=Depends(get_db)
     return await crud.create_uploaded_file(db=db, file=uploaded)
 
 @app.get("/magazines", response_model=list[models.Magazine])
-async def get_magazines():
-    raise NotImplementedError
+async def get_magazines(skip: int=0, limit: int=100, db: Session=Depends(get_db)):
+    return crud.get_magazines(db=db, skip=skip, limit=limit)
 
 @app.get("/magazines/{published}", response_model=models.Magazine)
-async def get_magazine(published: date):
-    raise NotImplementedError
+async def get_magazine(published: date, db: Session=Depends(get_db)):
+    return crud.get_magazine(db=db, published=published)
 
 @app.post("/magazines", response_model=models.Magazine)
 async def create_magazine(magazine: models.MagazineCreate, db: Session=Depends(get_db), publisher: schemas.Member=Depends(auth.get_current_member_board_only)):
