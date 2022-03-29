@@ -10,7 +10,7 @@ import models
 import crud
 import auth
 import schemas
-from database import SessionLocal, engine
+from database import SessionLocal, engine, get_db
 
 schemas.Base.metadata.create_all(bind=engine)
 
@@ -24,13 +24,6 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 class RegisterForm(BaseModel):
     portal_id: int
     portal_pw: str
@@ -43,14 +36,8 @@ async def get_club_information(db: Session=Depends(get_db)):
     return crud.get_club_information(db=db)
 
 @app.put("/club-information", response_model=models.ClubInformation)
-async def update_club_information(info: models.ClubInformationCreate, db: Session=Depends(get_db)):
-    updater = await auth.get_current_member(db=db, token=info.token)
-    if updater.role in {
-        models.Role.board,
-        models.Role.president
-    }:
-        return crud.update_club_information(db=db, info=info)
-    raise HTTPException(status_code=403, detail="권한이 없습니다.")
+async def update_club_information(info: models.ClubInformationCreate, db: Session=Depends(get_db), modifier: schemas.Member=Depends(auth.get_current_member_board_only)):
+    return crud.update_club_information(db=db, info=info)
 
 @app.get("/recent-notices", response_model=list[models.Post])
 async def get_recent_notices(limit: int=4, db: Session=Depends(get_db)):
@@ -58,35 +45,23 @@ async def get_recent_notices(limit: int=4, db: Session=Depends(get_db)):
 
 @app.get("/recent-magazines", response_model=list[models.Magazine])
 async def get_recent_magazines():
-    return []
+    raise NotImplementedError
 
 @app.get("/about", response_model=models.Post)
 async def get_about(db: Session=Depends(get_db)):
     return crud.get_post(db=db, type=models.PostType.about)
 
 @app.put("/about", response_model=models.Post)
-async def update_about(about: models.PostCreate, db: Session=Depends(get_db)):
-    modifier = await auth.get_current_member(db=db, token=about.token)
-    if modifier.role in {
-        models.Role.board,
-        models.Role.president
-    }:
-        return crud.update_post(db=db, type=models.PostType.about, post=about, modifier=modifier)
-    raise HTTPException(status_code=403, detail="권한이 없습니다.")
+async def update_about(about: models.PostCreate, db: Session=Depends(get_db), modifier: schemas.Member=Depends(auth.get_current_member_board_only)):
+    return crud.update_post(db=db, type=models.PostType.about, post=about, modifier=modifier)
 
 @app.get("/rules", response_model=models.Post)
 async def get_rules(db: Session=Depends(get_db)):
     return crud.get_post(db=db,type=models.PostType.rules)
 
 @app.put("/rules", response_model=models.Post)
-async def update_rules(rules: models.PostCreate, db: Session=Depends(get_db)):
-    modifier = await auth.get_current_member(db=db, token=rules.token)
-    if modifier.role in {
-        models.Role.board,
-        models.Role.president
-    }:
-        return crud.update_post(db=db, type=models.PostType.rules, post=rules, modifier=modifier)
-    raise HTTPException(status_code=403, detail="권한이 없습니다.")
+async def update_rules(rules: models.PostCreate, db: Session=Depends(get_db), modifier: schemas.Member=Depends(auth.get_current_member_board_only)):
+    return crud.update_post(db=db, type=models.PostType.rules, post=rules, modifier=modifier)
 
 @app.get("/notices", response_model=list[models.Post])
 async def get_notices(skip: int=0, limit: int=100, db: Session=Depends(get_db)):
@@ -100,50 +75,22 @@ async def get_notice(no: int, db: Session=Depends(get_db)):
     return db_notice
 
 @app.post("/notices", response_model=models.Post)
-async def create_notice(post: models.PostCreate, db: Session=Depends(get_db)):
-    author = await auth.get_current_member(db=db, token=post.token)
-    if author.role in {
-        models.Role.board,
-        models.Role.president
-    }:
-        return await crud.create_post(db=db, post=post, author=author, type=models.PostType.notice)
-    raise HTTPException(
-            status_code=403,
-            detail="권한이 없습니다."
-        )
+async def create_notice(post: models.PostCreate, db: Session=Depends(get_db), author: schemas.Member=Depends(auth.get_current_member_board_only)):
+    return await crud.create_post(db=db, post=post, author=author, type=models.PostType.notice)
     
 @app.patch("/notices/{no:int}", response_model=models.Post)
-async def update_notice(no: int, post: models.PostCreate, db: Session=Depends(get_db)):
-    modifier = await auth.get_current_member(db=db, token=post.token)
-    if modifier.role in {
-        models.Role.board,
-        models.Role.president
-    }:
-        if updated := crud.update_post(db=db, post=post, modifier=modifier, type=models.PostType.notice, no=no):
-            return updated
-        raise HTTPException(404, "그런 글이 없습니다.")
-    raise HTTPException(
-            status_code=403,
-            detail="권한이 없습니다."
-        )
+async def update_notice(no: int, post: models.PostCreate, db: Session=Depends(get_db), modifier: schemas.Member=Depends(auth.get_current_member_board_only)):
+    if updated := crud.update_post(db=db, post=post, modifier=modifier, type=models.PostType.notice, no=no):
+        return updated
+    raise HTTPException(404, "그런 글이 없습니다.")
 
 @app.delete("/notices/{no:int}")
-async def delete_notice(no: int, token: str, db: Session=Depends(get_db)):
-    deleter = await auth.get_current_member(db=db, token=token)
-    if deleter.role in {
-        models.Role.board,
-        models.Role.president
-    }:
-        if not crud.delete_post(db=db, type=models.PostType.notice, no=no):
-            raise HTTPException(404, "그런 글이 없습니다.")
-    else:
-        raise HTTPException(
-            status_code=403,
-            detail="권한이 없습니다."
-        )
+async def delete_notice(no: int, db: Session=Depends(get_db), deleter: schemas.Member=Depends(auth.get_current_member_board_only)):
+    if not crud.delete_post(db=db, type=models.PostType.notice, no=no):
+        raise HTTPException(404, "그런 글이 없습니다.")
 
 @app.get("/members", response_model=list[models.Member])
-async def get_members(skip: int, limit: int, db: Session=Depends(get_db)):
+async def get_members(skip: int=0, limit: int=100, db: Session=Depends(get_db), accessor: schemas.Member=Depends(auth.get_current_member_board_only)):
     return crud.get_members(db, skip, limit)
 
 @app.get("/members/{student_id:int}", response_model=models.Member)
@@ -154,69 +101,64 @@ async def get_member(student_id: int, db: Session=Depends(get_db)):
     return db_member
 
 @app.patch("/members/{student_id:int}", response_model=models.Member)
-async def update_member(student_id: int, token: str, member: models.MemberModify, db: Session=Depends(get_db)):
-    author = await auth.get_current_member(db=db, token=token)
-    if author.role in {
-        models.Role.board,
-        models.Role.president
-    }:
-        return await crud.update_member(db=db, student_id=student_id, member=member)
+async def update_member(student_id: int, member: models.MemberModify, db: Session=Depends(get_db), author: schemas.Member=Depends(auth.get_current_member_board_only)):
+    return await crud.update_member(db=db, student_id=student_id, member=member)
 
 @app.delete("/members/{student_id:int}")
-async def delete_member(student_id: int):
-    pass
+async def delete_member(student_id: int, deleter: schemas.Member=Depends(auth.get_current_member_board_only)):
+    raise NotImplementedError
 
 @app.get("/magazines", response_model=list[models.Magazine])
 async def get_magazines():
-    return []
+    raise NotImplementedError
 
 @app.get("/magazines/{published}", response_model=models.Magazine)
 async def get_magazine(published: date):
-    pass
+    raise NotImplementedError
 
 @app.post("/magazines", response_model=models.Magazine)
-async def create_magazine(magazine: models.MagazineCreate):
-    pass
+async def create_magazine(magazine: models.MagazineCreate, publisher: schemas.Member=Depends(auth.get_current_member_board_only)):
+    raise NotImplementedError
 
 @app.patch("/magazines/{published}", response_model=models.Magazine)
-async def update_magazine(published: date, magazine: models.MagazineCreate):
-    pass
+async def update_magazine(published: date, magazine: models.MagazineCreate, publisher: schemas.Member=Depends(auth.get_current_member_board_only)):
+    raise NotImplementedError
 
 @app.delete("/magazines/{published}")
-async def delete_magazine(published:date):
-    pass
+async def delete_magazine(published:date, deleter: schemas.Member=Depends(auth.get_current_member_board_only)):
+    raise NotImplementedError
 
 @app.get("/classes", response_model=list[models.Class])
 async def get_classes():
-    return None
+    raise NotImplementedError
 
 @app.get("/classes/{class_name}", response_model=models.Class)
 async def get_class(class_name: models.ClassName):
-    return None
+    raise NotImplementedError
 
 @app.patch("/classes/{class_name}", response_model=models.Class)
-async def update_class(class_name: models.ClassName):
-    pass
+async def update_class(class_name: models.ClassName, modifier: schemas.Member=Depends(auth.get_current_member_board_only)):
+    raise NotImplementedError
 
 @app.get("/classes/{class_name}/records", response_model=list[models.ClassRecord])
 async def get_class_records(class_name: models.ClassName):
-    pass
+    raise NotImplementedError
 
 @app.get("/classes/{class_name}/records/{id:int}", response_model=models.ClassRecord)
 async def get_class_record(class_name: models.ClassName, id: int):
-    pass
+    raise NotImplementedError
 
 @app.post("/classes/{class_name}/records", response_model=models.ClassRecord)
-async def create_class_record(class_name: models.ClassName, records: models.ClassRecord):
-    pass
+async def create_class_record(class_name: models.ClassName, records: models.ClassRecord, recorder: schemas.Member=Depends(auth.get_current_member_board_only)):
+    raise NotImplementedError
 
 @app.patch("/classes/{class_name}/records/{id:int}", response_model=models.ClassRecord)
-async def update_class_record(class_name: models.ClassName, id: int):
-    pass
+async def update_class_record(class_name: models.ClassName, id: int, recorder: schemas.Member=Depends(auth.get_current_member_board_only)):
+    raise NotImplementedError
 
 @app.delete("/classes/{class_name}/records/{id:int}")
-async def delete_class_record(class_name: models.ClassName, id: int):
-    pass
+async def delete_class_record(class_name: models.ClassName, id: int, recorder: schemas.Member=Depends(auth.get_current_member_board_only)):
+    raise NotImplementedError
 
 @app.post("/register", response_model=models.Member)
 async def register(form: RegisterForm, db: Session=Depends(get_db)):
@@ -256,9 +198,9 @@ async def register(form: RegisterForm, db: Session=Depends(get_db)):
         )
     )
 
-@app.post("/login")
-async def login(form: OAuth2PasswordRequestForm=Depends(), db: Session=Depends(get_db)):
-    member = auth.authenticate(db, form.username, form.password)
+@app.post("/token")
+async def login(form: OAuth2PasswordRequestForm=Depends(),db: Session=Depends(get_db)):
+    member = auth.authenticate(db=db, username=form.username, password=form.password)
     if not member:
         raise HTTPException(
             status_code=401,

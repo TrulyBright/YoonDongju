@@ -28,7 +28,7 @@ def override_get_db():
     finally:
         db.close()
 
-main.app.dependency_overrides[main.get_db] = override_get_db
+main.app.dependency_overrides[database.get_db] = override_get_db
 tested = TestClient(main.app)
 
 class Settings(BaseSettings):
@@ -61,6 +61,9 @@ rules = {
     "title": "rules",
     "content": "not that strict"
 }
+
+def get_jwt_header(invalid=False):
+    return {"Authorization": "Bearer "+("asdf" if invalid else my_token)}
 
 def change_role(into: models.Role):
     db: Session = TestingSessionLocal()
@@ -95,21 +98,19 @@ def test_login():
         "username": settings.test_username,
         "password": settings.test_password,
     }
-    response = tested.post("/login", data=data)
+    response = tested.post("/token", data=data)
     assert response.status_code == 200
     my_token = response.json()["access_token"]
 
 def test_update_club_information():
     change_role(models.Role.member)
-    info = club_info.copy()
-    info["token"] = "asdf"
-    response = tested.put("/club-information", json=info)
+    info = club_info
+    response = tested.put("/club-information", json=info, headers=get_jwt_header(True))
     assert response.status_code == 401
-    info["token"] = my_token
-    response = tested.put("/club-information", json=info)
+    response = tested.put("/club-information", json=info, headers=get_jwt_header())
     assert response.status_code == 403
     change_role(models.Role.board)
-    response = tested.put("/club-information", json=info)
+    response = tested.put("/club-information", json=info, headers=get_jwt_header())
     assert response.status_code == 200
     updated: dict = response.json()
     assert updated == club_info
@@ -125,22 +126,18 @@ def test_get_recent_magazines():
 
 def test_update_about():
     change_role(models.Role.member)
-    
-    data = about_data.copy()
-    data["token"] = "asdf"
-    response = tested.put("/about", json=data)
+    response = tested.put("/about", json=about_data, headers=get_jwt_header(True))
     assert response.status_code == 401
 
-    data["token"] = my_token
-    response = tested.put("/about", json=data)
+    response = tested.put("/about", json=about_data, headers=get_jwt_header())
     assert response.status_code == 403
     
     change_role(models.Role.board)
-    response = tested.put("/about", json=data)
+    response = tested.put("/about", json=about_data, headers=get_jwt_header())
     assert response.status_code == 200
     posted = response.json()
-    assert posted["title"] == data["title"]
-    assert posted["content"] == data["content"]
+    assert posted["title"] == about_data["title"]
+    assert posted["content"] == about_data["content"]
     assert posted["modified"] == datetime.today().date().strftime("%Y-%m-%d")
     assert posted["modifier"] == settings.test_real_name
     
@@ -155,22 +152,19 @@ def test_get_about():
     assert about["content"] == about_data["content"]
 
 def test_update_rules():
-    requested = rules.copy()
-    requested["token"] = "asdf"
-    response = tested.put("/rules", json=requested)
+    response = tested.put("/rules", json=rules, headers=get_jwt_header(True))
     assert response.status_code == 401
     
     change_role(models.Role.member)
-    requested["token"] = my_token
-    response = tested.put("/rules", json=requested)
+    response = tested.put("/rules", json=rules, headers=get_jwt_header())
     assert response.status_code == 403
 
     change_role(models.Role.board)
-    response = tested.put("/rules", json=requested)
+    response = tested.put("/rules", json=rules, headers=get_jwt_header())
     assert response.status_code == 200
     changed = response.json()
-    assert changed["title"] == requested["title"]
-    assert changed["content"] == requested["content"]
+    assert changed["title"] == rules["title"]
+    assert changed["content"] == rules["content"]
     assert changed["published"] == datetime.today().date().strftime("%Y-%m-%d")
     assert changed["author"] == "연세문학회"
     test_get_rules()
@@ -213,17 +207,15 @@ def test_create_notice():
     data = {
         "title": "tested-title",
         "content": "tested=content",
-        "token": "asdf"
     }
-    response = tested.post("/notices", json=data)
+    response = tested.post("/notices", json=data, headers=get_jwt_header(True))
     assert response.status_code == 401
 
-    data["token"] = my_token
-    response = tested.post("/notices", json=data)
+    response = tested.post("/notices", json=data, headers=get_jwt_header())
     assert response.status_code == 403
 
     change_role(models.Role.board)
-    response = tested.post("/notices", json=data)
+    response = tested.post("/notices", json=data, headers=get_jwt_header())
     assert response.status_code == 200
     posted: dict = response.json()
     assert posted["title"] == data["title"]
@@ -253,14 +245,12 @@ def test_update_notice():
     modified = {
         "title": "updated-title",
         "content": "updated=content",
-        "token": my_token
     }
-    modified["token"] = my_token
-    assert tested.patch(f"/notices/{last_post_no}", json=modified).status_code == 403
+    assert tested.patch(f"/notices/{last_post_no}", json=modified, headers=get_jwt_header()).status_code == 403
 
     change_role(models.Role.board)
     today = datetime.today().strftime("%Y-%m-%d")
-    response = tested.patch(f"/notices/{last_post_no}", json=modified)
+    response = tested.patch(f"/notices/{last_post_no}", json=modified, headers=get_jwt_header())
     assert response.status_code == 200
     posted: dict = response.json()
     assert posted["title"] == modified["title"]
@@ -271,31 +261,32 @@ def test_update_notice():
     assert posted["no"] == last_post_no
     test_get_notice(posted)
 
-    modified["token"] = "asdf"
-    assert tested.patch(f"/notices/{last_post_no}", json=modified).status_code == 401
+    assert tested.patch(f"/notices/{last_post_no}", json=modified, headers=get_jwt_header(True)).status_code == 401
 
     posted_posts[posted["no"]] = posted
 
 def test_delete_notice():
-    change_role(models.Role.member)
-    deletion_params = {
-        "token": "asdf"
-    }
-    assert tested.delete(f"/notices/{last_post_no}", params=deletion_params).status_code == 401
+    assert tested.delete(f"/notices/{last_post_no}", headers=get_jwt_header(True)).status_code == 401
     assert tested.get(f"/notices/{last_post_no}").status_code == 200
 
-    deletion_params["token"] = my_token
-    assert tested.delete(f"/notices/{last_post_no}", params=deletion_params).status_code == 403
+    change_role(models.Role.member)
+    assert tested.delete(f"/notices/{last_post_no}", headers=get_jwt_header()).status_code == 403
     assert tested.get(f"/notices/{last_post_no}").status_code == 200
 
     change_role(models.Role.board)
-    assert tested.delete(f"/notices/{last_post_no}", params=deletion_params).status_code == 200
+    assert tested.delete(f"/notices/{last_post_no}", headers=get_jwt_header()).status_code == 200
     assert tested.get(f"/notices/{last_post_no}").status_code == 404
-    assert tested.delete(f"/notices/{last_post_no}", params=deletion_params).status_code == 404
+    assert tested.delete(f"/notices/{last_post_no}", headers=get_jwt_header()).status_code == 404
     del posted_posts[last_post_no]
 
 def test_get_members():
     response = tested.get("/members")
+    assert response.status_code == 401
+    change_role(models.Role.member)
+    response = tested.get("/members", headers=get_jwt_header())
+    assert response.status_code == 403
+    change_role(models.Role.board)
+    response = tested.get("/members", headers=get_jwt_header())
     assert response.status_code == 200
 
 def test_get_member():

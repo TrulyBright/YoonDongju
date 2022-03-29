@@ -31,7 +31,7 @@ class ClubInformationBase(BaseModel):
     join_form_url: str
 
 class ClubInformationCreate(ClubInformationBase):
-    token: str
+    pass
 
 class ClubInformation(ClubInformationBase):
     class Config:
@@ -58,7 +58,7 @@ class PostBase(BaseModel):
     content: str
 
 class PostCreate(PostBase):
-    token: str
+    pass
     # attached: list[UploadFile]
 
 class Post(PostBase):

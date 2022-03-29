@@ -9,6 +9,8 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 import crud
+import database
+import models
 
 SECRET_KEY = "test"
 ALGORITHM = "HS256"
@@ -44,7 +46,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None=None):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-async def get_current_member(db, token: str=Depends(oauth2_scheme)):
+async def get_current_member(db: Session=Depends(database.get_db), token: str=Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -62,6 +64,13 @@ async def get_current_member(db, token: str=Depends(oauth2_scheme)):
     if member is None:
         raise credentials_exception
     return member
+
+async def get_current_member_board_only(member: models.Member=Depends(get_current_member)):
+    if member.role in {
+        models.Role.board,
+        models.Role.president
+    }: return member
+    raise HTTPException(403, "권한이 없습니다.")
 
 def is_yonsei_member(id: int, pw: str):
     if len(pw) > 1024: raise
