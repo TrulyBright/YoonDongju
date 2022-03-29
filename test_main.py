@@ -357,8 +357,11 @@ def test_create_uploaded_file():
         assert response.content == f.read()
 
 def test_get_uploaded_file():
-    response = tested.get(f"uploaded/{uuid.uuid4()}")
+    generated = uuid.uuid4()
+    response = tested.get(f"uploaded/{generated}")
     assert response.status_code == 404
+    response = tested.get("uploaded/../requirements.txt")
+    assert response.status_code == 400
 
 def test_get_magazine():
     response = tested.get(f"/magazines/2022-01-01")
