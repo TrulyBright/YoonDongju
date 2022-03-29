@@ -305,32 +305,6 @@ def test_delete_member():
     response = tested.delete(f"/members/{settings.test_portal_id}")
     assert response.status_code == 200
 
-def test_create_magazine():
-    data = {
-        "year": 2022,
-        "season": 1,
-        "cover": str(uuid.uuid4()),
-        "published": "2022-01-01",
-        "contents": [
-            models.MagazineContentCreate(
-                type="시",
-                title="「형」",
-                author="심보선",
-                language="한국어"
-            ).dict() for _ in range(100)],
-    }
-    response = tested.post("/magazines", json=data)
-    assert response.status_code == 401
-
-    change_role(models.Role.member)
-    response = tested.post("/magazines", headers=get_jwt_header())
-    assert response.status_code == 403
-
-    change_role(models.Role.board)
-    response = tested.post("/magazines", headers=get_jwt_header(), json=data)
-    assert response.status_code == 200
-    assert response.json() == data
-
 def test_get_magazines():
     dummies = [{
         "year": i,
@@ -378,6 +352,32 @@ def test_get_magazine():
     response = tested.get(f"/magazines/{dummy['published']}")
     assert response.status_code == 200
     assert response.json() == dummy
+
+def test_create_magazine():
+    data = {
+        "year": 2022,
+        "season": 1,
+        "cover": str(uuid.uuid4()),
+        "published": "2022-01-01",
+        "contents": [
+            models.MagazineContentCreate(
+                type="시",
+                title="「형」",
+                author="심보선",
+                language="한국어"
+            ).dict() for _ in range(100)],
+    }
+    response = tested.post("/magazines", json=data)
+    assert response.status_code == 401
+
+    change_role(models.Role.member)
+    response = tested.post("/magazines", headers=get_jwt_header())
+    assert response.status_code == 403
+
+    change_role(models.Role.board)
+    response = tested.post("/magazines", headers=get_jwt_header(), json=data)
+    assert response.status_code == 200
+    assert response.json() == data
 
 def test_create_uploaded_file():
     with open("main.py", "rb") as f:
