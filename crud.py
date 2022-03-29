@@ -121,13 +121,15 @@ def get_uploaded_file(db: Session, uuid: uuid.UUID) -> schemas.UploadedFile:
 
 async def create_uploaded_file(db: Session, file: UploadFile):
     name = file.filename
+    content_type = file.content_type
     internal_uuid = uuid.uuid4()
     Path("uploaded").mkdir(exist_ok=True)
     with open(f"uploaded/{internal_uuid}", "wb") as f:
         f.write(await file.read())
     row = schemas.UploadedFile(
         uuid=str(internal_uuid),
-        name=name
+        name=name,
+        content_type=content_type
     )
     db.add(row)
     db.commit()

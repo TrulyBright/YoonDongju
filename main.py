@@ -113,13 +113,12 @@ async def delete_member(student_id: int, deleter: schemas.Member=Depends(auth.ge
 @app.get("/uploaded/{uuid}")
 async def get_uploaded_file(uuid: UUID, db: Session=Depends(get_db)):
     if uploaded := crud.get_uploaded_file(db=db, uuid=uuid):
-        return FileResponse("uploaded/"+str(uuid), filename=uploaded.name)
+        return FileResponse("uploaded/"+str(uuid), filename=uploaded.name, media_type=uploaded.content_type)
     raise HTTPException(404)
 
 @app.post("/uploaded", response_model=models.UploadedFile)
-async def create_uploaded_file(uploaded: UploadFile, db: Session=Depends(get_db), uploader=Depends(auth.get_current_member_board_only)):
-    internal = await crud.create_uploaded_file(db=db, file=uploaded)
-    return models.UploadedFile(name=internal.name, uuid=internal.uuid)
+async def create_uploaded_file(uploaded: UploadFile, db: Session=Depends(get_db),): # uploader=Depends(auth.get_current_member_board_only)):
+    return await crud.create_uploaded_file(db=db, file=uploaded)
 
 @app.get("/magazines", response_model=list[models.Magazine])
 async def get_magazines():

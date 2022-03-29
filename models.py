@@ -146,3 +146,6 @@ class UploadedFileCreate(UploadedFileBase):
 
 class UploadedFile(UploadedFileBase):
     uuid: UUID
+    content_type: str
+    class Config:
+        orm_mode = True

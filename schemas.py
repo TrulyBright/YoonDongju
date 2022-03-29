@@ -41,6 +41,7 @@ class UploadedFile(Base):
     __tablename__ = "uploadedFiles"
     uuid = Column(String, primary_key=True)
     name = Column(String)
+    content_type = Column(String)
 
 class Class(Base):
     __tablename__ = "classes"
