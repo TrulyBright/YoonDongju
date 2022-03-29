@@ -122,21 +122,22 @@ class MagazineContentCreate(MagazineContentBase):
     pass
 
 class MagazineContent(MagazineContentBase):
-    pass
+    class Config:
+        orm_mode = True
 
 class MagazineBase(BaseModel):
     year: int
     season: int
-    cover: str
+    cover: UUID
     published: date
 
 class MagazineCreate(MagazineBase):
     contents: list[MagazineContentCreate]
-    class Config:
-        orm_mode = True
 
 class Magazine(MagazineBase):
     contents: list[MagazineContent]
+    class Config:
+        orm_mode = True
 
 class UploadedFileBase(BaseModel):
     name: str

@@ -1,5 +1,5 @@
 import bcrypt
-from datetime import datetime
+from datetime import datetime, date
 from pathlib import Path
 from sqlalchemy.sql import case
 from sqlalchemy.orm import Session
@@ -134,3 +134,30 @@ async def create_uploaded_file(db: Session, file: UploadFile):
     db.add(row)
     db.commit()
     return row
+
+def get_magazine(db: Session, published: date):
+    return db.query(schemas.Magazine).filter(schemas.Magazine.published==published).first()
+
+def create_magazine(db: Session, magazine: models.MagazineCreate):
+    db_magazine = schemas.Magazine(
+        year=magazine.year,
+        season=magazine.season,
+        cover=str(magazine.cover),
+        published=magazine.published,
+    )
+    db.add(db_magazine)
+    db.add_all([
+        schemas.MagazineContent(
+            published=magazine.published,
+            index=i+1,
+            type=c.type,
+            title=c.title,
+            author=c.author,
+            language=c.language
+        )
+    for i, c in enumerate(magazine.contents)])
+    db.commit()
+    return db_magazine
+
+def get_magazine_content(db: Session, published: date):
+    return db.query(schemas.MagazineContent).filter(schemas.MagazineContent.published==published).all()

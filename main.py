@@ -129,8 +129,8 @@ async def get_magazine(published: date):
     raise NotImplementedError
 
 @app.post("/magazines", response_model=models.Magazine)
-async def create_magazine(magazine: models.MagazineCreate, publisher: schemas.Member=Depends(auth.get_current_member_board_only)):
-    raise NotImplementedError
+async def create_magazine(magazine: models.MagazineCreate, db: Session=Depends(get_db), publisher: schemas.Member=Depends(auth.get_current_member_board_only)):
+    return crud.create_magazine(db=db, magazine=magazine)
 
 @app.patch("/magazines/{published}", response_model=models.Magazine)
 async def update_magazine(published: date, magazine: models.MagazineCreate, publisher: schemas.Member=Depends(auth.get_current_member_board_only)):

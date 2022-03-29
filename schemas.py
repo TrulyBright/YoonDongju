@@ -73,14 +73,14 @@ class Magazine(Base):
     __tablename__ = "magazines"
     year = Column(Integer)
     season = Column(Integer)
-    cover = Column(String)
+    cover = Column(String, ForeignKey("uploadedFiles.uuid")) # 표지 파일 UUID
     published = Column(Date, primary_key=True)
     contents = relationship("MagazineContent")
     __table_args__ = (UniqueConstraint('year', 'season'),)
 
 class MagazineContent(Base):
     __tablename__ = "magazineContents"
-    published = Column(Integer, ForeignKey("magazines.published"))
+    published = Column(Integer, ForeignKey("magazines.published"), index=True)
     index = Column(Integer)
     type = Column(String)
     title = Column(String)

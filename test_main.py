@@ -311,31 +311,30 @@ def test_get_magazines():
     assert response.json() == []
 
 def test_create_magazine():
-    response = tested.post("/magazines")
+    data = {
+        "year": 2022,
+        "season": 1,
+        "cover": str(uuid.uuid4()),
+        "published": "2022-01-01",
+        "contents": [
+            models.MagazineContentCreate(
+                type="시",
+                title="「형」",
+                author="심보선",
+                language="한국어"
+            ).dict() for _ in range(100)],
+    }
+    response = tested.post("/magazines", json=data)
     assert response.status_code == 401
 
     change_role(models.Role.member)
     response = tested.post("/magazines", headers=get_jwt_header())
     assert response.status_code == 403
-    
-    data = {
-        "magazine": {
-            "year": 2022,
-            "season": 1,
-            "published": "2022-01-01",
-            "contents": [
-                models.MagazineContentCreate(
-                    type="시",
-                    title="「형」",
-                    author="심보선",
-                    language="한국어"
-                ).dict()],
-        },
-    }
+
     change_role(models.Role.board)
-    response = tested.post("/magazines", headers=get_jwt_header(), data=data, files={"cover": ("main.py", open("main.py", "rb"), "text/plain")})
-    print(response.json())
+    response = tested.post("/magazines", headers=get_jwt_header(), json=data)
     assert response.status_code == 200
+    assert response.json() == data
 
 def test_create_uploaded_file():
     with open("main.py", "rb") as f:
