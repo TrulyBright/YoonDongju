@@ -361,7 +361,7 @@ def test_get_uploaded_file():
     response = tested.get(f"uploaded/{generated}")
     assert response.status_code == 404
     response = tested.get("uploaded/../requirements.txt")
-    assert response.status_code == 400
+    assert response.status_code == 404
 
 def test_get_magazine():
     response = tested.get(f"/magazines/2022-01-01")

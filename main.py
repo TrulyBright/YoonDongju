@@ -117,7 +117,7 @@ async def get_uploaded_file(uuid: UUID, db: Session=Depends(get_db)):
     raise HTTPException(404)
 
 @app.post("/uploaded", response_model=models.UploadedFile)
-async def create_uploaded_file(uploaded: UploadFile, db: Session=Depends(get_db),): # uploader=Depends(auth.get_current_member_board_only)):
+async def create_uploaded_file(uploaded: UploadFile, db: Session=Depends(get_db), uploader=Depends(auth.get_current_member_board_only)):
     return await crud.create_uploaded_file(db=db, file=uploaded)
 
 @app.get("/magazines", response_model=list[models.Magazine])
