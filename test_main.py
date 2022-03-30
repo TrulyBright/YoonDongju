@@ -497,10 +497,44 @@ def test_update_magazine():
     assert response.json() == data
 
 def test_delete_magazine():
-    change_role(models.Role.member)
-    response = tested.delete("/magazines/2022-01-01")
-    assert response.status_code == 200
+    uploaded = tested.post(
+        "/uploaded",
+        files={
+            "uploaded": (
+                "main.py",
+                open("main.py", "rb"),
+                "text/plain"
+            )
+        },
+        headers=get_jwt_header()
+    ).json()["uuid"]
+    data = {
+        "year": 2002,
+        "season": 1,
+        "cover": uploaded,
+        "published": "2002-06-25",
+        "contents": [
+            models.MagazineContentCreate(
+                type="소설",
+                title="「황만근은 이렇게 말했다」",
+                author="성석제",
+                language="한국어"
+            ).dict()]
+    }
+    change_role(models.Role.board)
+    tested.post("/magazines", json=data, headers=get_jwt_header())
 
+    response = tested.delete(f"/magazines/{data['published']}")
+    assert response.status_code == 401
+    
+    change_role(models.Role.member)
+    response = tested.delete(f"/magazines/{data['published']}", headers=get_jwt_header())
+    assert response.status_code == 403
+
+    change_role(models.Role.board)
+    response = tested.delete(f"/magazines/{data['published']}", headers=get_jwt_header())
+    assert response.status_code == 200
+    
 def test_get_uploaded_file():
     generated = uuid.uuid4()
     response = tested.get(f"uploaded/{generated}")

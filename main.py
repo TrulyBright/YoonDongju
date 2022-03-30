@@ -128,7 +128,7 @@ async def get_magazines(skip: int=0, limit: int=100, db: Session=Depends(get_db)
 async def get_magazine(published: date, db: Session=Depends(get_db)):
     if volume := crud.get_magazine(db=db, published=published):
         return volume
-    raise HTTPException(404, f"{published.year}년 {published.month}월 {published.day}일에 발행된 문집이 없습니다.")
+    raise HTTPException(404, f"{published}에 발행된 문집이 없습니다.")
 
 @app.post("/magazines", response_model=models.Magazine)
 async def create_magazine(magazine: models.MagazineCreate, db: Session=Depends(get_db), publisher: schemas.Member=Depends(auth.get_current_member_board_only)):
@@ -138,11 +138,12 @@ async def create_magazine(magazine: models.MagazineCreate, db: Session=Depends(g
 async def update_magazine(published: date, magazine: models.MagazineCreate, db: Session=Depends(get_db), publisher: schemas.Member=Depends(auth.get_current_member_board_only)):
     if crud.get_magazine(db=db, published=published):
         return crud.update_magazine(db=db, published=published, magazine=magazine)
-    raise HTTPException(404, f"{published.year}년 {published.month}월 {published.day}일에 발행된 문집이 없습니다.")
+    raise HTTPException(404, f"{published}에 발행된 문집이 없습니다.")
 
 @app.delete("/magazines/{published}")
-async def delete_magazine(published:date, deleter: schemas.Member=Depends(auth.get_current_member_board_only)):
-    raise NotImplementedError
+async def delete_magazine(published:date, db: Session=Depends(get_db), deleter: schemas.Member=Depends(auth.get_current_member_board_only)):
+    if not crud.delete_magazine(db=db, published=published):
+        raise HTTPException(404, f"{published}에 발행된 문집이 없습니다.")
 
 @app.get("/classes", response_model=list[models.Class])
 async def get_classes():

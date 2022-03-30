@@ -182,5 +182,13 @@ def update_magazine(db: Session, published: date, magazine: models.MagazineCreat
     db.commit()
     return magazine
 
+def delete_magazine(db: Session, published: date):
+    victim = db.query(schemas.Magazine).filter(schemas.Magazine.published==published)
+    if not victim:
+        return False
+    db.query(schemas.MagazineContent).filter(schemas.MagazineContent.published==published).delete()
+    victim.delete()
+    return True
+
 def get_magazine_content(db: Session, published: date):
     return db.query(schemas.MagazineContent).filter(schemas.MagazineContent.published==published).all()
