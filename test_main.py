@@ -293,10 +293,21 @@ def test_get_member():
     response = tested.get(f"/members/{settings.test_portal_id}")
     assert response.status_code == 200
 
-def test_patch_member():
+def test_update_member():
+    data = {
+        "role": models.Role.member.value # downgrade? LOL
+    }
+    response = tested.patch(f"/members/{settings.test_portal_id}", json=data)
+    assert response.status_code == 401
+
     change_role(models.Role.member)
-    response = tested.patch(f"/members/{settings.test_portal_id}")
+    response = tested.patch(f"/members/{settings.test_portal_id}", json=data, headers=get_jwt_header())
+    assert response.status_code == 403
+    
+    change_role(models.Role.board)
+    response = tested.patch(f"/members/{settings.test_portal_id}", json=data, headers=get_jwt_header())
     assert response.status_code == 200
+    assert response.json()["role"] == data["role"]
 
 def test_delete_member():
     change_role(models.Role.member)

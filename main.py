@@ -104,7 +104,7 @@ async def get_member(student_id: int, db: Session=Depends(get_db)):
 
 @app.patch("/members/{student_id:int}", response_model=models.Member)
 async def update_member(student_id: int, member: models.MemberModify, db: Session=Depends(get_db), author: schemas.Member=Depends(auth.get_current_member_board_only)):
-    return await crud.update_member(db=db, student_id=student_id, member=member)
+    return crud.update_member(db=db, student_id=student_id, member=member)
 
 @app.delete("/members/{student_id:int}")
 async def delete_member(student_id: int, deleter: schemas.Member=Depends(auth.get_current_member_board_only)):
