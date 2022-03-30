@@ -263,5 +263,8 @@ def update_class_record(db: Session, class_name: models.ClassName, conducted: da
     db.commit()
     return updated.first()
 
-def get_class_record(db: Session, class_name: models.ClassName, conducted: date):
+def get_class_record(db: Session, class_name: models.ClassName, conducted: date) -> schemas.ClassRecord:
     return db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name and schemas.ClassRecord.conducted==conducted).first()
+
+def get_class_records(db: Session, class_name: models.ClassName, skip: int=0, limit: int=100):
+    return db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name).order_by(schemas.ClassRecord.conducted.desc()).offset(skip).limit(limit).all()

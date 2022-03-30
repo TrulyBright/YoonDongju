@@ -101,14 +101,31 @@ class ClassRecordBase(BaseModel):
     conducted: date
     topic: str
     content: str
-    participants: list[ClassParticipant]
 
 class ClassRecordCreate(ClassRecordBase):
-    pass
+    participants: list[ClassParticipant]
 
 class ClassRecord(ClassRecordBase):
+    """참여자 명단을 볼 수 있는 기록. 임원진만 열람 가능"""
     class_name: ClassName
     moderator: str
+    participants: list[ClassParticipant]
+    class Config:
+        orm_mode = True
+
+class ClassRecordPublic(ClassRecordBase):
+    """참여자 명단이 가려진 기록."""
+    class_name: ClassName
+    moderator: str
+    class Config:
+        orm_mode = True
+
+class ClassRecordOutline(BaseModel):
+    class_name: ClassName
+    moderator: str
+    conducted: date
+    topic: str
+    number_of_participants: int
     class Config:
         orm_mode = True
 

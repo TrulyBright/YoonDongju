@@ -672,21 +672,48 @@ def test_update_class_record():
 
 def test_get_class_records():
     for name in models.ClassName:
+        change_role(models.Role.board)
+        data = {
+            "topic": "뒤치닥, 『투명드래곤』",
+            "content": "본 회차 독서반에서 우리는 뒤치닥이 톨킨보다 위대한 이유를 명쾌히 논증해냈으나 여백이 부족해 그 내용을 적지 않는다.",
+            "participants": [
+                models.ClassParticipantCreate(
+                    name="페르마"
+                ).dict() for _ in range(100)
+            ]
+        }
+        for d in range(10):
+            data["conducted"] = f"200{d}-0{d}-0{d}"
+            tested.post(f"/classes/{name}/records", headers=get_jwt_header(), json=data)
         response = tested.get(f"/classes/{name}/records")
         assert response.status_code == 200
+        for d, row in enumerate(response.json()):
+            assert row["topic"] == data["topic"]
+            assert row["number_of_participants"] == 100
+            assert row["moderator"] == settings.test_real_name
+            assert row["conducted"] == f"200{d}-0{d}-0{d}"
 
 def test_get_class_record():
     for name in models.ClassName:
         response = tested.get(f"/classes/{name}/records/{class_record_data['conducted']}")
         assert response.status_code == 401
 
-        change_role(models.Role.member)
+        change_role(models.Role.board)
         response = tested.get(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
         assert response.status_code == 200
         parsed = response.json()
         assert parsed["topic"] == class_record_data["topic"]
         assert parsed["conducted"] == class_record_data["conducted"]
         assert parsed["participants"] == class_record_data["participants"]
+        assert parsed["content"] == class_record_data["content"]
+        
+        change_role(models.Role.member)
+        response = tested.get(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
+        assert response.status_code == 200
+        parsed = response.json()
+        assert parsed["topic"] == class_record_data["topic"]
+        assert parsed["conducted"] == class_record_data["conducted"]
+        assert parsed.get("participants") == None
         assert parsed["content"] == class_record_data["content"]
 
 def test_delete_class_record():
