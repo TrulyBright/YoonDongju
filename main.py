@@ -164,13 +164,15 @@ async def update_class(class_name: models.ClassName, class_data: models.ClassCre
 async def get_class_records(class_name: models.ClassName):
     raise NotImplementedError
 
-@app.get("/classes/{class_name}/records/{id:int}", response_model=models.ClassRecord)
-async def get_class_record(class_name: models.ClassName, id: int):
-    raise NotImplementedError
+@app.get("/classes/{class_name}/records/{conducted}", response_model=models.ClassRecord)
+async def get_class_record(class_name: models.ClassName, conducted: date, db: Session=Depends(get_db)):
+    if record := crud.get_class_record(db=db, class_name=class_name, conducted=conducted):
+        return record
+    raise HTTPException(404, f"{conducted}에 진행한 활동이 없습니다.")
 
 @app.post("/classes/{class_name}/records", response_model=models.ClassRecord)
-async def create_class_record(class_name: models.ClassName, records: models.ClassRecord, recorder: schemas.Member=Depends(auth.get_current_member_board_only)):
-    raise NotImplementedError
+async def create_class_record(class_name: models.ClassName, record: models.ClassRecordCreate, db: Session=Depends(get_db), recorder: schemas.Member=Depends(auth.get_current_member_board_only)):
+    return crud.create_class_record(db=db, class_name=class_name, moderator=recorder, record=record)
 
 @app.patch("/classes/{class_name}/records/{id:int}", response_model=models.ClassRecord)
 async def update_class_record(class_name: models.ClassName, id: int, recorder: schemas.Member=Depends(auth.get_current_member_board_only)):

@@ -604,13 +604,44 @@ def test_get_class():
         assert response.status_code == 200
         assert response.json() == expected
 
+def test_create_class_record():
+    data = {
+        "conducted": "1920-01-01",
+        "topic": "김민규, 「카스테라」",
+        "content": "<b>미상불 이보다 난해한 작품도 없습니다.</b>",
+        "participants": [
+            models.ClassParticipantCreate(
+                name="채만식"
+            ).dict()
+        for _ in range(10)]
+    }
+    for name in models.ClassName:
+        response = tested.post(f"/classes/{name}/records", json=data)
+        assert response.status_code == 401
+
+        change_role(models.Role.member)
+        response = tested.post(f"/classes/poetry/records", json=data, headers=get_jwt_header())
+        assert response.status_code == 403
+
+        change_role(models.Role.board)
+        response = tested.post(f"/classes/{name}/records", json=data, headers=get_jwt_header())
+        assert response.status_code == 200
+        parsed = response.json()
+        assert parsed["conducted"] == data["conducted"]
+        assert parsed["participants"] == data["participants"]
+        assert parsed["topic"] == data["topic"]
+        assert parsed["content"] == data["content"]
+
+        response = tested.get(f"/classes/{name}/records/{data['conducted']}", json=data, headers=get_jwt_header())
+        assert response.status_code == 200
+        parsed = response.json()
+        assert parsed["conducted"] == data["conducted"]
+        assert parsed["participants"] == data["participants"]
+        assert parsed["topic"] == data["topic"]
+        assert parsed["content"] == data["content"]
+
 def test_get_class_records():
     response = tested.get("/classes/poetry/records")
-    assert response.status_code == 200
-
-def test_create_class_record():
-    change_role(models.Role.member)
-    response = tested.post("/classes/poetry/records")
     assert response.status_code == 200
 
 def test_get_class_record():

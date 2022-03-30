@@ -6,7 +6,8 @@ from sqlalchemy import (
     Date,
     ForeignKey,
     UniqueConstraint,
-    PrimaryKeyConstraint
+    PrimaryKeyConstraint,
+    ForeignKeyConstraint
 )
 from sqlalchemy.orm import relationship
 
@@ -53,21 +54,26 @@ class Class(Base):
 
 class ClassRecord(Base):
     __tablename__ = "classRecords"
-    id = Column(Integer, primary_key=True)
-    class_name = Column(String, ForeignKey("classes.name"))
-    conducted = Column(Date)
+    class_name = Column(String, ForeignKey("classes.name"), index=True)
+    conducted = Column(Date, index=True)
     moderator = Column(String)
     topic = Column(String)
     content = Column(String)
     participants = relationship("ClassParticipant")
-    __table_args__ = (UniqueConstraint("class_name", 'conducted'),)
+    __table_args__ = (PrimaryKeyConstraint("class_name", 'conducted'),)
 
 class ClassParticipant(Base):
     __tablename__ = "classParticipants"
-    record_id = Column(String, ForeignKey("classRecords.id"))
-    index = Column(Integer)
+    no = Column(Integer, primary_key=True)
+    class_name = Column(String, index=True)
+    conducted = Column(Date, index=True)
     name = Column(String)
-    __table_args__ = (PrimaryKeyConstraint("record_id", "index"),)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            [class_name, conducted],
+            [ClassRecord.class_name, ClassRecord.conducted]
+        ),
+    )
 
 class Magazine(Base):
     __tablename__ = "magazines"

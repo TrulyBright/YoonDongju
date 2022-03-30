@@ -223,3 +223,24 @@ def update_class(db: Session, name: models.ClassName, class_data: models.ClassCr
         db.add(db_class)
     db.commit()
     return existing or db_class
+
+def create_class_record(db: Session, class_name: models.ClassName, moderator: models.Member, record: models.ClassRecordCreate):
+    new_record = schemas.ClassRecord(
+        class_name=class_name,
+        conducted=record.conducted,
+        moderator=moderator.real_name,
+        topic=record.topic,
+        content=record.content,
+    )
+    db.add(new_record)
+    db.add_all([
+        schemas.ClassParticipant(
+            conducted=record.conducted,
+            class_name=class_name,
+            name=p.name
+        ) for p in record.participants])
+    db.commit()
+    return new_record
+
+def get_class_record(db: Session, class_name: models.ClassName, conducted: date):
+    return db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name and schemas.ClassRecord.conducted==conducted).first()

@@ -2,7 +2,6 @@ from __future__ import annotations
 from datetime import date
 from enum import Enum
 import json
-from pydoc import classname
 from uuid import UUID
 from pydantic import BaseModel
 from fastapi import UploadFile
@@ -105,10 +104,10 @@ class ClassRecordBase(BaseModel):
     participants: list[ClassParticipant]
 
 class ClassRecordCreate(ClassRecordBase):
-    class_name: str
+    pass
 
 class ClassRecord(ClassRecordBase):
-    id: int
+    class_name: ClassName
     moderator: str
     class Config:
         orm_mode = True
