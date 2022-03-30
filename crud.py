@@ -173,6 +173,8 @@ def create_magazine(db: Session, magazine: models.MagazineCreate):
 def update_magazine(db: Session, published: date, magazine: models.MagazineCreate):
     db.query(schemas.MagazineContent).filter(schemas.MagazineContent.published==published).delete()
     updated = db.query(schemas.Magazine).filter(schemas.Magazine.published==published)
+    if not updated.first():
+        return False
     updated.update({
         "year": magazine.year,
         "season": magazine.season,
@@ -241,6 +243,25 @@ def create_class_record(db: Session, class_name: models.ClassName, moderator: mo
         ) for p in record.participants])
     db.commit()
     return new_record
+
+def update_class_record(db: Session, class_name: models.ClassName, conducted: date, record: models.ClassRecordCreate):
+    db.query(schemas.ClassParticipant).filter(schemas.ClassParticipant.class_name==class_name and schemas.ClassParticipant.conducted==conducted).delete()
+    updated = db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name and schemas.ClassRecord.conducted==conducted)
+    if not updated.first():
+        return False
+    updated.update({
+        "topic": record.topic,
+        "conducted": record.conducted,
+        "content": record.content,
+    })
+    db.add_all([
+        schemas.ClassParticipant(
+            conducted=record.conducted,
+            class_name=class_name,
+            name=p.name
+        ) for p in record.participants])
+    db.commit()
+    return updated.first()
 
 def get_class_record(db: Session, class_name: models.ClassName, conducted: date):
     return db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name and schemas.ClassRecord.conducted==conducted).first()

@@ -137,8 +137,8 @@ async def create_magazine(magazine: models.MagazineCreate, db: Session=Depends(g
 
 @app.patch("/magazines/{published}", response_model=models.Magazine)
 async def update_magazine(published: date, magazine: models.MagazineCreate, db: Session=Depends(get_db), publisher: schemas.Member=Depends(auth.get_current_member_board_only)):
-    if crud.get_magazine(db=db, published=published):
-        return crud.update_magazine(db=db, published=published, magazine=magazine)
+    if updated := crud.update_magazine(db=db, published=published, magazine=magazine):
+        return updated
     raise HTTPException(404, f"{published}에 발행된 문집이 없습니다.")
 
 @app.delete("/magazines/{published}")
@@ -174,9 +174,9 @@ async def get_class_record(class_name: models.ClassName, conducted: date, db: Se
 async def create_class_record(class_name: models.ClassName, record: models.ClassRecordCreate, db: Session=Depends(get_db), recorder: schemas.Member=Depends(auth.get_current_member_board_only)):
     return crud.create_class_record(db=db, class_name=class_name, moderator=recorder, record=record)
 
-@app.patch("/classes/{class_name}/records/{id:int}", response_model=models.ClassRecord)
-async def update_class_record(class_name: models.ClassName, id: int, recorder: schemas.Member=Depends(auth.get_current_member_board_only)):
-    raise NotImplementedError
+@app.patch("/classes/{class_name}/records/{conducted}", response_model=models.ClassRecord)
+async def update_class_record(class_name: models.ClassName, conducted: date, record: models.ClassRecordCreate, db: Session=Depends(get_db), recorder: schemas.Member=Depends(auth.get_current_member_board_only)):
+    return crud.update_class_record(db=db, class_name=class_name, conducted=conducted, record=record)
 
 @app.delete("/classes/{class_name}/records/{id:int}")
 async def delete_class_record(class_name: models.ClassName, id: int, recorder: schemas.Member=Depends(auth.get_current_member_board_only)):
