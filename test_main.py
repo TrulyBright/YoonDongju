@@ -496,6 +496,9 @@ def test_update_magazine():
     assert response.status_code == 200
     assert response.json() == data
 
+    response = tested.get(f"/magazines/{prev['published']}")
+    assert response.status_code == 404
+
 def test_delete_magazine():
     uploaded = tested.post(
         "/uploaded",
@@ -534,6 +537,9 @@ def test_delete_magazine():
     change_role(models.Role.board)
     response = tested.delete(f"/magazines/{data['published']}", headers=get_jwt_header())
     assert response.status_code == 200
+
+    response = tested.get(f"/magazines/{data['published']}")
+    assert response.status_code == 404
     
 def test_get_uploaded_file():
     generated = uuid.uuid4()
