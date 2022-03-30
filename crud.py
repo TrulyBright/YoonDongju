@@ -202,3 +202,21 @@ def delete_magazine(db: Session, published: date):
 
 def get_magazine_content(db: Session, published: date):
     return db.query(schemas.MagazineContent).filter(schemas.MagazineContent.published==published).all()
+
+def get_class(db: Session, name: models.ClassName):
+    return db.query(schemas.Class).filter(schemas.Class.name==name).first()
+
+def update_class(db: Session, name: models.ClassName, class_data: models.ClassCreate):
+    queried = db.query(schemas.Class).filter(schemas.Class.name==name)
+    if existing := queried.first():
+        queried.update(class_data.dict())
+    else:
+        db_class = schemas.Class(
+            name=name,
+            moderator=class_data.moderator,
+            schedule=class_data.schedule,
+            description=class_data.description,
+        )
+        db.add(db_class)
+    db.commit()
+    return existing or db_class

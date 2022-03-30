@@ -151,12 +151,14 @@ async def get_classes():
     raise NotImplementedError
 
 @app.get("/classes/{class_name}", response_model=models.Class)
-async def get_class(class_name: models.ClassName):
-    raise NotImplementedError
+async def get_class(class_name: models.ClassName, db: Session=Depends(get_db)):
+    if existing := crud.get_class(db=db, name=class_name):
+        return existing
+    raise HTTPException(404, "아직 구현되지 않은 분반입니다.")
 
 @app.patch("/classes/{class_name}", response_model=models.Class)
-async def update_class(class_name: models.ClassName, modifier: schemas.Member=Depends(auth.get_current_member_board_only)):
-    raise NotImplementedError
+async def update_class(class_name: models.ClassName, class_data: models.ClassCreate, db: Session=Depends(get_db), modifier: schemas.Member=Depends(auth.get_current_member_board_only)):
+    return crud.update_class(db=db, name=class_name, class_data=class_data)
 
 @app.get("/classes/{class_name}/records", response_model=list[models.ClassRecord])
 async def get_class_records(class_name: models.ClassName):

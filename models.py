@@ -75,7 +75,6 @@ class Post(PostBase):
         orm_mode = True
 
 class ClassBase(BaseModel):
-    name: ClassName
     moderator: str
     schedule: str
     description: str

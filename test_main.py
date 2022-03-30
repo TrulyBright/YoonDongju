@@ -66,6 +66,12 @@ rules = {
     "content": "not that strict"
 }
 
+class_data = models.ClassCreate(
+    moderator="성춘향",
+    schedule="주 52시간",
+    description="이몽룡 참석 금지"
+).dict()
+
 def get_jwt_header(invalid=False):
     return {"Authorization": "Bearer "+("asdf" if invalid else my_token)}
 
@@ -558,14 +564,39 @@ def test_get_classes():
     response = tested.get("/classes")
     assert response.status_code == 200
 
-def test_get_class():
-    response = tested.get("/classes/poetry")
-    assert response.status_code == 200
-
 def test_update_class():
-    change_role(models.Role.member)
-    response = tested.patch("/classes/poetry")
-    assert response.status_code == 200
+    for name in models.ClassName:
+        response = tested.patch(f"/classes/{name}", json=class_data)
+        assert response.status_code == 401
+
+        change_role(models.Role.member)
+        response = tested.patch(f"/classes/{name}", json=class_data, headers=get_jwt_header())
+        assert response.status_code == 403
+
+        change_role(models.Role.board)
+        response = tested.patch(f"/classes/{name}", json=class_data, headers=get_jwt_header())
+        assert response.status_code == 200
+        assert response.json() == class_data
+
+        response = tested.get(f"/classes/{name}")
+        assert response.status_code == 200
+        assert response.json() == class_data
+        
+        modified = class_data
+        modified["moderator"] = "이몽룡"
+        modified["description"] = "성춘향 환영"
+        response = tested.patch(f"/classes/{name}", json=modified, headers=get_jwt_header())
+        assert response.status_code == 200
+        assert response.json() == modified
+        response = tested.get(f"/classes/{name}")
+        assert response.status_code == 200
+        assert response.json() == modified
+
+def test_get_class():
+    for name in models.ClassName:
+        response = tested.get(f"/classes/{name}")
+        assert response.status_code == 200
+        assert response.json() == class_data
 
 def test_get_class_records():
     response = tested.get("/classes/poetry/records")
