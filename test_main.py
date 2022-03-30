@@ -5,6 +5,7 @@ from fastapi import Depends
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
+import sqlalchemy.event as sqlevent
 from fastapi.testclient import TestClient
 from pydantic import BaseSettings
 import database
@@ -19,6 +20,7 @@ engine = create_engine(
     connect_args={"check_same_thread": False},
     poolclass=StaticPool
 )
+sqlevent.listen(engine, "connect", lambda conn, rec: conn.execute("PRAGMA foreign_keys=ON;"))
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 database.Base.metadata.create_all(bind=engine)
@@ -302,10 +304,24 @@ def test_delete_member():
     assert response.status_code == 200
 
 def test_get_magazines():
+    change_role(models.Role.board)
+    dummy_upload = [
+        tested.post(
+            "/uploaded",
+            files={
+                "uploaded": (
+                    "main.py",
+                    open("main.py", "rb"),
+                    "text/plain"
+                )
+            },
+            headers=get_jwt_header()
+        ).json() for _ in range(1, 129)
+    ]
     dummies = [{
         "year": i,
         "season": i,
-        "cover": str(uuid.uuid4()),
+        "cover": dummy_upload[i-1]["uuid"],
         "published": date(year=i, month=1, day=1).strftime("%Y-%m-%d"),
         "contents": [
             models.MagazineContentCreate(
@@ -330,11 +346,22 @@ def test_get_magazines():
     assert response.json() == dummies[::-1][params["skip"]:params["skip"]+params["limit"]]
 
 def test_get_magazine():
+    uploaded = tested.post(
+        "/uploaded",
+        files={
+            "uploaded": (
+                "main.py",
+                open("main.py", "rb"),
+                "text/plain"
+            )
+        },
+        headers=get_jwt_header()
+    ).json()["uuid"]
     dummy = {
         "year": 1984,
         "season": 1,
-        "cover": str(uuid.uuid4()),
-        "published": date(year=1984, month=1, day=1).strftime("%Y-%m-%d"),
+        "cover": uploaded,
+        "published": date(year=1984, month=4, day=3).strftime("%Y-%m-%d"),
         "contents": [
             models.MagazineContentCreate(
                 type="소설",
@@ -350,10 +377,21 @@ def test_get_magazine():
     assert response.json() == dummy
 
 def test_create_magazine():
+    uploaded = tested.post(
+        "/uploaded",
+        files={
+            "uploaded": (
+                "main.py",
+                open("main.py", "rb"),
+                "text/plain"
+            )
+        },
+        headers=get_jwt_header()
+    ).json()["uuid"]
     data = {
         "year": 2022,
         "season": 1,
-        "cover": str(uuid.uuid4()),
+        "cover": uploaded,
         "published": "2022-01-01",
         "contents": [
             models.MagazineContentCreate(
@@ -400,22 +438,75 @@ def test_create_uploaded_file():
         assert response.headers["content-disposition"].endswith(f'"{data["name"]}"')
         assert response.content == f.read()
 
+def test_update_magazine():
+    change_role(models.Role.board)
+    uploaded = tested.post(
+        "/uploaded",
+        files={
+            "uploaded": (
+                "main.py",
+                open("main.py", "rb"),
+                "text/plain"
+            )
+        },
+        headers=get_jwt_header()
+    ).json()["uuid"]
+    prev = {
+        "year": 2016,
+        "season": 5,
+        "cover": uploaded,
+        "published": "2016-05-13",
+        "contents": [
+            models.MagazineContentCreate(
+                type="시나리오",
+                title="『나, 다니엘 블레이크』",
+                author="폴 레이버티",
+                language="영어"
+            ).dict()]
+    }
+    data = {
+        "year": 2019,
+        "season": 1,
+        "cover": uploaded,
+        "published": "2019-05-30",
+        "contents": [
+            models.MagazineContentCreate(
+                type="시나리오",
+                title="『기생충』",
+                author="봉준호, 한진원",
+                language="한국어"
+            ).dict()]
+    }
+    change_role(models.Role.board)
+    response = tested.post("/magazines", headers=get_jwt_header(), json=prev)
+
+    response = tested.patch(f"/magazines/{prev['published']}", json=data)
+    assert response.status_code == 401
+
+    change_role(models.Role.member)
+    response = tested.patch(f"/magazines/{prev['published']}", headers=get_jwt_header(), json=data)
+    assert response.status_code == 403
+    
+    change_role(models.Role.board)
+    response = tested.patch(f"/magazines/{prev['published']}", headers=get_jwt_header(), json=data)
+    assert response.status_code == 200
+    assert response.json() == data
+    
+    response = tested.get(f"/magazines/{data['published']}")
+    assert response.status_code == 200
+    assert response.json() == data
+
+def test_delete_magazine():
+    change_role(models.Role.member)
+    response = tested.delete("/magazines/2022-01-01")
+    assert response.status_code == 200
+
 def test_get_uploaded_file():
     generated = uuid.uuid4()
     response = tested.get(f"uploaded/{generated}")
     assert response.status_code == 404
     response = tested.get("uploaded/../requirements.txt")
     assert response.status_code == 404
-
-def test_update_magazine():
-    change_role(models.Role.member)
-    response = tested.patch("/magazines/2022-01-01")
-    assert response.status_code == 200
-
-def test_delete_magazine():
-    change_role(models.Role.member)
-    response = tested.delete("/magazines/2022-01-01")
-    assert response.status_code == 200
 
 def test_get_classes():
     response = tested.get("/classes")

@@ -80,10 +80,9 @@ class Magazine(Base):
 
 class MagazineContent(Base):
     __tablename__ = "magazineContents"
+    no = Column(Integer, primary_key=True)
     published = Column(Integer, ForeignKey("magazines.published"), index=True)
-    index = Column(Integer)
     type = Column(String)
     title = Column(String)
     author = Column(String)
     language = Column(String)
-    __table_args__ = (PrimaryKeyConstraint("published", "index"),)

@@ -152,15 +152,35 @@ def create_magazine(db: Session, magazine: models.MagazineCreate):
     db.add_all([
         schemas.MagazineContent(
             published=magazine.published,
-            index=i+1,
             type=c.type,
             title=c.title,
             author=c.author,
             language=c.language
         )
-    for i, c in enumerate(magazine.contents)])
+    for c in magazine.contents])
     db.commit()
     return db_magazine
+
+def update_magazine(db: Session, published: date, magazine: models.MagazineCreate):
+    db.query(schemas.MagazineContent).filter(schemas.MagazineContent.published==published).delete()
+    updated = db.query(schemas.Magazine).filter(schemas.Magazine.published==published)
+    updated.update({
+        "year": magazine.year,
+        "season": magazine.season,
+        "cover": str(magazine.cover),
+        "published": magazine.published
+    })
+    db.add_all([
+        schemas.MagazineContent(
+            published=magazine.published,
+            type=c.type,
+            title=c.title,
+            author=c.author,
+            language=c.language
+        )
+    for c in magazine.contents])
+    db.commit()
+    return magazine
 
 def get_magazine_content(db: Session, published: date):
     return db.query(schemas.MagazineContent).filter(schemas.MagazineContent.published==published).all()
