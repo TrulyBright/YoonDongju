@@ -309,11 +309,6 @@ def test_update_member():
     assert response.status_code == 200
     assert response.json()["role"] == data["role"]
 
-def test_delete_member():
-    change_role(models.Role.member)
-    response = tested.delete(f"/members/{settings.test_portal_id}")
-    assert response.status_code == 200
-
 def test_get_magazines():
     change_role(models.Role.board)
     dummy_upload = [
@@ -593,4 +588,19 @@ def test_update_class_record():
 def test_delete_class_record():
     change_role(models.Role.member)
     response = tested.patch("/classes/poetry/records/1")
+    assert response.status_code == 200
+
+def test_delete_member():
+    response = tested.delete(f"/members/{settings.test_portal_id}")
+    assert response.status_code == 401
+
+    change_role(models.Role.member)
+    response = tested.delete(f"/members/{settings.test_portal_id}", headers=get_jwt_header())
+    assert response.status_code == 403
+
+    change_role(models.Role.board)
+    response = tested.delete("/members/58826974", headers=get_jwt_header())
+    assert response.status_code == 404
+    
+    response = tested.delete(f"/members/{settings.test_portal_id}", headers=get_jwt_header())
     assert response.status_code == 200

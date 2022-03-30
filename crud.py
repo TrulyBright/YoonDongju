@@ -41,6 +41,14 @@ def update_member(db: Session, student_id: int, member: models.MemberModify):
     db.refresh(actual_object)
     return actual_object
 
+def delete_member(db: Session, student_id: int):
+    deleted = db.query(schemas.Member).filter(schemas.Member.student_id==student_id)
+    if not deleted.first():
+        return False
+    deleted.delete()
+    db.commit()
+    return True
+
 def get_posts(db: Session, type: models.PostType, skip: int=0, limit: int=100):
     return db.query(schemas.Post).filter(schemas.Post.type==type.value).order_by(schemas.Post.no.desc()).offset(skip).limit(limit).all()
 
@@ -101,10 +109,11 @@ def update_post(db: Session, type: models.PostType, post: models.PostCreate, mod
 def delete_post(db: Session, type: models.PostType, no: int):
     """삭제에 성공하면 `True`, 못 하면 `False`"""
     deleted = db.query(schemas.Post).filter(schemas.Post.no==no and schemas.Post.type==type)
-    victim: schemas.Post = deleted.first()
+    if not deleted.first():
+        return False
     deleted.delete()
     db.commit()
-    return victim is not None
+    return True
 
 def get_club_information(db: Session):
     return {row.key:row.value for row in db.query(schemas.ClubInformation).all()}
@@ -183,11 +192,11 @@ def update_magazine(db: Session, published: date, magazine: models.MagazineCreat
     return magazine
 
 def delete_magazine(db: Session, published: date):
-    victim = db.query(schemas.Magazine).filter(schemas.Magazine.published==published)
-    if not victim:
+    deleted = db.query(schemas.Magazine).filter(schemas.Magazine.published==published)
+    if not deleted.first():
         return False
     db.query(schemas.MagazineContent).filter(schemas.MagazineContent.published==published).delete()
-    victim.delete()
+    deleted.delete()
     db.commit()
     return True
 
