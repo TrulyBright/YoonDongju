@@ -2,6 +2,7 @@ from __future__ import annotations
 from datetime import date
 from enum import Enum
 import json
+from pydoc import classname
 from uuid import UUID
 from pydantic import BaseModel
 from fastapi import UploadFile
@@ -83,6 +84,7 @@ class ClassCreate(ClassBase):
     pass
 
 class Class(ClassBase):
+    name: ClassName
     class Config:
         orm_mode = True
 

@@ -206,6 +206,9 @@ def get_magazine_content(db: Session, published: date):
 def get_class(db: Session, name: models.ClassName):
     return db.query(schemas.Class).filter(schemas.Class.name==name).first()
 
+def get_classes(db: Session):
+    return db.query(schemas.Class).all()
+
 def update_class(db: Session, name: models.ClassName, class_data: models.ClassCreate):
     queried = db.query(schemas.Class).filter(schemas.Class.name==name)
     if existing := queried.first():

@@ -560,12 +560,10 @@ def test_get_uploaded_file():
     response = tested.get("uploaded/../requirements.txt")
     assert response.status_code == 404
 
-def test_get_classes():
-    response = tested.get("/classes")
-    assert response.status_code == 200
-
 def test_update_class():
     for name in models.ClassName:
+        expected = class_data.copy()
+        expected["name"] = name
         response = tested.patch(f"/classes/{name}", json=class_data)
         assert response.status_code == 401
 
@@ -576,27 +574,35 @@ def test_update_class():
         change_role(models.Role.board)
         response = tested.patch(f"/classes/{name}", json=class_data, headers=get_jwt_header())
         assert response.status_code == 200
-        assert response.json() == class_data
+        assert response.json() == expected
 
         response = tested.get(f"/classes/{name}")
         assert response.status_code == 200
-        assert response.json() == class_data
+        assert response.json() == expected
         
         modified = class_data
-        modified["moderator"] = "이몽룡"
-        modified["description"] = "성춘향 환영"
+        modified["moderator"] = expected["moderator"] = "이몽룡"
+        modified["description"] = expected["description"] = "성춘향 환영"
         response = tested.patch(f"/classes/{name}", json=modified, headers=get_jwt_header())
         assert response.status_code == 200
-        assert response.json() == modified
+        assert response.json() == expected
         response = tested.get(f"/classes/{name}")
         assert response.status_code == 200
-        assert response.json() == modified
+        assert response.json() == expected
+
+def test_get_classes():
+    every_class = [tested.get(f"/classes/{name}").json() for name in models.ClassName]
+    response = tested.get("/classes")
+    assert response.status_code == 200
+    assert response.json() == every_class
 
 def test_get_class():
     for name in models.ClassName:
+        expected = class_data.copy()
+        expected["name"] = name
         response = tested.get(f"/classes/{name}")
         assert response.status_code == 200
-        assert response.json() == class_data
+        assert response.json() == expected
 
 def test_get_class_records():
     response = tested.get("/classes/poetry/records")

@@ -147,8 +147,8 @@ async def delete_magazine(published:date, db: Session=Depends(get_db), deleter: 
         raise HTTPException(404, f"{published}에 발행된 문집이 없습니다.")
 
 @app.get("/classes", response_model=list[models.Class])
-async def get_classes():
-    raise NotImplementedError
+async def get_classes(db: Session=Depends(get_db)):
+    return crud.get_classes(db=db)
 
 @app.get("/classes/{class_name}", response_model=models.Class)
 async def get_class(class_name: models.ClassName, db: Session=Depends(get_db)):
