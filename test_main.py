@@ -722,9 +722,26 @@ def test_get_class_record():
 
 def test_delete_class_record():
     for name in models.ClassName:
+        response = tested.delete(f"/classes/{name}/records/{class_record_data['conducted']}")
+        assert response.status_code == 401
+
         change_role(models.Role.member)
-        response = tested.delete(f"/classes/{name}/records/1")
+        response = tested.delete(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
+        assert response.status_code == 403
+        
+        change_role(models.Role.board)
+        response = tested.delete(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
         assert response.status_code == 200
+        response = tested.delete(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
+        assert response.status_code == 404
+        for record in tested.get(f"/classes/{name}/records").json():
+            response = tested.delete(f"/classes/{name}/records/{record['conducted']}", headers=get_jwt_header())
+            assert response.status_code == 200
+            response = tested.delete(f"/classes/{name}/records/{record['conducted']}", headers=get_jwt_header())
+            assert response.status_code == 404
+        response = tested.get(f"/classes/{name}/records")
+        assert response.status_code == 200
+        assert response.json() == []
 
 def test_delete_member():
     response = tested.delete(f"/members/{settings.test_portal_id}")

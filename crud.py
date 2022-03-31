@@ -194,13 +194,10 @@ def update_magazine(db: Session, published: date, magazine: models.MagazineCreat
     return magazine
 
 def delete_magazine(db: Session, published: date):
-    deleted = db.query(schemas.Magazine).filter(schemas.Magazine.published==published)
-    if not deleted.first():
-        return False
     db.query(schemas.MagazineContent).filter(schemas.MagazineContent.published==published).delete()
-    deleted.delete()
+    deleted = db.query(schemas.Magazine).filter(schemas.Magazine.published==published).delete()
     db.commit()
-    return True
+    return deleted
 
 def get_magazine_content(db: Session, published: date):
     return db.query(schemas.MagazineContent).filter(schemas.MagazineContent.published==published).all()
@@ -267,13 +264,17 @@ def update_class_record(db: Session, class_name: models.ClassName, conducted: da
             name=p.name
         ) for p in record.participants])
     db.commit()
-    # db.refresh(updated)
-    # return original
-    f = db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name, schemas.ClassRecord.conducted==updated.conducted).first()
-    return f
+    db.refresh(updated)
+    return updated
 
 def get_class_record(db: Session, class_name: models.ClassName, conducted: date) -> schemas.ClassRecord:
     return db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name, schemas.ClassRecord.conducted==conducted).first()
 
 def get_class_records(db: Session, class_name: models.ClassName, skip: int=0, limit: int=100):
     return db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name).order_by(schemas.ClassRecord.conducted.desc()).offset(skip).limit(limit).all()
+
+def delete_class_record(db: Session, class_name: models.ClassName, conducted: date):
+    db.query(schemas.ClassParticipant).filter(schemas.ClassParticipant.class_name==class_name, schemas.ClassParticipant.conducted==conducted).delete()
+    deleted = db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name, schemas.ClassRecord.conducted==conducted).delete()
+    db.commit()
+    return deleted

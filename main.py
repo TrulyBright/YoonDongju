@@ -192,9 +192,10 @@ async def update_class_record(class_name: models.ClassName, conducted: date, rec
         return updated
     raise HTTPException(404, f"{conducted}에 진행한 활동이 없습니다.")
 
-@app.delete("/classes/{class_name}/records/{id:int}")
-async def delete_class_record(class_name: models.ClassName, id: int, recorder: schemas.Member=Depends(auth.get_current_member_board_only)):
-    raise NotImplementedError
+@app.delete("/classes/{class_name}/records/{conducted}")
+async def delete_class_record(class_name: models.ClassName, conducted: date, recorder: schemas.Member=Depends(auth.get_current_member_board_only), db: Session=Depends(get_db)):
+    if not crud.delete_class_record(db=db, class_name=class_name, conducted=conducted):
+        raise HTTPException(404, f"{conducted}에 진행된 활동이 없습니다.")
 
 @app.post("/register", response_model=models.Member)
 async def register(form: RegisterForm, db: Session=Depends(get_db)):
