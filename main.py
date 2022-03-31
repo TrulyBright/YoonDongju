@@ -162,8 +162,8 @@ async def update_class(class_name: models.ClassName, class_data: models.ClassCre
     return crud.update_class(db=db, name=class_name, class_data=class_data)
 
 @app.get("/classes/{class_name}/records", response_model=list[models.ClassRecordOutline])
-async def get_class_records(class_name: models.ClassName, skip: int=0, limit: int=100):
-    raise NotImplementedError
+async def get_class_records(class_name: models.ClassName, skip: int=0, limit: int=100, db: Session=Depends(get_db)):
+    return crud.get_class_records(db=db, class_name=class_name, skip=skip, limit=limit)
 
 @app.get("/classes/{class_name}/records/{conducted}", response_model=Union[models.ClassRecord, models.ClassRecordPublic])
 async def get_class_record(class_name: models.ClassName, conducted: date, db: Session=Depends(get_db), accessing: schemas.Member=Depends(auth.get_current_member)):
@@ -188,7 +188,9 @@ async def create_class_record(class_name: models.ClassName, record: models.Class
 
 @app.patch("/classes/{class_name}/records/{conducted}", response_model=models.ClassRecord)
 async def update_class_record(class_name: models.ClassName, conducted: date, record: models.ClassRecordCreate, db: Session=Depends(get_db), recorder: schemas.Member=Depends(auth.get_current_member_board_only)):
-    return crud.update_class_record(db=db, class_name=class_name, conducted=conducted, record=record)
+    if updated := crud.update_class_record(db=db, class_name=class_name, conducted=conducted, record=record):
+        return updated
+    raise HTTPException(404, f"{conducted}에 진행한 활동이 없습니다.")
 
 @app.delete("/classes/{class_name}/records/{id:int}")
 async def delete_class_record(class_name: models.ClassName, id: int, recorder: schemas.Member=Depends(auth.get_current_member_board_only)):

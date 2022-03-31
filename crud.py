@@ -53,7 +53,7 @@ def get_posts(db: Session, type: models.PostType, skip: int=0, limit: int=100):
     return db.query(schemas.Post).filter(schemas.Post.type==type.value).order_by(schemas.Post.no.desc()).offset(skip).limit(limit).all()
 
 def get_post(db: Session, type: models.PostType, no: int=None):
-    return db.query(schemas.Post).filter((type != models.PostType.notice or schemas.Post.no==no) and schemas.Post.type==type.value).first()
+    return db.query(schemas.Post).filter((type != models.PostType.notice or schemas.Post.no==no), schemas.Post.type==type.value).first()
 
 async def create_post(db: Session, author: models.Member, post: models.PostCreate, type: models.PostType):
     # Path("sql").mkdir(exist_ok=True)
@@ -245,15 +245,21 @@ def create_class_record(db: Session, class_name: models.ClassName, moderator: mo
     return new_record
 
 def update_class_record(db: Session, class_name: models.ClassName, conducted: date, record: models.ClassRecordCreate):
-    db.query(schemas.ClassParticipant).filter(schemas.ClassParticipant.class_name==class_name and schemas.ClassParticipant.conducted==conducted).delete()
-    updated = db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name and schemas.ClassRecord.conducted==conducted)
-    if not updated.first():
+    db.query(schemas.ClassParticipant).filter(schemas.ClassParticipant.class_name==class_name, schemas.ClassParticipant.conducted==conducted).delete()
+    deleted  = db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name, schemas.ClassRecord.conducted==conducted)
+    original: schemas.ClassRecord = deleted.first()
+    if not original:
         return False
-    updated.update({
-        "topic": record.topic,
-        "conducted": record.conducted,
-        "content": record.content,
-    })
+    deleted.delete()
+    moderator = original.moderator
+    updated = schemas.ClassRecord(
+        class_name=class_name,
+        conducted=record.conducted,
+        moderator=moderator,
+        topic=record.topic,
+        content=record.content
+    )
+    db.add(updated)
     db.add_all([
         schemas.ClassParticipant(
             conducted=record.conducted,
@@ -261,10 +267,13 @@ def update_class_record(db: Session, class_name: models.ClassName, conducted: da
             name=p.name
         ) for p in record.participants])
     db.commit()
-    return updated.first()
+    # db.refresh(updated)
+    # return original
+    f = db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name, schemas.ClassRecord.conducted==updated.conducted).first()
+    return f
 
 def get_class_record(db: Session, class_name: models.ClassName, conducted: date) -> schemas.ClassRecord:
-    return db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name and schemas.ClassRecord.conducted==conducted).first()
+    return db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name, schemas.ClassRecord.conducted==conducted).first()
 
 def get_class_records(db: Session, class_name: models.ClassName, skip: int=0, limit: int=100):
     return db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name).order_by(schemas.ClassRecord.conducted.desc()).offset(skip).limit(limit).all()

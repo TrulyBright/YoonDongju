@@ -615,61 +615,6 @@ def test_get_class():
         assert response.status_code == 200
         assert response.json() == expected
 
-def test_create_class_record():
-    for name in models.ClassName:
-        response = tested.post(f"/classes/{name}/records", json=class_record_data)
-        assert response.status_code == 401
-
-        change_role(models.Role.member)
-        response = tested.post(f"/classes/poetry/records", json=class_record_data, headers=get_jwt_header())
-        assert response.status_code == 403
-
-        change_role(models.Role.board)
-        response = tested.post(f"/classes/{name}/records", json=class_record_data, headers=get_jwt_header())
-        assert response.status_code == 200
-        parsed = response.json()
-        assert parsed["conducted"] == class_record_data["conducted"]
-        assert parsed["participants"] == class_record_data["participants"]
-        assert parsed["topic"] == class_record_data["topic"]
-        assert parsed["content"] == class_record_data["content"]
-
-        response = tested.get(f"/classes/{name}/records/{class_record_data['conducted']}", json=class_record_data, headers=get_jwt_header())
-        assert response.status_code == 200
-        parsed = response.json()
-        assert parsed["conducted"] == class_record_data["conducted"]
-        assert parsed["participants"] == class_record_data["participants"]
-        assert parsed["topic"] == class_record_data["topic"]
-        assert parsed["content"] == class_record_data["content"]
-
-def test_update_class_record():
-    for name in models.ClassName:
-        class_record_data["topic"] = "One Day in the Life of Ivan Denisovich"
-        class_record_data["content"] = "Death is the solution to all problems; no man, no problem."
-        class_record_data["participants"] = [
-            models.ClassParticipantCreate(
-                name="Joseph Stalin"
-            ).dict() for _ in range(17)
-        ]
-        class_record_data["conducted"] = "1962-01-01"
-        response = tested.patch(f"/classes/{name}/records/{class_record_data['conducted']}", json=class_record_data)
-        assert response.status_code == 401
-        
-        change_role(models.Role.member)
-        response = tested.patch(f"/classes/{name}/records/{class_record_data['conducted']}", json=class_record_data, headers=get_jwt_header())
-        assert response.status_code == 403
-
-        change_role(models.Role.board)
-        response = tested.patch(f"/classes/{name}/records/{class_record_data['conducted']}", json=class_record_data, headers=get_jwt_header())
-        assert response.status_code == 200
-        parsed = response.json()
-        assert parsed["topic"] == class_record_data["topic"]
-        assert parsed["conducted"] == class_record_data["conducted"]
-        assert parsed["participants"] == class_record_data["participants"]
-        assert parsed["content"] == class_record_data["content"]
-        
-        response = tested.get(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
-        assert response.json() == parsed
-
 def test_get_class_records():
     for name in models.ClassName:
         change_role(models.Role.board)
@@ -682,16 +627,75 @@ def test_get_class_records():
                 ).dict() for _ in range(100)
             ]
         }
-        for d in range(10):
+        for d in range(1, 10):
             data["conducted"] = f"200{d}-0{d}-0{d}"
             tested.post(f"/classes/{name}/records", headers=get_jwt_header(), json=data)
         response = tested.get(f"/classes/{name}/records")
         assert response.status_code == 200
-        for d, row in enumerate(response.json()):
+        for d, row in enumerate(response.json()[::-1]):
+            d += 1
             assert row["topic"] == data["topic"]
-            assert row["number_of_participants"] == 100
+            assert row["number_of_participants"] == len(data["participants"])
             assert row["moderator"] == settings.test_real_name
             assert row["conducted"] == f"200{d}-0{d}-0{d}"
+
+def test_create_class_record():
+    for name in models.ClassName:
+        response = tested.post(f"/classes/{name}/records", json=class_record_data)
+        assert response.status_code == 401
+
+        change_role(models.Role.member)
+        response = tested.post(f"/classes/{name}/records", json=class_record_data, headers=get_jwt_header())
+        assert response.status_code == 403
+
+        change_role(models.Role.board)
+        response = tested.post(f"/classes/{name}/records", json=class_record_data, headers=get_jwt_header())
+        assert response.status_code == 200
+        parsed = response.json()
+        assert parsed["conducted"] == class_record_data["conducted"]
+        assert parsed["participants"] == class_record_data["participants"]
+        assert parsed["topic"] == class_record_data["topic"]
+        assert parsed["content"] == class_record_data["content"]
+
+        response = tested.get(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
+        assert response.status_code == 200
+        parsed = response.json()
+        assert parsed["conducted"] == class_record_data["conducted"]
+        assert parsed["participants"] == class_record_data["participants"]
+        assert parsed["topic"] == class_record_data["topic"]
+        assert parsed["content"] == class_record_data["content"]
+
+def test_update_class_record():
+    class_record_data["topic"] = "One Day in the Life of Ivan Denisovich"
+    class_record_data["content"] = "Death is the solution to all problems; no man, no problem."
+    class_record_data["participants"] = [
+        models.ClassParticipantCreate(
+            name="Joseph Stalin"
+        ).dict() for _ in range(17)
+    ]
+    original_conducted = class_record_data["conducted"]
+    class_record_data["conducted"] = "1962-01-01"
+    for name in models.ClassName:
+        response = tested.patch(f"/classes/{name}/records/{original_conducted}", json=class_record_data)
+        assert response.status_code == 401
+        
+        change_role(models.Role.member)
+        response = tested.patch(f"/classes/{name}/records/{original_conducted}", json=class_record_data, headers=get_jwt_header())
+        assert response.status_code == 403
+
+        change_role(models.Role.board)
+        response = tested.patch(f"/classes/{name}/records/{original_conducted}", json=class_record_data, headers=get_jwt_header())
+        assert response.status_code == 200
+        parsed = response.json()
+        assert parsed["topic"] == class_record_data["topic"]
+        assert parsed["conducted"] == class_record_data["conducted"]
+        assert parsed["participants"] == class_record_data["participants"]
+        assert parsed["content"] == class_record_data["content"]
+        
+        response = tested.get(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
+        assert response.json() == parsed
+        response = tested.get(f"/classes/{name}/records/{original_conducted}", headers=get_jwt_header())
+        assert response.status_code == 404
 
 def test_get_class_record():
     for name in models.ClassName:
@@ -719,7 +723,7 @@ def test_get_class_record():
 def test_delete_class_record():
     for name in models.ClassName:
         change_role(models.Role.member)
-        response = tested.patch(f"/classes/{name}/records/1")
+        response = tested.delete(f"/classes/{name}/records/1")
         assert response.status_code == 200
 
 def test_delete_member():

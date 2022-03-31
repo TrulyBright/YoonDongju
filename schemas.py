@@ -10,6 +10,7 @@ from sqlalchemy import (
     ForeignKeyConstraint
 )
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from database import Base
 
@@ -60,6 +61,9 @@ class ClassRecord(Base):
     topic = Column(String)
     content = Column(String)
     participants = relationship("ClassParticipant")
+    @hybrid_property
+    def number_of_participants(self):
+        return len(self.participants)
     __table_args__ = (PrimaryKeyConstraint("class_name", 'conducted'),)
 
 class ClassParticipant(Base):
