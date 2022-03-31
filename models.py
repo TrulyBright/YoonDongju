@@ -25,6 +25,18 @@ class ClassName(str, Enum):
 class TokenData(BaseModel):
     student_id: int | None = None
 
+class UploadedFileBase(BaseModel):
+    name: str
+
+class UploadedFileCreate(UploadedFileBase):
+    pass
+
+class UploadedFile(UploadedFileBase):
+    uuid: UUID
+    content_type: str
+    class Config:
+        orm_mode = True
+
 class ClubInformationBase(BaseModel):
     address: str
     email: str
@@ -60,8 +72,7 @@ class PostBase(BaseModel):
     content: str
 
 class PostCreate(PostBase):
-    pass
-    # attached: list[UploadFile]
+    attached: list[UUID]
 
 class Post(PostBase):
     no: int
@@ -69,8 +80,15 @@ class Post(PostBase):
     published: date
     modified: date | None = None
     modifier: str | None = None
-    # attached: list[str]
+    attached: list[UploadedFile]
+    class Config:
+        orm_mode = True
 
+class PostOutline(BaseModel):
+    no: int
+    title: str
+    author: str
+    published: date
     class Config:
         orm_mode = True
 
@@ -153,17 +171,5 @@ class MagazineCreate(MagazineBase):
 
 class Magazine(MagazineBase):
     contents: list[MagazineContent]
-    class Config:
-        orm_mode = True
-
-class UploadedFileBase(BaseModel):
-    name: str
-
-class UploadedFileCreate(UploadedFileBase):
-    pass
-
-class UploadedFile(UploadedFileBase):
-    uuid: UUID
-    content_type: str
     class Config:
         orm_mode = True

@@ -2,7 +2,7 @@ import bcrypt
 from datetime import datetime, date
 from pathlib import Path
 from sqlalchemy.sql import case
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from fastapi import UploadFile
 import auth
 import asyncio
@@ -42,39 +42,28 @@ def update_member(db: Session, student_id: int, member: models.MemberModify):
     return actual_object
 
 def delete_member(db: Session, student_id: int):
-    deleted = db.query(schemas.Member).filter(schemas.Member.student_id==student_id)
-    if not deleted.first():
-        return False
-    deleted.delete()
-    db.commit()
-    return True
+    if db.query(schemas.Member).filter(schemas.Member.student_id==student_id).delete():
+        db.commit()
+        return True
+    return False
 
 def get_posts(db: Session, type: models.PostType, skip: int=0, limit: int=100):
-    return db.query(schemas.Post).filter(schemas.Post.type==type.value).order_by(schemas.Post.no.desc()).offset(skip).limit(limit).all()
+    return db.query(schemas.Post.no, schemas.Post.author, schemas.Post.title, schemas.Post.published).filter(schemas.Post.type==type.value).order_by(schemas.Post.no.desc()).offset(skip).limit(limit).all()
 
 def get_post(db: Session, type: models.PostType, no: int=None):
-    return db.query(schemas.Post).filter((type != models.PostType.notice or schemas.Post.no==no), schemas.Post.type==type.value).first()
+    return db.query(schemas.Post).options(joinedload(schemas.Post.attached)).filter((type != models.PostType.notice or schemas.Post.no==no), schemas.Post.type==type.value).first()
 
-async def create_post(db: Session, author: models.Member, post: models.PostCreate, type: models.PostType):
-    # Path("sql").mkdir(exist_ok=True)
-    # async def __upload(file: UploadFile):
-    #     content = await file.read()
-    #     internal_uuid = uuid.uuid4()
-    #     with open(f"sql/{internal_uuid}", "wb") as f:
-    #         f.write(content)
-    #     db.add(schemas.AttachedFile(
-    #         uuid=internal_uuid,
-    #         type=file.content_type,
-    #         name=file.filename
-    #     ))
-    # await asyncio.gather(*[__upload(file) for file in post.attached])
+def create_post(db: Session, author: models.Member, post: models.PostCreate, type: models.PostType):
     db_post = schemas.Post(
         type=type.value,
         title=post.title,
         author=author.real_name,
         content=post.content,
         published=datetime.today().date(),
-        # attached_files=
+        attached=db.query(schemas.UploadedFile)
+                    .filter(schemas.UploadedFile.uuid.in_(
+                        [str(id) for id in post.attached]
+                    )).all()
     )
     db.add(db_post)
     db.commit()
@@ -90,8 +79,9 @@ def update_post(db: Session, type: models.PostType, post: models.PostCreate, mod
             "modified": datetime.today().date(),
             "modifier": modifier.real_name,
         })
+        updated.first().attached = db.query(schemas.UploadedFile).filter(schemas.UploadedFile.uuid.in_([str(id) for id in post.attached])).all()
         db.commit()
-        return updated.first()    
+        return updated.first()
     db.query(schemas.Post).filter(schemas.Post.type==type.value).delete()
     new = schemas.Post(
         type=type.value,
@@ -100,20 +90,21 @@ def update_post(db: Session, type: models.PostType, post: models.PostCreate, mod
         content=post.content,
         published=datetime.today().date(),
         modified=datetime.today().date(),
-        modifier=modifier.real_name
+        modifier=modifier.real_name,
+        attached=db.query(schemas.UploadedFile).filter(schemas.UploadedFile.uuid.in_([str(id) for id in post.attached])).all()
     )
     db.add(new)
     db.commit()
     return new
 
 def delete_post(db: Session, type: models.PostType, no: int):
-    """삭제에 성공하면 `True`, 못 하면 `False`"""
-    deleted = db.query(schemas.Post).filter(schemas.Post.no==no and schemas.Post.type==type)
-    if not deleted.first():
-        return False
-    deleted.delete()
-    db.commit()
-    return True
+    queried = db.query(schemas.Post).filter(schemas.Post.no==no and schemas.Post.type==type)
+    if queried.first():
+        db.query(schemas.PostUploadedFileAssociation).filter(schemas.PostUploadedFileAssociation.post_no==no).delete()
+        queried.delete()
+        db.commit()
+        return True
+    return False
 
 def get_club_information(db: Session):
     return {row.key:row.value for row in db.query(schemas.ClubInformation).all()}
@@ -195,9 +186,10 @@ def update_magazine(db: Session, published: date, magazine: models.MagazineCreat
 
 def delete_magazine(db: Session, published: date):
     db.query(schemas.MagazineContent).filter(schemas.MagazineContent.published==published).delete()
-    deleted = db.query(schemas.Magazine).filter(schemas.Magazine.published==published).delete()
-    db.commit()
-    return deleted
+    if db.query(schemas.Magazine).filter(schemas.Magazine.published==published).delete():
+        db.commit()
+        return True
+    return False
 
 def get_magazine_content(db: Session, published: date):
     return db.query(schemas.MagazineContent).filter(schemas.MagazineContent.published==published).all()

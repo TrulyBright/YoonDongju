@@ -59,11 +59,13 @@ club_info = {
 about_data = {
     "title": "about",
     "content": "us",
+    "attached": [],
 }
 posted_posts = dict()
 rules = {
     "title": "rules",
-    "content": "not that strict"
+    "content": "not that strict",
+    "attached": [],
 }
 
 class_data = models.ClassCreate(
@@ -200,9 +202,13 @@ def test_get_recent_notices():
         test_create_notice()
     response = tested.get("/recent-notices")
     assert response.status_code == 200
-    assert response.json() == list(posted_posts.values())[::-1][:4]
+    for i, post in enumerate(list(posted_posts.values())[::-1][:4]):
+        for key, value in response.json()[i].items():
+            assert post[key] == value
     response = tested.get("/recent-notices", params={"limit":10})
-    assert response.json() == list(posted_posts.values())[::-1]
+    for i, post in enumerate(list(posted_posts.values())[::-1][:4]):
+        for key, value in response.json()[i].items():
+            assert post[key] == value
 
 def test_get_notices():
     for _ in range(10):
@@ -213,17 +219,34 @@ def test_get_notices():
     }
     response = tested.get("/notices", params=span)
     assert response.status_code == 200
-    assert response.json() == list(posted_posts.values())[::-1][span["skip"]:span["skip"]+span["limit"]]
+    for i, post in enumerate(list(posted_posts.values())[::-1][span["skip"]:span["skip"]+span["limit"]]):
+        for key, value in response.json()[i].items():
+            assert post[key] == value
     span["skip"] = 17
     response = tested.get("/notices", params=span)
-    assert response.json() == list(posted_posts.values())[::-1][span["skip"]:span["skip"]+span["limit"]]
+    for i, post in enumerate(list(posted_posts.values())[::-1][span["skip"]:span["skip"]+span["limit"]]):
+        for key, value in response.json()[i].items():
+            assert post[key] == value
 
 def test_create_notice():
+    change_role(models.Role.board)
+    attached = [tested.post(
+        "/uploaded",
+        files={
+            "uploaded": (
+                "main.py",
+                open("main.py", "rb"),
+                "text/plain"
+            )
+        },
+        headers=get_jwt_header()
+    ).json()["uuid"] for _ in range(3)]
     change_role(models.Role.member)
     global last_post_no
     data = {
         "title": "tested-title",
         "content": "tested=content",
+        "attached": attached
     }
     response = tested.post("/notices", json=data, headers=get_jwt_header(True))
     assert response.status_code == 401
@@ -241,6 +264,8 @@ def test_create_notice():
     assert posted["published"] == datetime.today().strftime("%Y-%m-%d")
     assert posted["modifier"] == None
     assert posted["modified"] == None
+    assert len(posted["attached"]) == len(attached)
+    assert {uploaded["uuid"] for uploaded in posted["attached"]} == set(attached)
     last_post_no = posted["no"]
     test_get_notice(posted)
     posted_posts[posted["no"]] = posted
@@ -256,12 +281,27 @@ def test_get_notice(data=None):
         assert posted["published"] == data["published"]
         assert posted["modifier"] == data["modifier"]
         assert posted["modified"] == data["modified"]
+        assert len(posted["attached"]) == len(data["attached"])
+        assert {uploaded["uuid"] for uploaded in posted["attached"]} == {uploaded["uuid"] for uploaded in data["attached"]}
 
 def test_update_notice():
+    change_role(models.Role.board)
+    attached = [tested.post(
+        "/uploaded",
+        files={
+            "uploaded": (
+                "main.py",
+                open("main.py", "rb"),
+                "text/plain"
+            )
+        },
+        headers=get_jwt_header()
+    ).json()["uuid"] for _ in range(10)]
     change_role(models.Role.member)
     modified = {
         "title": "updated-title",
         "content": "updated=content",
+        "attached": attached
     }
     assert tested.patch(f"/notices/{last_post_no}", json=modified, headers=get_jwt_header()).status_code == 403
 
@@ -272,6 +312,8 @@ def test_update_notice():
     posted: dict = response.json()
     assert posted["title"] == modified["title"]
     assert posted["content"] == modified["content"]
+    assert len(posted["attached"]) == len(modified["attached"])
+    assert {uploaded["uuid"] for uploaded in posted["attached"]} == set(attached)
     assert posted["author"] == settings.test_real_name
     assert posted["modifier"] == settings.test_real_name
     assert posted["modified"] == today
@@ -328,6 +370,7 @@ def test_update_member():
 
 def test_get_magazines():
     change_role(models.Role.board)
+    LENGTH = 10
     dummy_upload = [
         tested.post(
             "/uploaded",
@@ -339,7 +382,7 @@ def test_get_magazines():
                 )
             },
             headers=get_jwt_header()
-        ).json() for _ in range(1, 129)
+        ).json() for _ in range(1, LENGTH)
     ]
     dummies = [{
         "year": i,
@@ -353,13 +396,13 @@ def test_get_magazines():
                 author="윤동주",
                 language="한국어"
             ).dict() for _ in range(37)]
-    } for i in range(1, 129)]
+    } for i in range(1, LENGTH)]
     change_role(models.Role.board)
     for d in dummies:
         tested.post("/magazines", json=d, headers=get_jwt_header())
     response = tested.get("/magazines")
     assert response.status_code == 200
-    assert response.json() == dummies[::-1][:100]
+    assert response.json() == dummies[::-1][:LENGTH]
     params = {
         "skip": 3,
         "limit": 11

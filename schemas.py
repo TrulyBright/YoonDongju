@@ -6,8 +6,9 @@ from sqlalchemy import (
     Date,
     ForeignKey,
     UniqueConstraint,
+    ForeignKeyConstraint,
     PrimaryKeyConstraint,
-    ForeignKeyConstraint
+    Table
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -27,6 +28,12 @@ class Member(Base):
     password = Column(String)
     role = Column(String)
 
+class PostUploadedFileAssociation(Base):
+    __tablename__ = "postUploadedFileAssociation"
+    post_no = Column(Integer, ForeignKey("posts.no"), index=True)
+    file_uuid = Column(String, ForeignKey("uploadedFiles.uuid"))
+    __table_args__ = (PrimaryKeyConstraint("post_no", "file_uuid"),)
+
 class Post(Base):
     __tablename__ = "posts"
     no = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -37,7 +44,10 @@ class Post(Base):
     published = Column(Date)
     modified = Column(Date, nullable=True)
     modifier = Column(String, nullable=True)
-    # attached_files = relationship("AttachedFile") TODO
+    attached = relationship(
+        "UploadedFile",
+        secondary=PostUploadedFileAssociation.__tablename__,
+    )
 
 class UploadedFile(Base):
     __tablename__ = "uploadedFiles"
@@ -55,8 +65,8 @@ class Class(Base):
 
 class ClassRecord(Base):
     __tablename__ = "classRecords"
-    class_name = Column(String, ForeignKey("classes.name"), index=True)
-    conducted = Column(Date, index=True)
+    class_name = Column(String, ForeignKey("classes.name"), index=True, primary_key=True)
+    conducted = Column(Date, index=True, primary_key=True)
     moderator = Column(String)
     topic = Column(String)
     content = Column(String)
@@ -64,7 +74,6 @@ class ClassRecord(Base):
     @hybrid_property
     def number_of_participants(self):
         return len(self.participants)
-    __table_args__ = (PrimaryKeyConstraint("class_name", 'conducted'),)
 
 class ClassParticipant(Base):
     __tablename__ = "classParticipants"

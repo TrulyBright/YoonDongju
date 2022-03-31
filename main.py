@@ -42,7 +42,7 @@ async def get_club_information(db: Session=Depends(get_db)):
 async def update_club_information(info: models.ClubInformationCreate, db: Session=Depends(get_db), modifier: schemas.Member=Depends(auth.get_current_member_board_only)):
     return crud.update_club_information(db=db, info=info)
 
-@app.get("/recent-notices", response_model=list[models.Post])
+@app.get("/recent-notices", response_model=list[models.PostOutline])
 async def get_recent_notices(limit: int=4, db: Session=Depends(get_db)):
     return crud.get_posts(db=db, type=models.PostType.notice, limit=limit)
 
@@ -66,31 +66,30 @@ async def get_rules(db: Session=Depends(get_db)):
 async def update_rules(rules: models.PostCreate, db: Session=Depends(get_db), modifier: schemas.Member=Depends(auth.get_current_member_board_only)):
     return crud.update_post(db=db, type=models.PostType.rules, post=rules, modifier=modifier)
 
-@app.get("/notices", response_model=list[models.Post])
+@app.get("/notices", response_model=list[models.PostOutline])
 async def get_notices(skip: int=0, limit: int=100, db: Session=Depends(get_db)):
     return crud.get_posts(db=db, type=models.PostType.notice, skip=skip, limit=limit)
 
 @app.get("/notices/{no:int}", response_model=models.Post)
 async def get_notice(no: int, db: Session=Depends(get_db)):
-    db_notice = crud.get_post(db=db, type=models.PostType.notice, no=no)
-    if db_notice is None:
-        raise HTTPException(404, "그런 글이 없습니다.")
-    return db_notice
+    if notice := crud.get_post(db=db, type=models.PostType.notice, no=no):
+        return notice
+    raise HTTPException(404, f"{no}번 글이 없습니다.")
 
 @app.post("/notices", response_model=models.Post)
 async def create_notice(post: models.PostCreate, db: Session=Depends(get_db), author: schemas.Member=Depends(auth.get_current_member_board_only)):
-    return await crud.create_post(db=db, post=post, author=author, type=models.PostType.notice)
-    
+    return crud.create_post(db=db, post=post, author=author, type=models.PostType.notice)
+
 @app.patch("/notices/{no:int}", response_model=models.Post)
 async def update_notice(no: int, post: models.PostCreate, db: Session=Depends(get_db), modifier: schemas.Member=Depends(auth.get_current_member_board_only)):
     if updated := crud.update_post(db=db, post=post, modifier=modifier, type=models.PostType.notice, no=no):
         return updated
-    raise HTTPException(404, "그런 글이 없습니다.")
+    raise HTTPException(404, f"{no}번 글이 없습니다.")
 
 @app.delete("/notices/{no:int}")
 async def delete_notice(no: int, db: Session=Depends(get_db), deleter: schemas.Member=Depends(auth.get_current_member_board_only)):
     if not crud.delete_post(db=db, type=models.PostType.notice, no=no):
-        raise HTTPException(404, "그런 글이 없습니다.")
+        raise HTTPException(404, f"{no}번 글이 없습니다.")
 
 @app.get("/members", response_model=list[models.Member])
 async def get_members(skip: int=0, limit: int=100, db: Session=Depends(get_db), accessor: schemas.Member=Depends(auth.get_current_member_board_only)):
