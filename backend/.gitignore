@@ -2,3 +2,4 @@
 uploaded
 *.db
 __pycache__
+.venv
