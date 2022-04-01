@@ -105,3 +105,17 @@ class MagazineContent(Base):
     title = Column(String)
     author = Column(String)
     language = Column(String)
+
+class Book(Base):
+    __tablename__ = "books"
+    no = Column(Integer, primary_key=True)
+    title = Column(String)
+    author = Column(String) # 저자가 여럿이면 그냥 "철수, 영희, 민지, ..."
+    translator = Column(String, nullable=True)
+    published = Column(Date)
+    publisher = Column(String, nullable=True)
+    call_number = Column(String, nullable=True, unique=True)
+    isbn13 = Column(Integer, nullable=True, unique=True)
+    isbn10 = Column(Integer, nullable=True, unique=True)
+    borrower = Column(Integer, ForeignKey("members.student_id"), nullable=True)
+    date_borrowed = Column(Date, nullable=True)

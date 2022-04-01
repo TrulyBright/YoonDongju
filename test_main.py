@@ -786,6 +786,121 @@ def test_delete_class_record():
         assert response.status_code == 200
         assert response.json() == []
 
+def test_create_book():
+    data = {
+        "title": "『눈먼 자들의 도시』",
+        "author": "주제 사라마구",
+        "translator": "정영목",
+        "published": "2008-11-30",
+        "publisher": "해냄",
+        "isbn13": 9788973374939
+    }
+    response = tested.post("/books", json=data)
+    assert response.status_code == 401
+    change_role(models.Role.member)
+    response = tested.post("/books", json=data, headers=get_jwt_header())
+    assert response.status_code == 403
+
+    change_role(models.Role.board)
+    response = tested.post("/books", json=data, headers=get_jwt_header())
+    assert response.status_code == 200
+    for key, value in response.json().items():
+        assert data[key] == value
+
+def test_get_book():
+    data = {
+        "title": "『허삼관 매혈기』",
+        "author": "위화",
+        "translator": "최용만",
+        "published": "2014-09-29",
+        "publisher": "푸른숲",
+        "isbn13": 9788971847244
+    }
+    change_role(models.Role.board)
+    response = tested.post("/books", json=data, headers=get_jwt_header())
+    no = response.json()["no"]
+    response = tested.get(f"/books/{no}")
+    for key, value in response.json():
+        assert data[key] == value
+
+def test_update_book():
+    data = {
+        "title": "『표준국어문법론』",
+        "author": "남기심, 고영근",
+        "published": "1985-09-30",
+        "publisher": "탑",
+        "isbn13": 9788968177231
+    }
+    change_role(models.Role.board)
+    response = tested.post("/books", json=data, headers=get_jwt_header())
+    no = response.json()["no"]
+    data["title"] = "『표준국어문법론』 (전면개정판)"
+    data["published"] = "2019-02-25"
+    data["author"] = "남기심, 고영근, 유현경, 최형용"
+    data["publisher"] = "한국문화사"
+    response = tested.patch(f"/books/{no}", json=data, headers=get_jwt_header())
+    for key, value in response.json().items():
+        assert data[key] == value
+
+def test_delete_book():
+    data = {
+        "title": "『미적분학 1+』",
+        "author": "김홍종",
+        "published": "2018-01-22",
+        "publihser": "서울대학교출판문화원",
+        "isbn13": 9788952117878
+    }
+    change_role(models.Role.board)
+    response = tested.post("/books", json=data, headers=get_jwt_header())
+    no = response.json()["no"]
+    
+    response = tested.delete(f"/books/{no}")
+    assert response.status_code == 401
+    
+    change_role(models.Role.member)
+    response = tested.delete(f"/books/{no}")
+    assert response.status_code == 403
+
+    change_role(models.Role.board)
+    response = tested.delete(f"/books/{no}")
+    assert response.status_code == 200
+    response = tested.delete(f"/books/{no}")
+    assert response.status_code == 404
+
+    response = tested.get(f"/books/{no}")
+    assert response.status_code == 404
+
+def test_borrow_book():
+    data = {
+        "title": "왜 나는 너를 사랑하는가",
+        "author": "알랭 드 보통",
+        "published": "2012-08-20"
+    }
+    change_role(models.Role.board)
+    response = tested.post(f"/books", json=data, headers=get_jwt_header())
+    no = response.json()["no"]
+    response = tested.post(f"/books/{no}/borrow")
+    assert response.status_code == 401
+
+    change_role(models.Role.member)
+    response = tested.post(f"/books/{no}/borrow", headers=get_jwt_header())
+    assert response.status_code == 200
+
+    response = tested.post(f"/books/{no}/borrow", headers=get_jwt_header())
+    assert response.status_code == 423 # Locked
+
+    response = tested.post(f"/books/{no}/return")
+    assert response.status_code == 401
+    # TODO: another member
+    response = tested.post(f"/books/{no}/return", headers=get_jwt_header())
+    assert response.status_code == 200
+
+    response = tested.post(f"/books/{no}/return")
+    assert response.status_code == 401
+    # TODO: another member
+    response = tested.post(f"/books/{no}/return", headers=get_jwt_header())
+    assert response.status_code == 409 # Conflict
+
 def test_delete_member():
     response = tested.delete(f"/members/{settings.test_portal_id}")
     assert response.status_code == 401

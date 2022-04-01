@@ -173,3 +173,23 @@ class Magazine(MagazineBase):
     contents: list[MagazineContent]
     class Config:
         orm_mode = True
+
+class BookBase(BaseModel):
+    title: str
+    author: str
+    translator: str | None
+    published: date
+    publisher: str | None
+    call_number: str | None
+    isbn13: int | None
+    isbn10: int | None
+
+class BookCreate(BookBase):
+    pass
+
+class Book(BookBase):
+    no: int
+    borrower: Member | None
+    date_borrowed: date | None
+    class Config:
+        orm_mode = True
