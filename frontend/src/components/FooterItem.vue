@@ -1,5 +1,6 @@
 <script setup>
 import { RouterLink } from "vue-router";
+import axios from "axios";
 </script>
 <script>
 export default {
@@ -10,7 +11,7 @@ export default {
     presidentTel: String,
     joinFormUrl: String,
   },
-  methods: {
+  computed: {
     getTheYear() {
       return new Date().getFullYear();
     },
@@ -21,9 +22,14 @@ export default {
   <footer>
     <div>
       <p>연락처</p>
-      <div>{{ address }}</div>
-      <div><a :href="'mailto:' + email"></a></div>
-      <div>회장 {{ presidentName }} <a :href="'tel:' + presidentTel"></a></div>
+      <div>📌 {{ address }}</div>
+      <div>
+        📧 <a :href="'mailto:' + email">{{ email }}</a>
+      </div>
+      <div>
+        📞 회장 {{ presidentName }}
+        <a :href="'tel:' + presidentTel">{{ presidentTel }}</a>
+      </div>
     </div>
     <div>
       <p>가입</p>
@@ -38,7 +44,7 @@ export default {
       </div>
       <div>서체: 고운 바탕(한글/영문) / Noto Serif KR (한자)</div>
       <div>
-        © {{ getTheYear() }} 연세문학회 | 작품 저작권은 항상 작가에게 있습니다.
+        © {{ getTheYear }} 연세문학회 | 작품 저작권은 항상 작가에게 있습니다.
       </div>
     </div>
   </footer>

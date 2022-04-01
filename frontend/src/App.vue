@@ -2,12 +2,42 @@
 import { RouterView } from "vue-router";
 import HeaderItem from "@/components/HeaderItem.vue";
 import FooterItem from "@/components/FooterItem.vue";
+import axios from "axios";
+</script>
+<script>
+export default {
+  data() {
+    return {
+      footer: {
+        address: "주소가 없음",
+        email: "메일이 없음",
+        presidentName: "회장 이름이 없음",
+        presidentTel: "회장 전화번호가 없음",
+        joinFormUrl: "가입 주소가 없음",
+      },
+    };
+  },
+  created() {
+    axios
+      .get("/club-information")
+      .then((res) => {
+        this.footer.address = res.data.address;
+        this.footer.email = res.data.email;
+        this.footer.presidentName = res.data.president_name;
+        this.footer.presidentTel = res.data.president_tel;
+        this.footer.joinFormUrl = res.data.joinFormUrl;
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  },
+};
 </script>
 
 <template>
   <HeaderItem></HeaderItem>
   <RouterView />
-  <FooterItem></FooterItem>
+  <FooterItem v-bind="footer"></FooterItem>
 </template>
 
 <style>
