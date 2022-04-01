@@ -52,7 +52,9 @@ async def get_recent_magazines(limit: int=4, db: Session=Depends(get_db)):
 
 @app.get("/about", response_model=models.Post)
 async def get_about(db: Session=Depends(get_db)):
-    return crud.get_post(db=db, type=models.PostType.about)
+    if existing := crud.get_post(db=db, type=models.PostType.about):
+        return existing
+    raise HTTPException(404, "소개가 아직 없습니다.")
 
 @app.put("/about", response_model=models.Post)
 async def update_about(about: models.PostCreate, db: Session=Depends(get_db), modifier: schemas.Member=Depends(auth.get_current_member_board_only)):
@@ -60,7 +62,9 @@ async def update_about(about: models.PostCreate, db: Session=Depends(get_db), mo
 
 @app.get("/rules", response_model=models.Post)
 async def get_rules(db: Session=Depends(get_db)):
-    return crud.get_post(db=db,type=models.PostType.rules)
+    if existing := crud.get_post(db=db,type=models.PostType.rules):
+        return existing
+    raise HTTPException(404, "회칙이 아직 없습니다.")
 
 @app.put("/rules", response_model=models.Post)
 async def update_rules(rules: models.PostCreate, db: Session=Depends(get_db), modifier: schemas.Member=Depends(auth.get_current_member_board_only)):
