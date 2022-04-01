@@ -198,7 +198,7 @@ async def delete_class_record(class_name: models.ClassName, conducted: date, rec
 
 @app.post("/register", response_model=models.Member)
 async def register(form: RegisterForm, db: Session=Depends(get_db)):
-    password_pattern = "^(?=.*[0-9])(?=.*[a-zA-Z]).{10,}$"
+    password_pattern = "^(?=.*[0-9])(?=.*[a-zA-Z]).{10,}$" # 10자 이상에 숫자와 영문이 하나씩은 있어야 함.
     if str(form.portal_id)[4]!="1":
         raise HTTPException(
             status_code=403,
