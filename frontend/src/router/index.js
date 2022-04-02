@@ -22,6 +22,11 @@ const router = createRouter({
       props: { type: "rules" },
     },
     {
+      path: "/notices",
+      name: "notices",
+      component: () => import("../views/PostListView.vue"),
+    },
+    {
       path: "/notices/:no",
       name: "notice",
       component: () => import("../views/PostView.vue"),
