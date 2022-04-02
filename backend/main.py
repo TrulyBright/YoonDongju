@@ -86,7 +86,7 @@ async def create_notice(post: models.PostCreate, db: Session=Depends(get_db), au
 
 @app.patch("/notices/{no:int}", response_model=models.Post)
 async def update_notice(no: int, post: models.PostCreate, db: Session=Depends(get_db), modifier: schemas.Member=Depends(auth.get_current_member_board_only)):
-    if updated := crud.update_post(db=db, post=post, modifier=modifier, type=models.PostType.notice, no=no):
+    if updated := crud.update_post(db=db, post=post, modifier=modifier, no=no):
         return updated
     raise HTTPException(404, f"{no}번 글이 없습니다.")
 

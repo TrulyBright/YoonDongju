@@ -69,7 +69,7 @@ def create_post(db: Session, author: models.Member, post: models.PostCreate, typ
     db.commit()
     return db_post
 
-def update_post(db: Session, type: models.PostType, post: models.PostCreate, modifier: models.Member, no: int=None):
+def update_post(db: Session, post: models.PostCreate, modifier: models.Member, no: int=None,  type: models.PostType=None):
     """`no`가 있으면 `no`번 `Post`를, 없으면 `type`이 `type`인 `Post`를 수정합니다."""
     if no:
         updated = db.query(schemas.Post).filter(schemas.Post.no==no)
