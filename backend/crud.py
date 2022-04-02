@@ -51,7 +51,7 @@ def get_posts(db: Session, type: models.PostType, skip: int=0, limit: int=100):
     return db.query(schemas.Post.no, schemas.Post.author, schemas.Post.title, schemas.Post.published).filter(schemas.Post.type==type.value).order_by(schemas.Post.no.desc()).offset(skip).limit(limit).all()
 
 def get_post(db: Session, type: models.PostType, no: int=None):
-    return db.query(schemas.Post).options(joinedload(schemas.Post.attached)).filter((type != models.PostType.notice or schemas.Post.no==no), schemas.Post.type==type.value).first()
+    return db.query(schemas.Post).options(joinedload(schemas.Post.attached)).filter(schemas.Post.no==no if no else schemas.Post.type==type.value).first()
 
 def create_post(db: Session, author: models.Member, post: models.PostCreate, type: models.PostType):
     db_post = schemas.Post(
