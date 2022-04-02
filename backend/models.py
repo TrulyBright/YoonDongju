@@ -75,6 +75,7 @@ class PostCreate(PostBase):
     attached: list[UUID]
 
 class Post(PostBase):
+    type: PostType
     no: int
     author: str
     published: date
