@@ -208,16 +208,6 @@ async def register(form: RegisterForm, db: Session=Depends(get_db)):
             status_code=403,
             detail="신촌캠만 가입할 수 있습니다."
         )
-    if not re.match(password_pattern, form.password):
-        raise HTTPException(
-            status_code=422,
-            detail="비밀번호가 안전하지 않습니다."
-        )
-    if crud.get_member_by_username(db=db, username=form.username):
-        raise HTTPException(
-            status_code=409,
-            detail="이미 있는 ID입니다."
-        )
     if not auth.is_yonsei_member(form.portal_id, form.portal_pw):
         raise HTTPException(
             status_code=403,
@@ -227,6 +217,16 @@ async def register(form: RegisterForm, db: Session=Depends(get_db)):
         raise HTTPException(
             status_code=409,
             detail="이미 이 학번으로 가입된 계정이 있습니다."
+        )
+    if crud.get_member_by_username(db=db, username=form.username):
+        raise HTTPException(
+            status_code=409,
+            detail="이미 있는 ID입니다."
+        )
+    if not re.match(password_pattern, form.password):
+        raise HTTPException(
+            status_code=422,
+            detail="비밀번호가 안전하지 않습니다."
         )
     return crud.create_member(
         db=db,
