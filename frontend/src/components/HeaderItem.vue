@@ -29,7 +29,9 @@ export default {
         @close="openLoginModal = false"
       ></LoginModal>
     </Teleport>
-    <RouterLink to="/" @click="store.logOut()" v-if="store.isAuthenticated">로그아웃</RouterLink>
+    <RouterLink to="/" @click="store.logOut()" v-if="store.isAuthenticated"
+      >로그아웃</RouterLink
+    >
   </header>
 </template>
 
