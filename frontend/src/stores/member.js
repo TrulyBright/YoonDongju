@@ -38,21 +38,23 @@ export const useMemberStore = defineStore({
       this.tokenType = result.data.token_type;
     },
     whoAmI() {
-      axios.get("/me", {
-        headers: {
-          Authorization: this.authorizationHeader,
-        },
-      }).then((response)=>{
-        this.member = {
-          username: response.data.username,
-          realName: response.data.real_name,
-          studentId: response.data.student_id,
-          role: response.data.role,
-        };
-      })
-      .catch((error)=>{
-        console.error(error);
-      })
+      axios
+        .get("/me", {
+          headers: {
+            Authorization: this.authorizationHeader,
+          },
+        })
+        .then((response) => {
+          this.member = {
+            username: response.data.username,
+            realName: response.data.real_name,
+            studentId: response.data.student_id,
+            role: response.data.role,
+          };
+        })
+        .catch((error) => {
+          console.error(error);
+        });
       return this.member;
     },
     logOut() {
