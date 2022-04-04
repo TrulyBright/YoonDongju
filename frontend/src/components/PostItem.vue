@@ -4,6 +4,8 @@ import PostContent from "./PostContent.vue";
 import PostAttached from "./PostAttached.vue";
 import PostMetadata from "./PostMetadata.vue";
 import PostAction from "./PostAction.vue";
+import { useMemberStore } from "../stores/member";
+const store = useMemberStore();
 </script>
 <script>
 export default {
@@ -30,5 +32,5 @@ export default {
   ></PostMetadata>
   <PostContent :content="content"></PostContent>
   <PostAttached v-for="a in attached" :key="a.uuid" v-bind="a"></PostAttached>
-  <PostAction :no="no"></PostAction>
+  <PostAction :no="no" v-if="store.isAdmin"></PostAction>
 </template>
