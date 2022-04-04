@@ -5,6 +5,6 @@
 - nodejs
 - python >= 3.10
 ## Solutions
-- FastAPI
-- Vue
-- SQLite
+- [FastAPI](https://fastapi.tiangolo.com/)
+- [Vue](https://vuejs.org/)
+- [SQLite](https://sqlite.org/index.html)
