@@ -31,9 +31,11 @@ export default {
   methods: {
     async submit() {
       try {
-        const member = useMemberStore().member;
+        const store = useMemberStore();
         const result = await axios.patch("/notices/" + this.no, this.form, {
-          headers: member.tokenType + " " + member.token,
+          headers: {
+            Authorization: store.authorizationHeader,
+          },
         });
         this.$router.push({ name: result.data.type, params: { no: this.no } });
       } catch (error) {
