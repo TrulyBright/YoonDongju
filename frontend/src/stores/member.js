@@ -12,7 +12,8 @@ export const useMemberStore = defineStore({
     isAuthenticated: (state) => state.member !== null,
     stateMember: (state) => state.member,
     isAdmin: (state) =>
-      state.isAuthenticated && state.member.role in ["board", "president"],
+      state.isAuthenticated &&
+      (state.member.role === "board" || state.member.role === "president"),
     authorizationHeader: (state) => state.tokenType + " " + state.token,
   },
   actions: {
