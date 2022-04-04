@@ -48,7 +48,7 @@ async def update_club_information(info: models.ClubInformationCreate, db: Sessio
 async def get_recent_notices(limit: int=4, db: Session=Depends(get_db)):
     return crud.get_posts(db=db, type=models.PostType.notice, limit=limit)
 
-@app.get("/recent-magazines", response_model=list[models.Magazine])
+@app.get("/recent-magazines", response_model=list[models.MagazineOutline])
 async def get_recent_magazines(limit: int=4, db: Session=Depends(get_db)):
     return crud.get_magazines(db=db, skip=0, limit=limit)
 
@@ -130,7 +130,7 @@ async def get_uploaded_file(uuid: UUID, db: Session=Depends(get_db)):
 async def create_uploaded_file(uploaded: UploadFile, db: Session=Depends(get_db), uploader=Depends(auth.get_current_member_board_only)):
     return await crud.create_uploaded_file(db=db, file=uploaded)
 
-@app.get("/magazines", response_model=list[models.Magazine])
+@app.get("/magazines", response_model=list[models.MagazineOutline])
 async def get_magazines(skip: int=0, limit: int=100, db: Session=Depends(get_db)):
     return crud.get_magazines(db=db, skip=skip, limit=limit)
 

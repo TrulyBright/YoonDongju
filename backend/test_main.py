@@ -415,19 +415,20 @@ def test_get_magazines():
                 language="한국어"
             ).dict() for _ in range(37)]
     } for i in range(1, LENGTH)]
+    dummies_outline = [json.loads(models.MagazineOutline(**d).json()) for d in dummies]
     change_role(models.Role.board)
     for d in dummies:
         tested.post("/magazines", json=d, headers=get_jwt_header())
     response = tested.get("/magazines")
     assert response.status_code == 200
-    assert response.json() == dummies[::-1][:LENGTH]
+    assert response.json() == dummies_outline[::-1][:LENGTH]
     params = {
         "skip": 3,
         "limit": 11
     }
     response = tested.get("/magazines", params=params)
     assert response.status_code == 200
-    assert response.json() == dummies[::-1][params["skip"]:params["skip"]+params["limit"]]
+    assert response.json() == dummies_outline[::-1][params["skip"]:params["skip"]+params["limit"]]
 
 def test_get_magazine():
     uploaded = tested.post(

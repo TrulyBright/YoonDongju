@@ -174,3 +174,9 @@ class Magazine(MagazineBase):
     contents: list[MagazineContent]
     class Config:
         orm_mode = True
+
+class MagazineOutline(BaseModel):
+    published: date
+    cover: UUID
+    class Config:
+        orm_mode = True
