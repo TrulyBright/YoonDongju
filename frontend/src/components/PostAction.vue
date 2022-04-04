@@ -1,6 +1,7 @@
 <script setup>
 import axios from "axios";
 import { RouterLink } from "vue-router";
+import { useMemberStore } from "../stores/member";
 </script>
 <script>
 export default {
@@ -11,7 +12,11 @@ export default {
     async deleteIfConfirmed() {
       if (confirm("이 글을 삭제합니다.")) {
         try {
-          await axios.delete("/notices/" + this.no);
+          await axios.delete("/notices/" + this.no, {
+            headers: {
+              Authorization: useMemberStore().authorizationHeader,
+            },
+          });
           this.$router.push("/notices");
         } catch (error) {
           console.error(error);
