@@ -5,14 +5,15 @@ export const useMemberStore = defineStore({
   id: "member",
   state: () => ({
     member: null,
-    token: null,
-    tokenType: null,
+    token: "",
+    tokenType: "",
   }),
   getters: {
     isAuthenticated: (state) => state.member !== null,
     stateMember: (state) => state.member,
     isAdmin: (state) =>
       state.isAuthenticated && state.member.role in ["board", "president"],
+    authorizationHeader: (state) => state.tokenType + " " + state.token,
   },
   actions: {
     async register(form) {
@@ -36,21 +37,28 @@ export const useMemberStore = defineStore({
       this.token = result.data.access_token;
       this.tokenType = result.data.token_type;
     },
-    async whoAmI() {
-      const response = await axios.get("/me", {
+    whoAmI() {
+      axios.get("/me", {
         headers: {
-          Authorization: this.tokenType + " " + this.token,
-        }
-      });
-      this.member = {
-        username: response.data.username,
-        realName: response.data.real_name,
-        studentId: response.data.student_id,
-        role: response.data.role,
-      };
+          Authorization: this.authorizationHeader,
+        },
+      }).then((response)=>{
+        this.member = {
+          username: response.data.username,
+          realName: response.data.real_name,
+          studentId: response.data.student_id,
+          role: response.data.role,
+        };
+      })
+      .catch((error)=>{
+        console.error(error);
+      })
+      return this.member;
     },
-    async logOut() {
+    logOut() {
       this.member = null;
+      this.token = "";
+      this.tokenType = "";
     },
   },
 });
