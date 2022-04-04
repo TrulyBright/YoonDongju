@@ -1,6 +1,7 @@
 <script setup>
 import axios from "axios";
 import PostOutlineItem from "../components/PostOutlineItem.vue";
+import ListAction from "../components/ListAction.vue";
 </script>
 <script>
 export default {
@@ -31,6 +32,7 @@ export default {
       v-bind="item"
       :key="item"
     ></PostOutlineItem>
+    <ListAction :routeName="'notice'"></ListAction>
   </main>
 </template>
 <style scoped></style>

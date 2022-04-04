@@ -19,6 +19,7 @@ export default {
     };
   },
   async created() {
+    if (!this.no) return;
     try {
       let result = await axios.get("/notices/" + this.no);
       this.form.title = result.data.title;
@@ -32,12 +33,17 @@ export default {
     async submit() {
       try {
         const store = useMemberStore();
-        const result = await axios.patch("/notices/" + this.no, this.form, {
+        const method = this.no === undefined ? axios.post : axios.patch;
+        const URI = this.no === undefined ? "notices" : `notices/${this.no}`;
+        const result = await method(URI, this.form, {
           headers: {
             Authorization: store.authorizationHeader,
           },
         });
-        this.$router.push({ name: result.data.type, params: { no: this.no } });
+        this.$router.push({
+          name: result.data.type,
+          params: { no: result.data.no },
+        });
       } catch (error) {
         console.error(error);
       }
