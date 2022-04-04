@@ -3,6 +3,7 @@ from functools import lru_cache
 from datetime import date, timedelta
 from typing import Union
 from uuid import UUID
+from pathlib import Path
 from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,6 +27,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
+Path("uploaded").mkdir(exist_ok=True)
 
 class RegisterForm(BaseModel):
     portal_id: int
