@@ -1,8 +1,14 @@
 <script setup>
 import { RouterLink } from "vue-router";
+import RegisterModal from "@/components/RegisterModal.vue";
 </script>
 <script>
 export default {
+  data() {
+    return {
+      openRegisterModal: false,
+    };
+  },
   props: {
     address: String,
     email: String,
@@ -33,7 +39,13 @@ export default {
     <div>
       <p>가입</p>
       <div><a :href="joinFormUrl">동아리 회원가입</a></div>
-      <RouterLink to="/register">사이트 회원가입</RouterLink>
+      <div><a @click="openRegisterModal = true">사이트 회원가입</a></div>
+      <Teleport to="#app">
+        <RegisterModal
+          v-if="openRegisterModal"
+          @close="openRegisterModal = false"
+        ></RegisterModal>
+      </Teleport>
     </div>
     <div>
       <p>정보</p>

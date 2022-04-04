@@ -11,6 +11,7 @@ export default {
   data() {
     return {
       post: {
+        no: 0,
         title: "",
         content: "",
         published: "",
@@ -21,7 +22,7 @@ export default {
       },
     };
   },
-  created() {
+  async created() {
     let route = null;
     switch (this.type) {
       case "about":
@@ -34,29 +35,19 @@ export default {
         route = "notices/" + this.no;
         break;
     }
-    axios
-      .get(route)
-      .then((res) => {
-        this.post.no = res.data.no;
-        this.post.title = res.data.title;
-        this.post.content = res.data.content;
-        this.post.published = res.data.published;
-        this.post.author = res.data.author;
-        this.post.modifier = res.data.modifier;
-        this.post.modified = res.data.modified;
-        this.post.attached = res.data.attached;
-      })
-      .catch((error) => {
-        switch (error.response.status) {
-          case 404:
-            // TODO
-            break;
-
-          default:
-            console.error(error);
-            break;
-        }
-      });
+    try {
+      const res = await axios.get(route);
+      this.post.no = res.data.no;
+      this.post.title = res.data.title;
+      this.post.content = res.data.content;
+      this.post.published = res.data.published;
+      this.post.author = res.data.author;
+      this.post.modifier = res.data.modifier;
+      this.post.modified = res.data.modified;
+      this.post.attached = res.data.attached;
+    } catch (error) {
+      console.error(error);
+    }
   },
 };
 </script>

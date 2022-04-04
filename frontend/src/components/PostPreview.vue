@@ -4,11 +4,12 @@ import Markdown from "vue3-markdown-it";
 <script>
 export default {
   props: {
-    content: String,
+    source: String,
   },
 };
 </script>
-
 <template>
-  <div><Markdown :source="content"></Markdown></div>
+  <div>
+    <Markdown :source="source"></Markdown>
+  </div>
 </template>

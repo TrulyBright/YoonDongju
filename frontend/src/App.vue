@@ -17,26 +17,24 @@ export default {
       },
     };
   },
-  created() {
-    axios
-      .get("/club-information")
-      .then((res) => {
-        this.footer.address = res.data.address;
-        this.footer.email = res.data.email;
-        this.footer.presidentName = res.data.president_name;
-        this.footer.presidentTel = res.data.president_tel;
-        this.footer.joinFormUrl = res.data.joinFormUrl;
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  async created() {
+    try {
+      const res = await axios.get("/club-information");
+      this.footer.address = res.data.address;
+      this.footer.email = res.data.email;
+      this.footer.presidentName = res.data.president_name;
+      this.footer.presidentTel = res.data.president_tel;
+      this.footer.joinFormUrl = res.data.joinFormUrl;
+    } catch (error) {
+      console.log(error);
+    }
   },
 };
 </script>
 
 <template>
   <HeaderItem></HeaderItem>
-  <RouterView />
+  <RouterView :key="$route.path" />
   <FooterItem v-bind="footer"></FooterItem>
 </template>
 

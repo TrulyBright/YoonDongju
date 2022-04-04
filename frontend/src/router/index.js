@@ -32,6 +32,16 @@ const router = createRouter({
       component: () => import("../views/PostView.vue"),
       props: (route) => ({ type: "notice", no: route.params.no }),
     },
+    {
+      path: "/write",
+      name: "write",
+      component: () => import("../views/PostWriteView.vue"),
+    },
+    {
+      path: "/me",
+      name: "me",
+      component: () => import("../views/MeView.vue"),
+    },
   ],
 });
 

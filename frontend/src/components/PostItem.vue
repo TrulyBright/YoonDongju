@@ -3,10 +3,12 @@ import PostTitle from "./PostTitle.vue";
 import PostContent from "./PostContent.vue";
 import PostAttached from "./PostAttached.vue";
 import PostMetadata from "./PostMetadata.vue";
+import PostAction from "./PostAction.vue";
 </script>
 <script>
 export default {
   props: {
+    no: Number,
     title: String,
     content: String,
     published: String,
@@ -28,4 +30,5 @@ export default {
   ></PostMetadata>
   <PostContent :content="content"></PostContent>
   <PostAttached v-for="a in attached" :key="a.uuid" v-bind="a"></PostAttached>
+  <PostAction :no="no"></PostAction>
 </template>
