@@ -107,7 +107,7 @@ async def get_member(student_id: int, db: Session=Depends(get_db), accessing: sc
 
 @app.get("/me", response_model=models.Member)
 async def get_myself(db: Session=Depends(get_db), me: schemas.Member=Depends(auth.get_current_member)):
-    return crud.get_member(db=db, student_id=me.student_id)
+    return me
 
 @app.patch("/members/{student_id:int}", response_model=models.Member)
 async def update_member(student_id: int, member: models.MemberModify, db: Session=Depends(get_db), author: schemas.Member=Depends(auth.get_current_member_board_only)):
