@@ -350,7 +350,25 @@ def test_get_members():
 
 def test_get_member():
     response = tested.get(f"/members/{settings.test_portal_id}")
+    assert response.status_code == 401
+    
+    change_role(models.Role.president)
+    response = tested.get(f"/members/{settings.test_portal_id}", headers=get_jwt_header())
     assert response.status_code == 200
+    parsed = response.json()
+    assert parsed["student_id"] == int(settings.test_portal_id)
+    assert parsed["username"] == settings.test_username
+    assert parsed["role"] == models.Role.president
+    assert parsed["real_name"] == settings.test_real_name
+
+def test_get_me():
+    response = tested.get("/me", headers=get_jwt_header())
+    assert response.status_code == 200
+    parsed = response.json()
+    assert parsed["student_id"] == int(settings.test_portal_id)
+    assert parsed["username"] == settings.test_username
+    assert parsed["role"] == models.Role.president
+    assert parsed["real_name"] == settings.test_real_name
 
 def test_update_member():
     data = {

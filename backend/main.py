@@ -100,11 +100,14 @@ async def get_members(skip: int=0, limit: int=100, db: Session=Depends(get_db), 
     return crud.get_members(db, skip, limit)
 
 @app.get("/members/{student_id:int}", response_model=models.Member)
-async def get_member(student_id: int, db: Session=Depends(get_db)):
-    db_member = crud.get_member(db, student_id)
-    if db_member is None:
-        raise HTTPException(404, "가입되지 않은 학번입니다.")
-    return db_member
+async def get_member(student_id: int, db: Session=Depends(get_db), accessing: schemas.Member=Depends(auth.get_current_member_board_only)):
+    if db_member := crud.get_member(db, student_id):
+        return db_member
+    raise HTTPException(404, "가입되지 않은 학번입니다.")
+
+@app.get("/me", response_model=models.Member)
+async def get_myself(db: Session=Depends(get_db), me: schemas.Member=Depends(auth.get_current_member)):
+    return crud.get_member(db=db, student_id=me.student_id)
 
 @app.patch("/members/{student_id:int}", response_model=models.Member)
 async def update_member(student_id: int, member: models.MemberModify, db: Session=Depends(get_db), author: schemas.Member=Depends(auth.get_current_member_board_only)):
