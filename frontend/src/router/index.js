@@ -42,6 +42,11 @@ const router = createRouter({
       name: "me",
       component: () => import("../views/MeView.vue"),
     },
+    {
+      path: "/magazines",
+      name: "magazines",
+      component: () => import("../views/MagazineGridView.vue"),
+    },
   ],
 });
 
