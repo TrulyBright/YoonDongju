@@ -1,12 +1,14 @@
 <script setup>
 import { RouterLink } from "vue-router";
 import RegisterModal from "@/components/RegisterModal.vue";
+import { useMemberStore } from "../stores/member";
 </script>
 <script>
 export default {
   data() {
     return {
       openRegisterModal: false,
+      store: useMemberStore(),
     };
   },
   props: {
@@ -39,7 +41,11 @@ export default {
     <div>
       <p>가입</p>
       <div><a :href="joinFormUrl">동아리 회원가입</a></div>
-      <div><a @click="openRegisterModal = true">사이트 회원가입</a></div>
+      <div>
+        <a @click="openRegisterModal = true" v-if="!store.isAuthenticated"
+          >사이트 회원가입</a
+        >
+      </div>
       <Teleport to="#app">
         <RegisterModal
           v-if="openRegisterModal"
