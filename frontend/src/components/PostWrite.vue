@@ -65,6 +65,6 @@ export default {
     </div>
     <button type="submit">게시</button>
   </form>
-  <PostPreview v-bind="content"></PostPreview>
+  <PostPreview :source="form.content"></PostPreview>
 </template>
 <style scoped></style>
