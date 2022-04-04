@@ -16,18 +16,22 @@ SECRET_KEY = "test"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str
 
+
 class TokenData(BaseModel):
     username: str | None = None
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 app = FastAPI()
+
 
 def authenticate(db: Session, username: str, password: str):
     member = crud.get_member_by_username(db, username)
@@ -37,7 +41,8 @@ def authenticate(db: Session, username: str, password: str):
         return False
     return member
 
-def create_access_token(data: dict, expires_delta: timedelta | None=None):
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -46,7 +51,8 @@ def create_access_token(data: dict, expires_delta: timedelta | None=None):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-async def get_current_member(db: Session=Depends(database.get_db), token: str=Depends(oauth2_scheme)):
+
+async def get_current_member(db: Session = Depends(database.get_db), token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -65,15 +71,19 @@ async def get_current_member(db: Session=Depends(database.get_db), token: str=De
         raise credentials_exception
     return member
 
-async def get_current_member_board_only(member: models.Member=Depends(get_current_member)):
+
+async def get_current_member_board_only(member: models.Member = Depends(get_current_member)):
     if member.role in {
         models.Role.board,
         models.Role.president
-    }: return member
+    }:
+        return member
     raise HTTPException(403, "권한이 없습니다.")
 
+
 def is_yonsei_member(id: int, pw: str):
-    if len(pw) > 1024: raise
+    if len(pw) > 1024:
+        raise
     data = {
         "loginType": "SSO",
         "retUrl": "/relation/otherSiteSSO",
