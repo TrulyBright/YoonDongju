@@ -6,7 +6,7 @@ import MeItem from "../components/MeItem.vue";
 export default {
   data() {
     return {
-      member: useMemberStore().member,
+      member: useMemberStore().whoAmI(),
     };
   },
 };
