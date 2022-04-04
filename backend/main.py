@@ -255,4 +255,4 @@ async def login(form: OAuth2PasswordRequestForm=Depends(),db: Session=Depends(ge
         data={"sub": member.username},
         expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "Bearer"}
