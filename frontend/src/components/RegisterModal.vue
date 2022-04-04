@@ -65,7 +65,7 @@ export default {
         placeholder="연세포탈 비밀번호"
         required
       />
-      <input type="text" v-model="form.real_name" placeholder="이름(실명)" />
+      <input type="text" v-model="form.real_name" placeholder="실명" />
       <input type="text" v-model="form.username" placeholder="사용할 ID" />
       <input
         type="password"
