@@ -404,7 +404,6 @@ def test_get_magazines():
     ]
     dummies = [{
         "year": i,
-        "season": i,
         "cover": dummy_upload[i-1]["uuid"],
         "published": date(year=i, month=1, day=1).strftime("%Y-%m-%d"),
         "contents": [
@@ -444,7 +443,6 @@ def test_get_magazine():
     ).json()["uuid"]
     dummy = {
         "year": 1984,
-        "season": 1,
         "cover": uploaded,
         "published": date(year=1984, month=4, day=3).strftime("%Y-%m-%d"),
         "contents": [
@@ -475,7 +473,6 @@ def test_create_magazine():
     ).json()["uuid"]
     data = {
         "year": 2022,
-        "season": 1,
         "cover": uploaded,
         "published": "2022-01-01",
         "contents": [
@@ -538,7 +535,6 @@ def test_update_magazine():
     ).json()["uuid"]
     prev = {
         "year": 2016,
-        "season": 5,
         "cover": uploaded,
         "published": "2016-05-13",
         "contents": [
@@ -551,7 +547,6 @@ def test_update_magazine():
     }
     data = {
         "year": 2019,
-        "season": 1,
         "cover": uploaded,
         "published": "2019-05-30",
         "contents": [
@@ -598,7 +593,6 @@ def test_delete_magazine():
     ).json()["uuid"]
     data = {
         "year": 2002,
-        "season": 1,
         "cover": uploaded,
         "published": "2002-06-25",
         "contents": [

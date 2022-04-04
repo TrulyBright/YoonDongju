@@ -143,7 +143,6 @@ def get_magazines(db: Session, skip: int=0, limit: int=100):
 def create_magazine(db: Session, magazine: models.MagazineCreate):
     db_magazine = schemas.Magazine(
         year=magazine.year,
-        season=magazine.season,
         cover=str(magazine.cover),
         published=magazine.published,
     )
@@ -167,7 +166,6 @@ def update_magazine(db: Session, published: date, magazine: models.MagazineCreat
         return False
     updated.update({
         "year": magazine.year,
-        "season": magazine.season,
         "cover": str(magazine.cover),
         "published": magazine.published
     })

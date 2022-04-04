@@ -15,10 +15,12 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 from database import Base
 
+
 class ClubInformation(Base):
     __tablename__ = "clubInformations"
     key = Column(String, primary_key=True)
     value = Column(String)
+
 
 class Member(Base):
     __tablename__ = "members"
@@ -28,11 +30,13 @@ class Member(Base):
     password = Column(String)
     role = Column(String)
 
+
 class PostUploadedFileAssociation(Base):
     __tablename__ = "postUploadedFileAssociation"
     post_no = Column(Integer, ForeignKey("posts.no"), index=True)
     file_uuid = Column(String, ForeignKey("uploadedFiles.uuid"))
     __table_args__ = (PrimaryKeyConstraint("post_no", "file_uuid"),)
+
 
 class Post(Base):
     __tablename__ = "posts"
@@ -49,11 +53,13 @@ class Post(Base):
         secondary=PostUploadedFileAssociation.__tablename__,
     )
 
+
 class UploadedFile(Base):
     __tablename__ = "uploadedFiles"
     uuid = Column(String, primary_key=True)
     name = Column(String)
     content_type = Column(String)
+
 
 class Class(Base):
     __tablename__ = "classes"
@@ -63,17 +69,21 @@ class Class(Base):
     description = Column(String)
     records = relationship("ClassRecord")
 
+
 class ClassRecord(Base):
     __tablename__ = "classRecords"
-    class_name = Column(String, ForeignKey("classes.name"), index=True, primary_key=True)
+    class_name = Column(String, ForeignKey("classes.name"),
+                        index=True, primary_key=True)
     conducted = Column(Date, index=True, primary_key=True)
     moderator = Column(String)
     topic = Column(String)
     content = Column(String)
     participants = relationship("ClassParticipant")
+
     @hybrid_property
     def number_of_participants(self):
         return len(self.participants)
+
 
 class ClassParticipant(Base):
     __tablename__ = "classParticipants"
@@ -88,14 +98,16 @@ class ClassParticipant(Base):
         ),
     )
 
+
 class Magazine(Base):
     __tablename__ = "magazines"
     year = Column(Integer)
     season = Column(Integer)
-    cover = Column(String, ForeignKey("uploadedFiles.uuid")) # 표지 파일 UUID
+    cover = Column(String, ForeignKey("uploadedFiles.uuid"))  # 표지 파일 UUID
     published = Column(Date, primary_key=True)
     contents = relationship("MagazineContent")
     __table_args__ = (UniqueConstraint('year', 'season'),)
+
 
 class MagazineContent(Base):
     __tablename__ = "magazineContents"
