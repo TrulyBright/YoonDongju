@@ -60,7 +60,9 @@ async def get_about(db: Session=Depends(get_db)):
 
 @app.put("/about", response_model=models.Post)
 async def update_about(about: models.PostCreate, db: Session=Depends(get_db), modifier: schemas.Member=Depends(auth.get_current_member_board_only)):
-    return crud.update_post(db=db, type=models.PostType.about, post=about, modifier=modifier)
+    if crud.get_post(db=db, type=models.PostType.about):
+        return crud.update_post(db=db, type=models.PostType.about, post=about, modifier=modifier)
+    return crud.create_post(db=db, author=modifier, post=about, type=models.PostType.about)
 
 @app.get("/rules", response_model=models.Post)
 async def get_rules(db: Session=Depends(get_db)):
@@ -70,7 +72,9 @@ async def get_rules(db: Session=Depends(get_db)):
 
 @app.put("/rules", response_model=models.Post)
 async def update_rules(rules: models.PostCreate, db: Session=Depends(get_db), modifier: schemas.Member=Depends(auth.get_current_member_board_only)):
-    return crud.update_post(db=db, type=models.PostType.rules, post=rules, modifier=modifier)
+    if crud.get_post(db=db, type=models.PostType.rules):
+        return crud.update_post(db=db, type=models.PostType.rules, post=rules, modifier=modifier)
+    return crud.create_post(db=db, author=modifier, post=rules, type=models.PostType.rules)
 
 @app.get("/notices", response_model=list[models.PostOutline])
 async def get_notices(skip: int=0, limit: int=100, db: Session=Depends(get_db)):

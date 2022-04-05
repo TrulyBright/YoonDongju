@@ -157,8 +157,14 @@ def test_update_about():
     posted = response.json()
     assert posted["title"] == about_data["title"]
     assert posted["content"] == about_data["content"]
-    assert posted["modified"] == datetime.today().date().strftime("%Y-%m-%d")
-    assert posted["modifier"] == settings.test_real_name
+
+    about_data["title"] = "updated"
+    about_data["content"] = "updated_content"
+    response = tested.put("/about", json=about_data, headers=get_jwt_header())
+    assert response.status_code == 200
+    posted = response.json()
+    assert posted["title"] == about_data["title"]
+    assert posted["content"] == about_data["content"]
     
     response = tested.get("/about")
     assert response.json() == posted
@@ -185,7 +191,7 @@ def test_update_rules():
     assert changed["title"] == rules["title"]
     assert changed["content"] == rules["content"]
     assert changed["published"] == datetime.today().date().strftime("%Y-%m-%d")
-    assert changed["author"] == "연세문학회"
+    assert changed["author"] == settings.test_real_name
     test_get_rules()
 
 def test_get_rules():
@@ -195,7 +201,7 @@ def test_get_rules():
     assert posted["title"] == rules["title"]
     assert posted["content"] == rules["content"]
     assert posted["published"] == datetime.today().date().strftime("%Y-%m-%d")
-    assert posted["author"] == "연세문학회"
+    assert posted["author"] == settings.test_real_name
 
 def test_get_recent_notices():
     for _ in range(10):

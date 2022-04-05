@@ -86,11 +86,9 @@ def update_post(db: Session, post: models.PostCreate, modifier: models.Member, n
     new = schemas.Post(
         type=type.value,
         title=post.title,
-        author="연세문학회",
+        author=modifier.real_name,
         content=post.content,
         published=datetime.today().date(),
-        modified=datetime.today().date(),
-        modifier=modifier.real_name,
         attached=db.query(schemas.UploadedFile).filter(schemas.UploadedFile.uuid.in_([str(id) for id in post.attached])).all()
     )
     db.add(new)
