@@ -16,6 +16,7 @@ export default {
       const store = useMemberStore();
       await store.requestToken(this.form);
       await store.whoAmI();
+      this.$emit("close");
     },
   },
 };
