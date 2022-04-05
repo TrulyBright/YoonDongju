@@ -1,5 +1,7 @@
 <script setup>
 import { RouterLink } from "vue-router";
+import { useMemberStore } from "../stores/member";
+const store = useMemberStore();
 </script>
 <script>
 export default {
@@ -14,6 +16,6 @@ export default {
 };
 </script>
 <template>
-  <RouterLink :to="writingLink">글쓰기</RouterLink>
+  <RouterLink :to="writingLink" v-if="store.isAdmin">글쓰기</RouterLink>
 </template>
 <style></style>
