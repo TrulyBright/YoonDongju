@@ -23,6 +23,7 @@ export default {
           await useMemberStore().register(this.form);
           this.error = "";
           this.$router.push({ name: "home" });
+          this.$emit("close");
         } catch (error) {
           console.log(error.response);
           this.error = `${error.response.status}: ${error.response.data.detail}`;
