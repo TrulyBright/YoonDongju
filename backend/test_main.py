@@ -526,6 +526,19 @@ def test_create_uploaded_file():
         assert response.headers["content-disposition"].endswith(f'"{data["name"]}"')
         assert response.content == f.read()
 
+def test_get_uploaded_file_info():
+    with open("main.py", "rb") as f:
+        change_role(models.Role.board)
+        response = tested.post("/uploaded", headers=get_jwt_header(), files={"uploaded":("main.py", f, "text/plain")})
+        assert response.status_code == 200
+        data = response.json()
+        response = tested.get(f"/uploaded-info/{data['uuid']}")
+        assert response.status_code == 200
+        parsed = response.json()
+        assert parsed['uuid'] == data['uuid']
+        assert parsed['name'] == "main.py"
+        assert parsed['content_type'] == "text/plain"
+
 def test_update_magazine():
     change_role(models.Role.board)
     uploaded = tested.post(

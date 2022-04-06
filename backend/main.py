@@ -134,6 +134,10 @@ async def get_uploaded_file(uuid: UUID, db: Session=Depends(get_db)):
 async def create_uploaded_file(uploaded: UploadFile, db: Session=Depends(get_db), uploader=Depends(auth.get_current_member_board_only)):
     return await crud.create_uploaded_file(db=db, file=uploaded)
 
+@app.get("/uploaded-info/{uuid}", response_model=models.UploadedFile)
+async def get_uploaded_file_info(uuid: UUID, db: Session=Depends(get_db)):
+    return crud.get_uploaded_file(db=db, uuid=uuid)
+
 @app.get("/magazines", response_model=list[models.MagazineOutline])
 async def get_magazines(skip: int=0, limit: int=100, db: Session=Depends(get_db)):
     return crud.get_magazines(db=db, skip=skip, limit=limit)
