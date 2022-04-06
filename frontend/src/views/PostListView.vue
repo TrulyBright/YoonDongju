@@ -5,6 +5,9 @@ import ListAction from "../components/ListAction.vue";
 </script>
 <script>
 export default {
+  props: {
+    type: String,
+  },
   data() {
     return {
       items: [],
@@ -13,7 +16,7 @@ export default {
   async created() {
     try {
       const result = await axios.get(
-        "/notices?skip=" +
+        `/${this.type}?skip=` +
           (this.$route.query.skip || 0) +
           "&limit=" +
           (this.$route.query.limit || 20)
@@ -32,7 +35,7 @@ export default {
       v-bind="item"
       :key="item"
     ></PostOutlineItem>
-    <ListAction :routeName="'notice'"></ListAction>
+    <ListAction :type="type"></ListAction>
   </main>
 </template>
 <style scoped></style>

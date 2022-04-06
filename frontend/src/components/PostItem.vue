@@ -11,6 +11,7 @@ const store = useMemberStore();
 export default {
   props: {
     no: Number,
+    type: String,
     title: String,
     content: String,
     published: String,
@@ -32,5 +33,5 @@ export default {
   ></PostMetadata>
   <PostContent :content="content"></PostContent>
   <PostAttached v-for="a in attached" :key="a.uuid" v-bind="a"></PostAttached>
-  <PostAction :no="no" v-if="store.isAdmin"></PostAction>
+  <PostAction :type="type" :no="no" v-if="store.isAdmin"></PostAction>
 </template>

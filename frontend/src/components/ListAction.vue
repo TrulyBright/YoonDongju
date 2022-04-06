@@ -6,16 +6,23 @@ const store = useMemberStore();
 <script>
 export default {
   props: {
-    routeName: String,
+    type: String,
   },
   computed: {
-    writingLink() {
-      return this.routeName === "class" ? "classWrite" : "write";
+    routeToWrite() {
+      switch (this.type) {
+        case "notices":
+          return {
+            name: "writeNotice",
+          };
+        default:
+          return undefined;
+      }
     },
   },
 };
 </script>
 <template>
-  <RouterLink :to="writingLink" v-if="store.isAdmin">글쓰기</RouterLink>
+  <RouterLink :to="routeToWrite" v-if="store.isAdmin">글쓰기</RouterLink>
 </template>
 <style></style>

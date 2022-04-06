@@ -11,7 +11,8 @@ export default {
   data() {
     return {
       post: {
-        no: 0,
+        no: this.no || 0,
+        type: this.type,
         title: "",
         content: "",
         published: "",
@@ -22,21 +23,22 @@ export default {
       },
     };
   },
+  computed: {
+    routeToFetch() {
+      switch (this.type) {
+        case "about":
+        case "rules":
+          return this.type;
+        case "notices":
+          return this.no === undefined ? "notices" : "notices/" + this.no;
+        default:
+          return undefined;
+      }
+    },
+  },
   async created() {
-    let route = null;
-    switch (this.type) {
-      case "about":
-        route = "about";
-        break;
-      case "rules":
-        route = "rules";
-        break;
-      case "notice":
-        route = "notices/" + this.no;
-        break;
-    }
     try {
-      const res = await axios.get(route);
+      const res = await axios.get(this.routeToFetch);
       this.post.no = res.data.no;
       this.post.title = res.data.title;
       this.post.content = res.data.content;

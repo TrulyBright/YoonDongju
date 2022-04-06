@@ -8,6 +8,7 @@ import axios from "axios";
 export default {
   props: {
     no: Number,
+    type: String,
   },
   data() {
     return {
@@ -19,9 +20,9 @@ export default {
     };
   },
   async created() {
-    if (!this.no) return;
+    if (!this.GETURI) return;
     try {
-      let result = await axios.get("/notices/" + this.no);
+      const result = await axios.get(this.GETURI);
       this.form.title = result.data.title;
       this.form.content = result.data.content;
       this.form.attached = result.data.attached;
@@ -29,21 +30,72 @@ export default {
       console.error(error);
     }
   },
+  computed: {
+    method() {
+      switch (this.type) {
+        case "about":
+        case "rules":
+          return axios.put;
+        case "notices":
+          return this.no === undefined ? axios.post : axios.patch;
+        default:
+          throw "unknown type: " + this.type;
+      }
+    },
+    GETURI() {
+      switch (this.type) {
+        case "about":
+        case "rules":
+          return this.type;
+        case "notices":
+          return this.no === undefined ? null : `notices/${this.no}`;
+        default:
+          throw "unknown type: " + this.type;
+      }
+    },
+    WriteURI() {
+      switch (this.type) {
+        case "about":
+        case "rules":
+          return this.type;
+        case "notices":
+          return this.no === undefined ? "notices" : `notices/${this.no}`;
+        default:
+          throw "unknown type: " + this.type;
+      }
+    },
+  },
   methods: {
+    routeToReturn(no) {
+      switch (this.type) {
+        case "about":
+          return {
+            name: "about",
+          };
+        case "rules":
+          return {
+            name: "rules",
+          };
+        case "notices":
+          return {
+            name: "notice",
+            params: {
+              no: no,
+            },
+          };
+        default:
+          throw "unknown type: " + this.type;
+      }
+    },
     async submit() {
       try {
         const store = useMemberStore();
-        const method = this.no === undefined ? axios.post : axios.patch;
-        const URI = this.no === undefined ? "notices" : `notices/${this.no}`;
-        const result = await method(URI, this.form, {
+        const result = await this.method(this.WriteURI, this.form, {
           headers: {
             Authorization: store.authorizationHeader,
           },
         });
-        this.$router.push({
-          name: result.data.type,
-          params: { no: result.data.no },
-        });
+        this.$router.push(this.routeToReturn(result.data.no));
       } catch (error) {
         console.error(error);
       }
