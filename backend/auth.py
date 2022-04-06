@@ -11,8 +11,9 @@ from sqlalchemy.orm import Session
 import crud
 import database
 import models
+from settings import get_settings
 
-SECRET_KEY = "test"
+SECRET_KEY = get_settings().jwt_secret
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
