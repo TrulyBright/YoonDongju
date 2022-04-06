@@ -61,12 +61,14 @@ export default {
       <input
         :value="form.title"
         @input="(event) => (form.title = event.target.value)"
+        placeholder="제목"
       />
     </div>
     <div>
       <textarea
         :value="form.content"
         @input="(event) => (form.content = event.target.value)"
+        placeholder="본문"
       ></textarea>
     </div>
     <button type="submit">게시</button>
