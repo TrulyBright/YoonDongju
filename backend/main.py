@@ -181,21 +181,10 @@ async def update_class(class_name: models.ClassName, class_data: models.ClassCre
 async def get_class_records(class_name: models.ClassName, skip: int=0, limit: int=100, db: Session=Depends(get_db)):
     return crud.get_class_records(db=db, class_name=class_name, skip=skip, limit=limit)
 
-@app.get("/classes/{class_name}/records/{conducted}", response_model=Union[models.ClassRecord, models.ClassRecordPublic])
+@app.get("/classes/{class_name}/records/{conducted}", response_model=Union[models.ClassRecord, models.ClassRecord])
 async def get_class_record(class_name: models.ClassName, conducted: date, db: Session=Depends(get_db), accessing: schemas.Member=Depends(auth.get_current_member)):
     if record := crud.get_class_record(db=db, class_name=class_name, conducted=conducted):
-        data = models.ClassRecordPublic(
-            conducted=record.conducted,
-            topic=record.topic,
-            content=record.content,
-            class_name=record.class_name,
-            moderator=record.moderator
-        )
-        if accessing.role == models.Role.member:
-            return data
-        data = data.dict()
-        data["participants"] = record.participants # 임원진에게는 참여자 명단도 보임
-        return models.ClassRecord(**data)
+        return record
     raise HTTPException(404, f"{conducted}에 진행한 활동이 없습니다.")
 
 @app.post("/classes/{class_name}/records", response_model=models.ClassRecord)

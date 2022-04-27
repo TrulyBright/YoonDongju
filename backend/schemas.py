@@ -78,26 +78,6 @@ class ClassRecord(Base):
     moderator = Column(String)
     topic = Column(String)
     content = Column(String)
-    participants = relationship("ClassParticipant")
-
-    @hybrid_property
-    def number_of_participants(self):
-        return len(self.participants)
-
-
-class ClassParticipant(Base):
-    __tablename__ = "classParticipants"
-    no = Column(Integer, primary_key=True)
-    class_name = Column(String, index=True)
-    conducted = Column(Date, index=True)
-    name = Column(String)
-    __table_args__ = (
-        ForeignKeyConstraint(
-            [class_name, conducted],
-            [ClassRecord.class_name, ClassRecord.conducted]
-        ),
-    )
-
 
 class Magazine(Base):
     __tablename__ = "magazines"

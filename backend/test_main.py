@@ -78,11 +78,6 @@ class_record_data = {
     "conducted": "1920-01-01",
     "topic": "김민규, 「카스테라」",
     "content": "<b>미상불 이보다 난해한 작품도 없습니다.</b>",
-    "participants": [
-        models.ClassParticipantCreate(
-            name="채만식"
-        ).dict()
-    for _ in range(10)]
 }
 
 def get_jwt_header(invalid=False):
@@ -696,11 +691,6 @@ def test_get_class_records():
         data = {
             "topic": "뒤치닥, 『투명드래곤』",
             "content": "본 회차 독서반에서 우리는 뒤치닥이 톨킨보다 위대한 이유를 명쾌히 논증해냈으나 여백이 부족해 그 내용을 적지 않는다.",
-            "participants": [
-                models.ClassParticipantCreate(
-                    name="페르마"
-                ).dict() for _ in range(100)
-            ]
         }
         for d in range(1, 10):
             data["conducted"] = f"200{d}-0{d}-0{d}"
@@ -710,7 +700,6 @@ def test_get_class_records():
         for d, row in enumerate(response.json()[::-1]):
             d += 1
             assert row["topic"] == data["topic"]
-            assert row["number_of_participants"] == len(data["participants"])
             assert row["moderator"] == settings.test_real_name
             assert row["conducted"] == f"200{d}-0{d}-0{d}"
 
@@ -728,7 +717,6 @@ def test_create_class_record():
         assert response.status_code == 200
         parsed = response.json()
         assert parsed["conducted"] == class_record_data["conducted"]
-        assert parsed["participants"] == class_record_data["participants"]
         assert parsed["topic"] == class_record_data["topic"]
         assert parsed["content"] == class_record_data["content"]
 
@@ -736,18 +724,12 @@ def test_create_class_record():
         assert response.status_code == 200
         parsed = response.json()
         assert parsed["conducted"] == class_record_data["conducted"]
-        assert parsed["participants"] == class_record_data["participants"]
         assert parsed["topic"] == class_record_data["topic"]
         assert parsed["content"] == class_record_data["content"]
 
 def test_update_class_record():
     class_record_data["topic"] = "One Day in the Life of Ivan Denisovich"
     class_record_data["content"] = "Death is the solution to all problems; no man, no problem."
-    class_record_data["participants"] = [
-        models.ClassParticipantCreate(
-            name="Joseph Stalin"
-        ).dict() for _ in range(17)
-    ]
     original_conducted = class_record_data["conducted"]
     class_record_data["conducted"] = "1962-01-01"
     for name in models.ClassName:
@@ -764,7 +746,6 @@ def test_update_class_record():
         parsed = response.json()
         assert parsed["topic"] == class_record_data["topic"]
         assert parsed["conducted"] == class_record_data["conducted"]
-        assert parsed["participants"] == class_record_data["participants"]
         assert parsed["content"] == class_record_data["content"]
         
         response = tested.get(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
@@ -783,7 +764,6 @@ def test_get_class_record():
         parsed = response.json()
         assert parsed["topic"] == class_record_data["topic"]
         assert parsed["conducted"] == class_record_data["conducted"]
-        assert parsed["participants"] == class_record_data["participants"]
         assert parsed["content"] == class_record_data["content"]
         
         change_role(models.Role.member)
@@ -792,7 +772,6 @@ def test_get_class_record():
         parsed = response.json()
         assert parsed["topic"] == class_record_data["topic"]
         assert parsed["conducted"] == class_record_data["conducted"]
-        assert parsed.get("participants") == None
         assert parsed["content"] == class_record_data["content"]
 
 def test_delete_class_record():

@@ -219,17 +219,10 @@ def create_class_record(db: Session, class_name: models.ClassName, moderator: mo
         content=record.content,
     )
     db.add(new_record)
-    db.add_all([
-        schemas.ClassParticipant(
-            conducted=record.conducted,
-            class_name=class_name,
-            name=p.name
-        ) for p in record.participants])
     db.commit()
     return new_record
 
 def update_class_record(db: Session, class_name: models.ClassName, conducted: date, record: models.ClassRecordCreate):
-    db.query(schemas.ClassParticipant).filter(schemas.ClassParticipant.class_name==class_name, schemas.ClassParticipant.conducted==conducted).delete()
     deleted  = db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name, schemas.ClassRecord.conducted==conducted)
     original: schemas.ClassRecord = deleted.first()
     if not original:
@@ -244,12 +237,6 @@ def update_class_record(db: Session, class_name: models.ClassName, conducted: da
         content=record.content
     )
     db.add(updated)
-    db.add_all([
-        schemas.ClassParticipant(
-            conducted=record.conducted,
-            class_name=class_name,
-            name=p.name
-        ) for p in record.participants])
     db.commit()
     db.refresh(updated)
     return updated
@@ -261,7 +248,6 @@ def get_class_records(db: Session, class_name: models.ClassName, skip: int=0, li
     return db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name).order_by(schemas.ClassRecord.conducted.desc()).offset(skip).limit(limit).all()
 
 def delete_class_record(db: Session, class_name: models.ClassName, conducted: date):
-    db.query(schemas.ClassParticipant).filter(schemas.ClassParticipant.class_name==class_name, schemas.ClassParticipant.conducted==conducted).delete()
     deleted = db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name==class_name, schemas.ClassRecord.conducted==conducted).delete()
     db.commit()
     return deleted
