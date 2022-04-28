@@ -132,6 +132,12 @@ async def create_uploaded_file(db: Session, file: UploadFile):
     db.commit()
     return row
 
+async def delete_uploaded_file(db: Session, uuid: uuid.UUID):
+    deleted = db.query(schemas.UploadedFile).filter(schemas.UploadedFile.uuid==str(uuid)).delete()
+    if deleted:
+        db.commit()
+    return deleted
+
 def get_magazine(db: Session, published: date):
     return db.query(schemas.Magazine).filter(schemas.Magazine.published==published).first()
 

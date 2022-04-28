@@ -521,6 +521,24 @@ def test_create_uploaded_file():
         assert response.headers["content-disposition"].endswith(f'"{data["name"]}"')
         assert response.content == f.read()
 
+def test_delete_uploaded_file():
+    with open("main.py", "rb") as f:
+        change_role(models.Role.board)
+        response = tested.post("/uploaded", headers=get_jwt_header(), files={"uploaded":("main.py", f, "text/plain")})
+        URI = "uploaded/"+response.json()["uuid"]
+        response = tested.delete(URI)
+        assert response.status_code == 401
+        change_role(models.Role.member)
+        response = tested.delete(URI, headers=get_jwt_header())
+        assert response.status_code == 403
+        change_role(models.Role.board)
+        response = tested.delete("uploaded/"+str(uuid.uuid4()), headers=get_jwt_header())
+        assert response.status_code == 404
+        response = tested.delete(URI, headers=get_jwt_header())
+        assert response.status_code == 200
+        response = tested.get(URI)
+        assert response.status_code == 404
+
 def test_get_uploaded_file_info():
     with open("main.py", "rb") as f:
         change_role(models.Role.board)

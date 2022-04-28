@@ -134,6 +134,11 @@ async def get_uploaded_file(uuid: UUID, db: Session=Depends(get_db)):
 async def create_uploaded_file(uploaded: UploadFile, db: Session=Depends(get_db), uploader=Depends(auth.get_current_member_board_only)):
     return await crud.create_uploaded_file(db=db, file=uploaded)
 
+@app.delete("/uploaded/{uuid}")
+async def delete_uploaded_file(uuid: UUID, db: Session=Depends(get_db), deleter=Depends(auth.get_current_member_board_only)):
+    if not await crud.delete_uploaded_file(db=db, uuid=uuid):
+        raise HTTPException(404)
+
 @app.get("/uploaded-info/{uuid}", response_model=models.UploadedFile)
 async def get_uploaded_file_info(uuid: UUID, db: Session=Depends(get_db)):
     return crud.get_uploaded_file(db=db, uuid=uuid)
