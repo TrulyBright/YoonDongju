@@ -17,6 +17,8 @@ export default {
         published: null,
         contents: [],
       },
+      coverName: null,
+      uploaded: false,
     };
   },
   async created() {
@@ -51,6 +53,11 @@ export default {
         (item) => item !== content
       );
     },
+    onUpload(event) {
+      this.form.cover = event.uuid;
+      this.coverName = event.name;
+      this.uploaded = true;
+    },
   },
   computed: {
     method() {
@@ -73,10 +80,16 @@ export default {
     /></label>
     <label for="cover"
       >표지
+      <div v-if="published || uploaded">
+        <img
+          :src="axios.defaults.baseURL + 'uploaded/' + form.cover"
+          :alt="coverName"
+        />
+      </div>
       <FileUploader
-        :uuid="this.published ? form.cover : null"
+        :uuid="form.cover"
         name="cover"
-        @upload="(value) => (form.cover = value)"
+        @upload="onUpload"
       ></FileUploader>
     </label>
     <label for="published"

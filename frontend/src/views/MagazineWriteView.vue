@@ -10,6 +10,6 @@ export default {
 };
 </script>
 <template>
-  <MagazineWriter></MagazineWriter>
+  <MagazineWriter :published="$route.query.published"></MagazineWriter>
 </template>
 <style scoped></style>

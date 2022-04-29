@@ -1,9 +1,12 @@
 <script setup>
+import { RouterLink } from "vue-router";
 import axios from "axios";
 import MagazineCover from "./MagazineCover.vue";
 import MagazineContents from "./MagazineContents.vue";
+import { useMemberStore } from "../stores/member";
 </script>
 <script>
+const store = useMemberStore();
 export default {
   components: {
     MagazineCover,
@@ -59,6 +62,16 @@ export default {
           this.error = error;
         });
     },
+    async deleteMagazine(item) {
+      if (confirm(`${item.published}에 발간된 문집을 삭제합니다.`)) {
+        await axios.delete("magazines/" + item.published, {
+          headers: {
+            Authorization: store.authorizationHeader,
+          },
+        });
+        this.$router.go(); // refresh
+      }
+    },
   },
 };
 </script>
@@ -74,6 +87,14 @@ export default {
       <p>{{ item.season }}</p>
       <p>{{ item.published }}</p>
     </div>
+    <RouterLink
+      v-if="store.isAdmin"
+      :to="'/magazines/write?published=' + item.published"
+      >편집</RouterLink
+    >
+    <button type="button" v-if="store.isAdmin" @click="deleteMagazine(item)">
+      삭제
+    </button>
   </div>
 </template>
 <style></style>

@@ -12,22 +12,25 @@ export default {
     return {
       input: null,
       uploaded: false,
-      uploadedFileInfo: {
-        name: null,
-        uuid: null,
-      },
     };
   },
   async created() {
     if (this.uuid) {
+      console.log("before");
       const response = await axios.get("uploaded-info/" + this.uuid);
-      this.uploaded = true;
-      this.uploadedFileInfo.name = response.data.name;
-      this.uploadedFileInfo.uuid = response.data.uuid;
-      this.$emit("upload", this.uploadedFileInfo.uuid);
+      console.log("after");
+      console.log("after");
+      this.applyUpload(response.data);
     }
   },
   methods: {
+    applyUpload(data) {
+      this.uploaded = true;
+      this.$emit("upload", {
+        name: data.name,
+        uuid: data.uuid,
+      });
+    },
     async submit() {
       const formData = new FormData();
       formData.append("uploaded", this.input);
@@ -36,10 +39,7 @@ export default {
           Authorization: store.authorizationHeader,
         },
       });
-      this.uploaded = true;
-      this.uploadedFileInfo.name = response.data.name;
-      this.uploadedFileInfo.uuid = response.data.uuid;
-      this.$emit("upload", this.uploadedFileInfo.uuid);
+      this.applyUpload(response.data);
     },
     changeFile(event) {
       const file = event.target.files[0];
@@ -49,18 +49,9 @@ export default {
 };
 </script>
 <template>
-  <div v-if="uploaded">
-    <img
-      :src="axios.defaults.baseURL + 'uploaded/' + uploadedFileInfo.uuid"
-      :alt="uploadedFileInfo.name"
-    />
-    <div>
-      {{ uploadedFileInfo.name }}
-    </div>
-  </div>
   <form @submit.prevent="submit">
     <input type="file" v-on:change="changeFile" />
-    <input type="submit" value="올리기" />
+    <input type="submit" value="올리기/교체하기" />
   </form>
 </template>
 <style scoped></style>
