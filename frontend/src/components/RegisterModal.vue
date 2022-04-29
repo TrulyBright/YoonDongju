@@ -66,8 +66,14 @@ export default {
         placeholder="연세포탈 비밀번호"
         required
       />
-      <input type="text" v-model="form.real_name" placeholder="실명" />
-      <input type="text" v-model="form.username" placeholder="사용할 ID" />
+      <input type="text" v-model="form.real_name" placeholder="실명" required />
+      <input
+        type="text"
+        v-model="form.username"
+        placeholder="사용할 ID"
+        pattern="^.{1,65}$"
+        required
+      />
       <input
         type="password"
         v-model="form.password"
@@ -82,6 +88,8 @@ export default {
         @blur="validate"
         required
       />
+      <p>ID는 최대 64자에, 한글을 비롯하여 어떤 문자든 허용됩니다.</p>
+      <p>비밀번호는 10자 이상에 숫자와 영문이 하나씩은 있어야 합니다.</p>
       <input type="submit" value="회원가입" />
       <div>{{ error }}</div>
     </div>
