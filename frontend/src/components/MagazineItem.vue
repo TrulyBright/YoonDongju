@@ -88,11 +88,15 @@ export default {
       <p>{{ item.published }}</p>
     </div>
     <RouterLink
-      v-if="store.isAdmin"
+      v-if="item && store.isAdmin"
       :to="'/magazines/write?published=' + item.published"
       >편집</RouterLink
     >
-    <button type="button" v-if="store.isAdmin" @click="deleteMagazine(item)">
+    <button
+      type="button"
+      v-if="item && store.isAdmin"
+      @click="deleteMagazine(item)"
+    >
       삭제
     </button>
   </div>
