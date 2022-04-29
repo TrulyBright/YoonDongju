@@ -7,6 +7,7 @@ const store = useMemberStore();
 export default {
   props: {
     uuid: [String, null],
+    accept: [String, null],
   },
   data() {
     return {
@@ -50,7 +51,7 @@ export default {
 </script>
 <template>
   <form @submit.prevent="submit">
-    <input type="file" v-on:change="changeFile" />
+    <input type="file" v-on:change="changeFile" :accept="accept" />
     <input type="submit" value="올리기/교체하기" />
   </form>
 </template>

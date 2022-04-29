@@ -88,6 +88,7 @@ export default {
       </div>
       <FileUploader
         :uuid="form.cover"
+        accept="image/*"
         name="cover"
         @upload="onUpload"
       ></FileUploader>
