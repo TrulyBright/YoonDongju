@@ -30,7 +30,6 @@ export default {
   },
   methods: {
     async submit() {
-      console.log(this.form);
       await this.method(this.URI, this.form, {
         headers: {
           Authorization: store.authorizationHeader,
