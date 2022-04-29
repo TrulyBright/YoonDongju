@@ -1,6 +1,9 @@
 <script setup>
 import MagazineItem from "../components/MagazineItem.vue";
 import axios from "axios";
+import MagazineListAction from "../components/MagazineListAction.vue";
+import { useMemberStore } from "../stores/member";
+const store = useMemberStore();
 </script>
 <script>
 export default {
@@ -17,6 +20,7 @@ export default {
 </script>
 <template>
   <div>
+    <MagazineListAction v-if="store.isAdmin"></MagazineListAction>
     <MagazineItem
       v-for="volume in magazines"
       :key="volume.published"

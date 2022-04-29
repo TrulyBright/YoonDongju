@@ -61,6 +61,11 @@ const router = createRouter({
       name: "magazines",
       component: () => import("../views/MagazineGridView.vue"),
     },
+    {
+      path: "/magazines/write",
+      name: "magazineWrite",
+      component: () => import("../views/MagazineWriteView.vue"),
+    },
   ],
 });
 
