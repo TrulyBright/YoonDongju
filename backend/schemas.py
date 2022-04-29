@@ -79,6 +79,7 @@ class ClassRecord(Base):
     topic = Column(String)
     content = Column(String)
 
+
 class Magazine(Base):
     __tablename__ = "magazines"
     year = Column(Integer)
