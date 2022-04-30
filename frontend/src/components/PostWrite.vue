@@ -104,27 +104,15 @@ export default {
 };
 </script>
 <template>
-  <form @submit.prevent="submit">
+  <BForm @submit.prevent="submit">
     <!-- <PostInput>
       <template #title>{{ title }}</template>
       <template #content>{{ content }}</template>
     </PostInput> -->
-    <div>
-      <input
-        :value="form.title"
-        @input="(event) => (form.title = event.target.value)"
-        placeholder="제목"
-      />
-    </div>
-    <div>
-      <textarea
-        :value="form.content"
-        @input="(event) => (form.content = event.target.value)"
-        placeholder="본문"
-      ></textarea>
-    </div>
-    <button type="submit">게시</button>
-  </form>
+    <BFormInput v-model="form.title" placeholder="제목" />
+    <BFormTextarea v-model="form.content" placeholder="본문"></BFormTextarea>
+    <BButton type="submit">게시</BButton>
+  </BForm>
   <PostPreview :source="form.content"></PostPreview>
 </template>
 <style scoped></style>
