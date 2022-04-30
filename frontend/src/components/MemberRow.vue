@@ -1,4 +1,9 @@
+<script setup>
+import { useMemberStore } from "../stores/member";
+import axios from "axios";
+</script>
 <script>
+const store = useMemberStore();
 export default {
   props: {
     username: String,
@@ -6,9 +11,46 @@ export default {
     student_id: Number,
     role: String,
   },
-  computed: {
-    roleInKorean() {
-      switch (this.role) {
+  data() {
+    return {
+      roles: ["member", "board", "president"],
+    };
+  },
+  methods: {
+    async kick() {
+      if (confirm(`이 회원(${this.student_id})을 사이트에서 추방합니다.`)) {
+        await axios.delete("members/" + this.student_id, {
+          headers: {
+            Authorization: store.authorizationHeader,
+          },
+        });
+        this.$router.go();
+      }
+    },
+    async patch(english) {
+      if (
+        confirm(
+          `이 회원(${this.student_id})을 ${this.roleInKorean(
+            english
+          )}으로 승진/강등합니다.`
+        )
+      ) {
+        await axios.patch(
+          "members/" + this.student_id,
+          {
+            role: english,
+          },
+          {
+            headers: {
+              Authorization: store.authorizationHeader,
+            },
+          }
+        );
+        this.$router.go();
+      }
+    },
+    roleInKorean(english) {
+      switch (english) {
         case "member":
           return "회원";
         case "board":
@@ -26,9 +68,19 @@ export default {
   <div>{{ username }}</div>
   <div>{{ real_name }}</div>
   <div>{{ student_id }}</div>
-  <div>{{ roleInKorean }}</div>
+  <div>{{ roleInKorean(role) }}</div>
   <div>
-    <button type="button">권한 변경</button>
+    <BDropdown text="작업">
+      <BDropdownHeader>권한 승강</BDropdownHeader>
+      <BDropdownItem
+        v-for="english in roles"
+        :key="english"
+        @click="patch(english)"
+        >{{ roleInKorean(english) }}으로</BDropdownItem
+      >
+      <BDropdownHeader>재적 변경</BDropdownHeader>
+      <BDropdownItem @click="kick">추방</BDropdownItem>
+    </BDropdown>
   </div>
 </template>
 <style scoped></style>

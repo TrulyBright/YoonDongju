@@ -1,7 +1,5 @@
 <script>
 export default {};
 </script>
-<template>
-  <h2>분반 정보</h2>
-</template>
+<template></template>
 <style scoped></style>

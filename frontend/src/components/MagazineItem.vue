@@ -77,7 +77,9 @@ export default {
 </script>
 <template>
   <div>
-    <div v-if="loading">가져오는 중···</div>
+    <div v-if="loading">
+      <b-spinner label="spinning"></b-spinner>
+    </div>
     <div v-if="error">{{ error }}</div>
     <div @click="swap()">
       <component v-if="item" :is="shown" v-bind="shownProperties()"></component>

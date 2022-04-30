@@ -66,6 +66,30 @@ const router = createRouter({
       name: "magazineWrite",
       component: () => import("../views/MagazineWriteView.vue"),
     },
+    {
+      path: "/classes",
+      name: "classes",
+      component: () => import("../views/ClassesView.vue"),
+    },
+    {
+      path: "/admin",
+      name: "admin",
+      component: () => import("../views/AdminView.vue"),
+      children: [
+        {
+          path: "club-information",
+          component: () => import("../views/AdminClubInformationView.vue"),
+        },
+        {
+          path: "classes",
+          component: () => import("../views/AdminClassInformationView.vue"),
+        },
+        {
+          path: "members",
+          component: () => import("../views/AdminMemberList.vue"),
+        },
+      ],
+    },
   ],
 });
 
