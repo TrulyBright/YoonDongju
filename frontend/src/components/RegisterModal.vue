@@ -42,8 +42,8 @@ export default {
 };
 </script>
 <template>
-  <form @submit.prevent="submit">
-    <button type="button" @click="$emit('close')">×</button>
+  <BForm @submit.prevent="submit">
+    <BButton @click="$emit('close')">×</BButton>
     <div>
       <h1>사이트 회원가입</h1>
       <p>동아리 가입은 따로 해야 합니다.</p>
@@ -54,45 +54,53 @@ export default {
       </p>
     </div>
     <div>
-      <input
+      <BFormInput
         type="number"
         v-model="form.portal_id"
         placeholder="학번(10자리)"
         required
       />
-      <input
+      <BFormInput
         type="password"
         v-model="form.portal_pw"
         placeholder="연세포탈 비밀번호"
         required
       />
-      <input type="text" v-model="form.real_name" placeholder="실명" required />
-      <input
+      <BFormInput
         type="text"
-        v-model="form.username"
-        placeholder="사용할 ID"
-        pattern="^.{1,65}$"
+        v-model="form.real_name"
+        placeholder="실명"
         required
       />
-      <input
-        type="password"
-        v-model="form.password"
-        placeholder="사용할 비밀번호"
-        pattern="^(?=.*[0-9])(?=.*[a-zA-Z]).{10,}$"
-        required
-      />
-      <input
+      <BFormGroup
+        description="ID는 최대 64자에, 한글을 비롯하여 어떤 문자든 허용됩니다."
+      >
+        <BFormInput
+          type="text"
+          v-model="form.username"
+          placeholder="사용할 ID"
+          pattern="^.{1,65}$"
+          required
+      /></BFormGroup>
+      <BFormGroup
+        description="비밀번호는 10자 이상에 숫자와 영문이 하나씩은 있어야 합니다."
+        ><BFormInput
+          type="password"
+          v-model="form.password"
+          placeholder="사용할 비밀번호"
+          pattern="^(?=.*[0-9])(?=.*[a-zA-Z]).{10,}$"
+          required
+      /></BFormGroup>
+      <BFormInput
         type="password"
         v-model="form.passwordConfirm"
         placeholder="사용할 비밀번호 재입력"
         @blur="validate"
         required
       />
-      <p>ID는 최대 64자에, 한글을 비롯하여 어떤 문자든 허용됩니다.</p>
-      <p>비밀번호는 10자 이상에 숫자와 영문이 하나씩은 있어야 합니다.</p>
-      <input type="submit" value="회원가입" />
+      <BButton type="submit">가입</BButton>
       <div>{{ error }}</div>
     </div>
-  </form>
+  </BForm>
 </template>
 <style></style>
