@@ -20,10 +20,13 @@ engine = create_engine(
     connect_args={"check_same_thread": False},
     poolclass=StaticPool
 )
-sqlevent.listen(engine, "connect", lambda conn, rec: conn.execute("PRAGMA foreign_keys=ON;"))
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+sqlevent.listen(engine, "connect", lambda conn,
+                rec: conn.execute("PRAGMA foreign_keys=ON;"))
+TestingSessionLocal = sessionmaker(
+    autocommit=False, autoflush=False, bind=engine)
 
 database.Base.metadata.create_all(bind=engine)
+
 
 def override_get_db():
     try:
@@ -32,8 +35,10 @@ def override_get_db():
     finally:
         db.close()
 
+
 main.app.dependency_overrides[database.get_db] = override_get_db
 tested = TestClient(main.app)
+
 
 class Settings(BaseSettings):
     test_portal_id: str
@@ -41,9 +46,11 @@ class Settings(BaseSettings):
     test_real_name: str
     test_username: str
     test_password: str
+
     class Config:
         env_file = "test.env"
         env_file_encoding = "utf-8"
+
 
 settings = Settings()
 
@@ -81,8 +88,10 @@ class_record_data = {
     "content": "<b>미상불 이보다 난해한 작품도 없습니다.</b>",
 }
 
+
 def get_jwt_header(invalid=False):
     return {"Authorization": "Bearer "+("asdf" if invalid else my_token)}
+
 
 def change_role(into: models.Role):
     db: Session = TestingSessionLocal()
@@ -91,7 +100,8 @@ def change_role(into: models.Role):
         student_id=settings.test_portal_id,
         member=models.MemberModify(role=into)
     )
-    assert crud.get_member(db=db, student_id=settings.test_portal_id).role == into.value
+    assert crud.get_member(
+        db=db, student_id=settings.test_portal_id).role == into.value
     db.close()
 
 
@@ -111,6 +121,7 @@ def test_register():
     assert created["username"] == settings.test_username
     assert created["role"] == models.Role.member.value
 
+
 def test_login():
     global my_token
     data = {
@@ -121,32 +132,39 @@ def test_login():
     assert response.status_code == 200
     my_token = response.json()["access_token"]
 
+
 def test_update_club_information():
     change_role(models.Role.member)
     info = club_info
-    response = tested.put("/club-information", json=info, headers=get_jwt_header(True))
+    response = tested.put("/club-information", json=info,
+                          headers=get_jwt_header(True))
     assert response.status_code == 401
-    response = tested.put("/club-information", json=info, headers=get_jwt_header())
+    response = tested.put("/club-information", json=info,
+                          headers=get_jwt_header())
     assert response.status_code == 403
     change_role(models.Role.board)
-    response = tested.put("/club-information", json=info, headers=get_jwt_header())
+    response = tested.put("/club-information", json=info,
+                          headers=get_jwt_header())
     assert response.status_code == 200
     updated: dict = response.json()
     assert updated == club_info
+
 
 def test_get_club_information():
     response = tested.get("/club-information")
     assert response.status_code == 200
     assert response.json() == club_info
 
+
 def test_update_about():
     change_role(models.Role.member)
-    response = tested.put("/about", json=about_data, headers=get_jwt_header(True))
+    response = tested.put("/about", json=about_data,
+                          headers=get_jwt_header(True))
     assert response.status_code == 401
 
     response = tested.put("/about", json=about_data, headers=get_jwt_header())
     assert response.status_code == 403
-    
+
     change_role(models.Role.board)
     response = tested.put("/about", json=about_data, headers=get_jwt_header())
     assert response.status_code == 200
@@ -161,9 +179,10 @@ def test_update_about():
     posted = response.json()
     assert posted["title"] == about_data["title"]
     assert posted["content"] == about_data["content"]
-    
+
     response = tested.get("/about")
     assert response.json() == posted
+
 
 def test_get_about():
     response = tested.get("/about")
@@ -172,10 +191,11 @@ def test_get_about():
     assert about["title"] == about_data["title"]
     assert about["content"] == about_data["content"]
 
+
 def test_update_rules():
     response = tested.put("/rules", json=rules, headers=get_jwt_header(True))
     assert response.status_code == 401
-    
+
     change_role(models.Role.member)
     response = tested.put("/rules", json=rules, headers=get_jwt_header())
     assert response.status_code == 403
@@ -190,6 +210,7 @@ def test_update_rules():
     assert changed["author"] == settings.test_real_name
     test_get_rules()
 
+
 def test_get_rules():
     response = tested.get("/rules")
     assert response.status_code == 200
@@ -199,6 +220,7 @@ def test_get_rules():
     assert posted["published"] == datetime.today().date().strftime("%Y-%m-%d")
     assert posted["author"] == settings.test_real_name
 
+
 def test_get_recent_notices():
     for _ in range(10):
         test_create_notice()
@@ -207,10 +229,11 @@ def test_get_recent_notices():
     for i, post in enumerate(list(posted_posts.values())[::-1][:4]):
         for key, value in response.json()[i].items():
             assert post[key] == value
-    response = tested.get("/recent-notices", params={"limit":10})
+    response = tested.get("/recent-notices", params={"limit": 10})
     for i, post in enumerate(list(posted_posts.values())[::-1][:4]):
         for key, value in response.json()[i].items():
             assert post[key] == value
+
 
 def test_get_notices():
     for _ in range(10):
@@ -229,6 +252,7 @@ def test_get_notices():
     for i, post in enumerate(list(posted_posts.values())[::-1][span["skip"]:span["skip"]+span["limit"]]):
         for key, value in response.json()[i].items():
             assert post[key] == value
+
 
 def test_create_notice():
     change_role(models.Role.board)
@@ -267,10 +291,12 @@ def test_create_notice():
     assert posted["modifier"] == None
     assert posted["modified"] == None
     assert len(posted["attached"]) == len(attached)
-    assert {uploaded["uuid"] for uploaded in posted["attached"]} == set(attached)
+    assert {uploaded["uuid"]
+            for uploaded in posted["attached"]} == set(attached)
     last_post_no = posted["no"]
     test_get_notice(posted)
     posted_posts[posted["no"]] = posted
+
 
 def test_get_notice(data=None):
     response = tested.get(f"/notices/{data['no'] if data else last_post_no}")
@@ -284,7 +310,9 @@ def test_get_notice(data=None):
         assert posted["modifier"] == data["modifier"]
         assert posted["modified"] == data["modified"]
         assert len(posted["attached"]) == len(data["attached"])
-        assert {uploaded["uuid"] for uploaded in posted["attached"]} == {uploaded["uuid"] for uploaded in data["attached"]}
+        assert {uploaded["uuid"] for uploaded in posted["attached"]} == {
+            uploaded["uuid"] for uploaded in data["attached"]}
+
 
 def test_update_notice():
     change_role(models.Role.board)
@@ -305,40 +333,50 @@ def test_update_notice():
         "content": "updated=content",
         "attached": attached
     }
-    assert tested.patch(f"/notices/{last_post_no}", json=modified, headers=get_jwt_header()).status_code == 403
+    assert tested.patch(f"/notices/{last_post_no}", json=modified,
+                        headers=get_jwt_header()).status_code == 403
 
     change_role(models.Role.board)
     today = datetime.today().strftime("%Y-%m-%d")
-    response = tested.patch(f"/notices/{last_post_no}", json=modified, headers=get_jwt_header())
+    response = tested.patch(
+        f"/notices/{last_post_no}", json=modified, headers=get_jwt_header())
     assert response.status_code == 200
     posted: dict = response.json()
     assert posted["title"] == modified["title"]
     assert posted["content"] == modified["content"]
     assert len(posted["attached"]) == len(modified["attached"])
-    assert {uploaded["uuid"] for uploaded in posted["attached"]} == set(attached)
+    assert {uploaded["uuid"]
+            for uploaded in posted["attached"]} == set(attached)
     assert posted["author"] == settings.test_real_name
     assert posted["modifier"] == settings.test_real_name
     assert posted["modified"] == today
     assert posted["no"] == last_post_no
     test_get_notice(posted)
 
-    assert tested.patch(f"/notices/{last_post_no}", json=modified, headers=get_jwt_header(True)).status_code == 401
+    assert tested.patch(f"/notices/{last_post_no}", json=modified,
+                        headers=get_jwt_header(True)).status_code == 401
 
     posted_posts[posted["no"]] = posted
 
+
 def test_delete_notice():
-    assert tested.delete(f"/notices/{last_post_no}", headers=get_jwt_header(True)).status_code == 401
+    assert tested.delete(
+        f"/notices/{last_post_no}", headers=get_jwt_header(True)).status_code == 401
     assert tested.get(f"/notices/{last_post_no}").status_code == 200
 
     change_role(models.Role.member)
-    assert tested.delete(f"/notices/{last_post_no}", headers=get_jwt_header()).status_code == 403
+    assert tested.delete(
+        f"/notices/{last_post_no}", headers=get_jwt_header()).status_code == 403
     assert tested.get(f"/notices/{last_post_no}").status_code == 200
 
     change_role(models.Role.board)
-    assert tested.delete(f"/notices/{last_post_no}", headers=get_jwt_header()).status_code == 200
+    assert tested.delete(
+        f"/notices/{last_post_no}", headers=get_jwt_header()).status_code == 200
     assert tested.get(f"/notices/{last_post_no}").status_code == 404
-    assert tested.delete(f"/notices/{last_post_no}", headers=get_jwt_header()).status_code == 404
+    assert tested.delete(
+        f"/notices/{last_post_no}", headers=get_jwt_header()).status_code == 404
     del posted_posts[last_post_no]
+
 
 def test_get_members():
     response = tested.get("/members")
@@ -350,18 +388,21 @@ def test_get_members():
     response = tested.get("/members", headers=get_jwt_header())
     assert response.status_code == 200
 
+
 def test_get_member():
     response = tested.get(f"/members/{settings.test_portal_id}")
     assert response.status_code == 401
-    
+
     change_role(models.Role.president)
-    response = tested.get(f"/members/{settings.test_portal_id}", headers=get_jwt_header())
+    response = tested.get(
+        f"/members/{settings.test_portal_id}", headers=get_jwt_header())
     assert response.status_code == 200
     parsed = response.json()
     assert parsed["student_id"] == int(settings.test_portal_id)
     assert parsed["username"] == settings.test_username
     assert parsed["role"] == models.Role.president
     assert parsed["real_name"] == settings.test_real_name
+
 
 def test_get_me():
     response = tested.get("/me", headers=get_jwt_header())
@@ -372,21 +413,25 @@ def test_get_me():
     assert parsed["role"] == models.Role.president
     assert parsed["real_name"] == settings.test_real_name
 
+
 def test_update_member():
     data = {
-        "role": models.Role.member.value # downgrade? LOL
+        "role": models.Role.member.value  # downgrade? LOL
     }
     response = tested.patch(f"/members/{settings.test_portal_id}", json=data)
     assert response.status_code == 401
 
     change_role(models.Role.member)
-    response = tested.patch(f"/members/{settings.test_portal_id}", json=data, headers=get_jwt_header())
+    response = tested.patch(
+        f"/members/{settings.test_portal_id}", json=data, headers=get_jwt_header())
     assert response.status_code == 403
-    
+
     change_role(models.Role.board)
-    response = tested.patch(f"/members/{settings.test_portal_id}", json=data, headers=get_jwt_header())
+    response = tested.patch(
+        f"/members/{settings.test_portal_id}", json=data, headers=get_jwt_header())
     assert response.status_code == 200
     assert response.json()["role"] == data["role"]
+
 
 def test_get_magazines():
     change_role(models.Role.board)
@@ -416,7 +461,8 @@ def test_get_magazines():
                 language="한국어"
             ).dict() for _ in range(37)]
     } for i in range(1, LENGTH)]
-    dummies_outline = [json.loads(models.MagazineOutline(**d).json()) for d in dummies]
+    dummies_outline = [json.loads(
+        models.MagazineOutline(**d).json()) for d in dummies]
     change_role(models.Role.board)
     for d in dummies:
         tested.post("/magazines", json=d, headers=get_jwt_header())
@@ -429,7 +475,9 @@ def test_get_magazines():
     }
     response = tested.get("/magazines", params=params)
     assert response.status_code == 200
-    assert response.json() == dummies_outline[::-1][params["skip"]:params["skip"]+params["limit"]]
+    assert response.json(
+    ) == dummies_outline[::-1][params["skip"]:params["skip"]+params["limit"]]
+
 
 def test_get_magazine():
     uploaded = tested.post(
@@ -460,6 +508,7 @@ def test_get_magazine():
     response = tested.get(f"/magazines/{dummy['published']}")
     assert response.status_code == 200
     assert response.json() == dummy
+
 
 def test_create_magazine():
     uploaded = tested.post(
@@ -497,21 +546,26 @@ def test_create_magazine():
     assert response.status_code == 200
     assert response.json() == data
 
+
 def test_get_recent_magazines():
     params = {"limit": 8}
     response = tested.get("/recent-magazines", params=params)
     assert response.status_code == 200
     assert len(response.json()) == params["limit"]
 
+
 def test_create_uploaded_file():
     with open("main.py", "rb") as f:
-        response = tested.post("/uploaded", headers=get_jwt_header(True), files={"uploaded": ("asdf.asdf", b"wer", "text/plain")})
+        response = tested.post("/uploaded", headers=get_jwt_header(True),
+                               files={"uploaded": ("asdf.asdf", b"wer", "text/plain")})
         assert response.status_code == 401
         change_role(models.Role.member)
-        response = tested.post("/uploaded", headers=get_jwt_header(), files={"uploaded": ("asdf.asdf", b"awe", "text/plain")})
+        response = tested.post("/uploaded", headers=get_jwt_header(),
+                               files={"uploaded": ("asdf.asdf", b"awe", "text/plain")})
         assert response.status_code == 403
         change_role(models.Role.board)
-        response = tested.post("/uploaded", headers=get_jwt_header(), files={"uploaded":("main.py", f, "text/plain")})
+        response = tested.post("/uploaded", headers=get_jwt_header(),
+                               files={"uploaded": ("main.py", f, "text/plain")})
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == "main.py"
@@ -519,13 +573,16 @@ def test_create_uploaded_file():
     with open("main.py", "rb") as f:
         response = tested.get(f"/uploaded/{uuid}")
         assert response.status_code == 200
-        assert response.headers["content-disposition"].endswith(f'"{data["name"]}"')
+        assert response.headers["content-disposition"].endswith(
+            f'"{data["name"]}"')
         assert response.content == f.read()
+
 
 def test_delete_uploaded_file():
     with open("main.py", "rb") as f:
         change_role(models.Role.board)
-        response = tested.post("/uploaded", headers=get_jwt_header(), files={"uploaded":("main.py", f, "text/plain")})
+        response = tested.post("/uploaded", headers=get_jwt_header(),
+                               files={"uploaded": ("main.py", f, "text/plain")})
         URI = "uploaded/"+response.json()["uuid"]
         response = tested.delete(URI)
         assert response.status_code == 401
@@ -533,17 +590,20 @@ def test_delete_uploaded_file():
         response = tested.delete(URI, headers=get_jwt_header())
         assert response.status_code == 403
         change_role(models.Role.board)
-        response = tested.delete("uploaded/"+str(uuid.uuid4()), headers=get_jwt_header())
+        response = tested.delete(
+            "uploaded/"+str(uuid.uuid4()), headers=get_jwt_header())
         assert response.status_code == 404
         response = tested.delete(URI, headers=get_jwt_header())
         assert response.status_code == 200
         response = tested.get(URI)
         assert response.status_code == 404
 
+
 def test_get_uploaded_file_info():
     with open("main.py", "rb") as f:
         change_role(models.Role.board)
-        response = tested.post("/uploaded", headers=get_jwt_header(), files={"uploaded":("main.py", f, "text/plain")})
+        response = tested.post("/uploaded", headers=get_jwt_header(),
+                               files={"uploaded": ("main.py", f, "text/plain")})
         assert response.status_code == 200
         data = response.json()
         response = tested.get(f"/uploaded-info/{data['uuid']}")
@@ -552,6 +612,7 @@ def test_get_uploaded_file_info():
         assert parsed['uuid'] == data['uuid']
         assert parsed['name'] == "main.py"
         assert parsed['content_type'] == "text/plain"
+
 
 def test_update_magazine():
     change_role(models.Role.board)
@@ -597,20 +658,23 @@ def test_update_magazine():
     assert response.status_code == 401
 
     change_role(models.Role.member)
-    response = tested.patch(f"/magazines/{prev['published']}", headers=get_jwt_header(), json=data)
+    response = tested.patch(
+        f"/magazines/{prev['published']}", headers=get_jwt_header(), json=data)
     assert response.status_code == 403
-    
+
     change_role(models.Role.board)
-    response = tested.patch(f"/magazines/{prev['published']}", headers=get_jwt_header(), json=data)
+    response = tested.patch(
+        f"/magazines/{prev['published']}", headers=get_jwt_header(), json=data)
     assert response.status_code == 200
     assert response.json() == data
-    
+
     response = tested.get(f"/magazines/{data['published']}")
     assert response.status_code == 200
     assert response.json() == data
 
     response = tested.get(f"/magazines/{prev['published']}")
     assert response.status_code == 404
+
 
 def test_delete_magazine():
     uploaded = tested.post(
@@ -641,18 +705,21 @@ def test_delete_magazine():
 
     response = tested.delete(f"/magazines/{data['published']}")
     assert response.status_code == 401
-    
+
     change_role(models.Role.member)
-    response = tested.delete(f"/magazines/{data['published']}", headers=get_jwt_header())
+    response = tested.delete(
+        f"/magazines/{data['published']}", headers=get_jwt_header())
     assert response.status_code == 403
 
     change_role(models.Role.board)
-    response = tested.delete(f"/magazines/{data['published']}", headers=get_jwt_header())
+    response = tested.delete(
+        f"/magazines/{data['published']}", headers=get_jwt_header())
     assert response.status_code == 200
 
     response = tested.get(f"/magazines/{data['published']}")
     assert response.status_code == 404
-    
+
+
 def test_get_uploaded_file():
     generated = uuid.uuid4()
     response = tested.get(f"uploaded/{generated}")
@@ -660,50 +727,57 @@ def test_get_uploaded_file():
     response = tested.get("uploaded/../requirements.txt")
     assert response.status_code == 404
 
-def test_update_class():
-    eng2kor = {
-        models.ClassName.poetry: "시반",
-        models.ClassName.novel: "소설반",
-        models.ClassName.critique: "합평반",
-        models.ClassName.reading: "독서반",
-    }
-    for name in models.ClassName:
-        class_data["korean"] = eng2kor[name]
-        expected = class_data.copy()
-        expected["name"] = name
-        response = tested.patch(f"/classes/{name}", json=class_data)
-        assert response.status_code == 401
-
-        change_role(models.Role.member)
-        response = tested.patch(f"/classes/{name}", json=class_data, headers=get_jwt_header())
-        assert response.status_code == 403
-
-        change_role(models.Role.board)
-        response = tested.patch(f"/classes/{name}", json=class_data, headers=get_jwt_header())
-        assert response.status_code == 200
-        assert response.json() == expected
-
-        response = tested.get(f"/classes/{name}")
-        assert response.status_code == 200
-        assert response.json() == expected
-        
-        modified = class_data
-        modified["moderator"] = expected["moderator"] = "이몽룡"
-        modified["description"] = expected["description"] = "성춘향 환영"
-        response = tested.patch(f"/classes/{name}", json=modified, headers=get_jwt_header())
-        assert response.status_code == 200
-        assert response.json() == expected
-        response = tested.get(f"/classes/{name}")
-        assert response.status_code == 200
-        assert response.json() == expected
 
 def test_get_classes():
     response = tested.get("/classes")
     assert response.status_code == 200
-    names = list(models.ClassName)
-    for i, data in enumerate(response.json()):
-        assert data["name"] == names[i]
+    names = set(models.ClassName)
+    for data in response.json():
+        assert data["name"] in names
         assert "korean" in data
+
+
+def test_update_class():
+    with TestClient(main.app) as tested:
+        eng2kor = {
+            models.ClassName.poetry: "시반",
+            models.ClassName.novel: "소설반",
+            models.ClassName.critique: "합평반",
+            models.ClassName.reading: "독서반",
+        }
+        for name in models.ClassName:
+            class_data["korean"] = eng2kor[name]
+            expected = class_data.copy()
+            expected["name"] = name
+            response = tested.patch(f"/classes/{name}", json=class_data)
+            assert response.status_code == 401
+
+            change_role(models.Role.member)
+            response = tested.patch(
+                f"/classes/{name}", json=class_data, headers=get_jwt_header())
+            assert response.status_code == 403
+
+            change_role(models.Role.board)
+            response = tested.patch(
+                f"/classes/{name}", json=class_data, headers=get_jwt_header())
+            assert response.status_code == 200
+            assert response.json() == expected
+
+            response = tested.get(f"/classes/{name}")
+            assert response.status_code == 200
+            assert response.json() == expected
+
+            modified = class_data
+            modified["moderator"] = expected["moderator"] = "이몽룡"
+            modified["description"] = expected["description"] = "성춘향 환영"
+            response = tested.patch(
+                f"/classes/{name}", json=modified, headers=get_jwt_header())
+            assert response.status_code == 200
+            assert response.json() == expected
+            response = tested.get(f"/classes/{name}")
+            assert response.status_code == 200
+            assert response.json() == expected
+
 
 def test_get_class():
     eng2kor = {
@@ -720,6 +794,7 @@ def test_get_class():
         assert response.status_code == 200
         assert response.json() == expected
 
+
 def test_get_class_records():
     for name in models.ClassName:
         change_role(models.Role.board)
@@ -729,7 +804,8 @@ def test_get_class_records():
         }
         for d in range(1, 10):
             data["conducted"] = f"200{d}-0{d}-0{d}"
-            tested.post(f"/classes/{name}/records", headers=get_jwt_header(), json=data)
+            tested.post(f"/classes/{name}/records",
+                        headers=get_jwt_header(), json=data)
         response = tested.get(f"/classes/{name}/records")
         assert response.status_code == 200
         for d, row in enumerate(response.json()[::-1]):
@@ -738,29 +814,35 @@ def test_get_class_records():
             assert row["moderator"] == settings.test_real_name
             assert row["conducted"] == f"200{d}-0{d}-0{d}"
 
+
 def test_create_class_record():
     for name in models.ClassName:
-        response = tested.post(f"/classes/{name}/records", json=class_record_data)
+        response = tested.post(
+            f"/classes/{name}/records", json=class_record_data)
         assert response.status_code == 401
 
         change_role(models.Role.member)
-        response = tested.post(f"/classes/{name}/records", json=class_record_data, headers=get_jwt_header())
+        response = tested.post(
+            f"/classes/{name}/records", json=class_record_data, headers=get_jwt_header())
         assert response.status_code == 403
 
         change_role(models.Role.board)
-        response = tested.post(f"/classes/{name}/records", json=class_record_data, headers=get_jwt_header())
+        response = tested.post(
+            f"/classes/{name}/records", json=class_record_data, headers=get_jwt_header())
         assert response.status_code == 200
         parsed = response.json()
         assert parsed["conducted"] == class_record_data["conducted"]
         assert parsed["topic"] == class_record_data["topic"]
         assert parsed["content"] == class_record_data["content"]
 
-        response = tested.get(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
+        response = tested.get(
+            f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
         assert response.status_code == 200
         parsed = response.json()
         assert parsed["conducted"] == class_record_data["conducted"]
         assert parsed["topic"] == class_record_data["topic"]
         assert parsed["content"] == class_record_data["content"]
+
 
 def test_update_class_record():
     class_record_data["topic"] = "One Day in the Life of Ivan Denisovich"
@@ -768,81 +850,100 @@ def test_update_class_record():
     original_conducted = class_record_data["conducted"]
     class_record_data["conducted"] = "1962-01-01"
     for name in models.ClassName:
-        response = tested.patch(f"/classes/{name}/records/{original_conducted}", json=class_record_data)
+        response = tested.patch(
+            f"/classes/{name}/records/{original_conducted}", json=class_record_data)
         assert response.status_code == 401
-        
+
         change_role(models.Role.member)
-        response = tested.patch(f"/classes/{name}/records/{original_conducted}", json=class_record_data, headers=get_jwt_header())
+        response = tested.patch(
+            f"/classes/{name}/records/{original_conducted}", json=class_record_data, headers=get_jwt_header())
         assert response.status_code == 403
 
         change_role(models.Role.board)
-        response = tested.patch(f"/classes/{name}/records/{original_conducted}", json=class_record_data, headers=get_jwt_header())
+        response = tested.patch(
+            f"/classes/{name}/records/{original_conducted}", json=class_record_data, headers=get_jwt_header())
         assert response.status_code == 200
         parsed = response.json()
         assert parsed["topic"] == class_record_data["topic"]
         assert parsed["conducted"] == class_record_data["conducted"]
         assert parsed["content"] == class_record_data["content"]
-        
-        response = tested.get(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
+
+        response = tested.get(
+            f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
         assert response.json() == parsed
-        response = tested.get(f"/classes/{name}/records/{original_conducted}", headers=get_jwt_header())
+        response = tested.get(
+            f"/classes/{name}/records/{original_conducted}", headers=get_jwt_header())
         assert response.status_code == 404
+
 
 def test_get_class_record():
     for name in models.ClassName:
-        response = tested.get(f"/classes/{name}/records/{class_record_data['conducted']}")
+        response = tested.get(
+            f"/classes/{name}/records/{class_record_data['conducted']}")
         assert response.status_code == 401
 
         change_role(models.Role.board)
-        response = tested.get(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
+        response = tested.get(
+            f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
         assert response.status_code == 200
         parsed = response.json()
         assert parsed["topic"] == class_record_data["topic"]
         assert parsed["conducted"] == class_record_data["conducted"]
         assert parsed["content"] == class_record_data["content"]
-        
+
         change_role(models.Role.member)
-        response = tested.get(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
+        response = tested.get(
+            f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
         assert response.status_code == 200
         parsed = response.json()
         assert parsed["topic"] == class_record_data["topic"]
         assert parsed["conducted"] == class_record_data["conducted"]
         assert parsed["content"] == class_record_data["content"]
+
 
 def test_delete_class_record():
     for name in models.ClassName:
-        response = tested.delete(f"/classes/{name}/records/{class_record_data['conducted']}")
+        response = tested.delete(
+            f"/classes/{name}/records/{class_record_data['conducted']}")
         assert response.status_code == 401
 
         change_role(models.Role.member)
-        response = tested.delete(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
+        response = tested.delete(
+            f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
         assert response.status_code == 403
-        
+
         change_role(models.Role.board)
-        response = tested.delete(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
+        response = tested.delete(
+            f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
         assert response.status_code == 200
-        response = tested.delete(f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
+        response = tested.delete(
+            f"/classes/{name}/records/{class_record_data['conducted']}", headers=get_jwt_header())
         assert response.status_code == 404
         for record in tested.get(f"/classes/{name}/records").json():
-            response = tested.delete(f"/classes/{name}/records/{record['conducted']}", headers=get_jwt_header())
+            response = tested.delete(
+                f"/classes/{name}/records/{record['conducted']}", headers=get_jwt_header())
             assert response.status_code == 200
-            response = tested.delete(f"/classes/{name}/records/{record['conducted']}", headers=get_jwt_header())
+            response = tested.delete(
+                f"/classes/{name}/records/{record['conducted']}", headers=get_jwt_header())
             assert response.status_code == 404
         response = tested.get(f"/classes/{name}/records")
         assert response.status_code == 200
         assert response.json() == []
+
 
 def test_delete_member():
     response = tested.delete(f"/members/{settings.test_portal_id}")
     assert response.status_code == 401
 
     change_role(models.Role.member)
-    response = tested.delete(f"/members/{settings.test_portal_id}", headers=get_jwt_header())
+    response = tested.delete(
+        f"/members/{settings.test_portal_id}", headers=get_jwt_header())
     assert response.status_code == 403
 
     change_role(models.Role.board)
     response = tested.delete("/members/58826974", headers=get_jwt_header())
     assert response.status_code == 404
-    
-    response = tested.delete(f"/members/{settings.test_portal_id}", headers=get_jwt_header())
+
+    response = tested.delete(
+        f"/members/{settings.test_portal_id}", headers=get_jwt_header())
     assert response.status_code == 200

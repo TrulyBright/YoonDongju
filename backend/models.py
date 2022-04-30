@@ -26,6 +26,13 @@ class ClassName(str, Enum):
     reading = "reading"
 
 
+class ClassKoreanName(str, Enum):
+    poetry = "시반"
+    novel = "소설반"
+    critique = "합평반"
+    reading = "독서반"
+
+
 class TokenData(BaseModel):
     student_id: int | None = None
 
