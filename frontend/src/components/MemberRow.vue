@@ -15,9 +15,6 @@ export default {
     roles() {
       return ["member", "board", "president"];
     },
-    canBe() {
-      return this.roles.filter((val) => this.role !== val);
-    },
   },
   methods: {
     async kick() {
@@ -78,13 +75,14 @@ export default {
     <BDropdown text="작업">
       <BDropdownHeader>권한 승강</BDropdownHeader>
       <BDropdownItem
-        v-for="english in canBe"
+        v-for="english in roles"
         :key="english"
+        :disabled="english === role"
         @click="patch(english)"
         >{{ roleInKorean(english) }}으로</BDropdownItem
       >
       <BDropdownHeader>재적 변경</BDropdownHeader>
-      <BDropdownItem @click="kick">추방</BDropdownItem>
+      <BDropdownItem @click="kick" variant="danger">추방</BDropdownItem>
     </BDropdown>
   </div>
 </template>
