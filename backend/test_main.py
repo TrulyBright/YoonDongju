@@ -700,7 +700,10 @@ def test_update_class():
 def test_get_classes():
     response = tested.get("/classes")
     assert response.status_code == 200
-    assert response.json() == list(models.ClassName)
+    names = list(models.ClassName)
+    for i, data in enumerate(response.json()):
+        assert data["name"] == names[i]
+        assert "korean" in data
 
 def test_get_class():
     eng2kor = {
