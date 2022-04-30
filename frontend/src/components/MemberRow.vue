@@ -18,7 +18,7 @@ export default {
   },
   methods: {
     async kick() {
-      if (confirm(`이 회원(${this.student_id})을 사이트에서 추방합니다.`)) {
+      if (confirm(`${this.real_name} 회원을 사이트에서 추방합니다.`)) {
         await axios.delete("members/" + this.student_id, {
           headers: {
             Authorization: store.authorizationHeader,
@@ -30,11 +30,11 @@ export default {
     async patch(english) {
       if (
         confirm(
-          `이 회원(${this.student_id})을 ${this.roleInKorean(english)}으로 ${
+          `${this.real_name} 회원이 ${this.roleInKorean(english)}으로 ${
             this.roles.indexOf(english) > this.roles.indexOf(this.role)
               ? "승진"
               : "강등"
-          }합니다.`
+          }됩니다.`
         )
       ) {
         await axios.patch(
@@ -67,23 +67,30 @@ export default {
 };
 </script>
 <template>
-  <div>{{ username }}</div>
-  <div>{{ real_name }}</div>
-  <div>{{ student_id }}</div>
-  <div>{{ roleInKorean(role) }}</div>
-  <div>
-    <BDropdown text="작업">
-      <BDropdownHeader>권한 승강</BDropdownHeader>
-      <BDropdownItem
-        v-for="english in roles"
-        :key="english"
-        :disabled="english === role"
-        @click="patch(english)"
-        >{{ roleInKorean(english) }}으로</BDropdownItem
-      >
-      <BDropdownHeader>재적 변경</BDropdownHeader>
-      <BDropdownItem @click="kick" variant="danger">추방</BDropdownItem>
-    </BDropdown>
-  </div>
+  <BTr>
+    <BTd>{{ username }}</BTd>
+    <BTd>{{ student_id }}</BTd>
+    <BTd>{{ real_name }}</BTd>
+    <BTd>{{ roleInKorean(role) }}</BTd>
+    <BTd>
+      <BDropdown text="작업" size="sm" class="action-dropdown">
+        <BDropdownHeader>직책 승강</BDropdownHeader>
+        <BDropdownItem
+          v-for="english in roles"
+          :key="english"
+          :disabled="english === role"
+          @click="patch(english)"
+          >{{ roleInKorean(english) }}으로</BDropdownItem
+        >
+        <BDropdownDivider></BDropdownDivider>
+        <BDropdownHeader>재적 변경</BDropdownHeader>
+        <BDropdownItem @click="kick" variant="danger">추방</BDropdownItem>
+      </BDropdown>
+    </BTd>
+  </BTr>
 </template>
-<style scoped></style>
+<style scoped>
+.action-dropdown {
+  position: static;
+}
+</style>

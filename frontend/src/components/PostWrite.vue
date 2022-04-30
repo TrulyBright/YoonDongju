@@ -104,7 +104,7 @@ export default {
 };
 </script>
 <template>
-  <BForm @submit.prevent="submit">
+  <BForm @submit="submit">
     <!-- <PostInput>
       <template #title>{{ title }}</template>
       <template #content>{{ content }}</template>

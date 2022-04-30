@@ -35,58 +35,41 @@ export default {
 };
 </script>
 <template>
-  <form @submit.prevent="submit">
-    <label for="address"
-      >위치
-      <input
+  <BCard>
+    <h2>연락처</h2>
+    <BForm @submit.prevent="submit">
+      <BFormInput
         type="text"
         name="address"
         placeholder="대강당 109호"
-        :value="form.address"
-        @input="(event) => (form.address = event.target.value)"
+        v-model="form.address"
       />
-    </label>
-    <label for="email"
-      >이메일
-      <input
+      <BFormInput
         type="email"
         name="email"
         placeholder="roompennoyeah@gmail.com"
-        :value="form.email"
-        @input="(event) => (form.email = event.target.value)"
+        v-model="form.email"
       />
-    </label>
-    <label for="president_name"
-      >회장
-      <input
+      <BFormInput
         type="text"
         name="president_name"
         placeholder="홍길동"
-        :value="form.president_name"
-        @input="(event) => (form.president_name = event.target.value)"
+        v-model="form.president_name"
       />
-    </label>
-    <label for="president_tel"
-      >전화번호
-      <input
+      <BFormInput
         type="tel"
         name="president_tel"
         placeholder="010-1234-5678"
-        :value="form.president_tel"
-        @input="(event) => (form.president_tel = event.target.value)"
+        v-model="form.president_tel"
       />
-    </label>
-    <label for="join_form_url"
-      >가입 구글 폼 주소
-      <input
+      <BFormInput
         type="url"
         name="join_form_url"
         placeholder="https://example.com"
-        :value="form.join_form_url"
-        @input="(event) => (form.join_form_url = event.target.value)"
+        v-model="form.join_form_url"
       />
-    </label>
-    <BButton type="submit">변경</BButton>
-  </form>
+      <BButton type="submit">변경</BButton>
+    </BForm>
+  </BCard>
 </template>
 <style scoped></style>
