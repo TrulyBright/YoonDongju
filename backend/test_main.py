@@ -690,10 +690,9 @@ def test_update_class():
         assert response.json() == expected
 
 def test_get_classes():
-    every_class = [tested.get(f"/classes/{name}").json() for name in models.ClassName]
     response = tested.get("/classes")
     assert response.status_code == 200
-    assert response.json() == every_class
+    assert response.json() == list(models.ClassName)
 
 def test_get_class():
     for name in models.ClassName:
