@@ -23,6 +23,7 @@ export default {
 </script>
 <template>
   <h2>회원 관리</h2>
+
   <MemberRow v-for="m in list" v-bind="m" :key="m.student_id"></MemberRow>
 </template>
 <style scoped></style>

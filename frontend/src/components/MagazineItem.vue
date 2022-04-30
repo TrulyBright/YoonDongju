@@ -1,5 +1,4 @@
 <script setup>
-import { RouterLink } from "vue-router";
 import axios from "axios";
 import MagazineCover from "./MagazineCover.vue";
 import MagazineContents from "./MagazineContents.vue";
@@ -62,9 +61,9 @@ export default {
           this.error = error;
         });
     },
-    async deleteMagazine(item) {
-      if (confirm(`${item.published}에 발간된 문집을 삭제합니다.`)) {
-        await axios.delete("magazines/" + item.published, {
+    async deleteMagazine() {
+      if (confirm(`${this.item.published}에 발간된 문집을 삭제합니다.`)) {
+        await axios.delete("magazines/" + this.item.published, {
           headers: {
             Authorization: store.authorizationHeader,
           },
@@ -78,7 +77,7 @@ export default {
 <template>
   <div>
     <div v-if="loading">
-      <b-spinner label="spinning"></b-spinner>
+      <BSpinner label="spinning"></BSpinner>
     </div>
     <div v-if="error">{{ error }}</div>
     <div @click="swap()">
@@ -89,18 +88,12 @@ export default {
       <p>{{ item.season }}</p>
       <p>{{ item.published }}</p>
     </div>
-    <RouterLink
-      v-if="item && store.isAdmin"
-      :to="'/magazines/write?published=' + item.published"
-      >편집</RouterLink
-    >
-    <button
-      type="button"
-      v-if="item && store.isAdmin"
-      @click="deleteMagazine(item)"
-    >
-      삭제
-    </button>
+    <BDropdown text="작업" v-if="item && store.isAdmin">
+      <BDropdownItem :to="'/magazines/write?published=' + item.published"
+        >편집</BDropdownItem
+      >
+      <BDropdownItem @click="deleteMagazine">삭제</BDropdownItem>
+    </BDropdown>
   </div>
 </template>
 <style></style>

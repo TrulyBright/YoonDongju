@@ -1,6 +1,5 @@
 <script setup>
 import axios from "axios";
-import { RouterLink } from "vue-router";
 import { useMemberStore } from "../stores/member";
 </script>
 <script>
@@ -60,8 +59,8 @@ export default {
 </script>
 <template>
   <div>
-    <RouterLink :to="routeToWrite">수정</RouterLink>
-    <button @click="deleteIfConfirmed">삭제</button>
+    <BButton :to="routeToWrite">수정</BButton>
+    <BButton @click="deleteIfConfirmed">삭제</BButton>
   </div>
 </template>
 <style></style>

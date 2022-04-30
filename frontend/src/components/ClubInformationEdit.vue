@@ -86,7 +86,7 @@ export default {
         @input="(event) => (form.join_form_url = event.target.value)"
       />
     </label>
-    <input type="submit" value="변경" />
+    <BButton type="submit">변경</BButton>
   </form>
 </template>
 <style scoped></style>

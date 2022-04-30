@@ -11,10 +11,13 @@ export default {
     student_id: Number,
     role: String,
   },
-  data() {
-    return {
-      roles: ["member", "board", "president"],
-    };
+  computed: {
+    roles() {
+      return ["member", "board", "president"];
+    },
+    canBe() {
+      return this.roles.filter((val) => this.role !== val);
+    },
   },
   methods: {
     async kick() {
@@ -30,9 +33,11 @@ export default {
     async patch(english) {
       if (
         confirm(
-          `이 회원(${this.student_id})을 ${this.roleInKorean(
-            english
-          )}으로 승진/강등합니다.`
+          `이 회원(${this.student_id})을 ${this.roleInKorean(english)}으로 ${
+            this.roles.indexOf(english) > this.roles.indexOf(this.role)
+              ? "승진"
+              : "강등"
+          }합니다.`
         )
       ) {
         await axios.patch(
@@ -73,7 +78,7 @@ export default {
     <BDropdown text="작업">
       <BDropdownHeader>권한 승강</BDropdownHeader>
       <BDropdownItem
-        v-for="english in roles"
+        v-for="english in canBe"
         :key="english"
         @click="patch(english)"
         >{{ roleInKorean(english) }}으로</BDropdownItem
