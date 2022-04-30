@@ -69,6 +69,7 @@ rules = {
 }
 
 class_data = models.ClassCreate(
+    korean="시반",
     moderator="성춘향",
     schedule="주 52시간",
     description="이몽룡 참석 금지"
@@ -660,7 +661,14 @@ def test_get_uploaded_file():
     assert response.status_code == 404
 
 def test_update_class():
+    eng2kor = {
+        models.ClassName.poetry: "시반",
+        models.ClassName.novel: "소설반",
+        models.ClassName.critique: "합평반",
+        models.ClassName.reading: "독서반",
+    }
     for name in models.ClassName:
+        class_data["korean"] = eng2kor[name]
         expected = class_data.copy()
         expected["name"] = name
         response = tested.patch(f"/classes/{name}", json=class_data)
@@ -695,7 +703,14 @@ def test_get_classes():
     assert response.json() == list(models.ClassName)
 
 def test_get_class():
+    eng2kor = {
+        models.ClassName.poetry: "시반",
+        models.ClassName.novel: "소설반",
+        models.ClassName.critique: "합평반",
+        models.ClassName.reading: "독서반",
+    }
     for name in models.ClassName:
+        class_data["korean"] = eng2kor[name]
         expected = class_data.copy()
         expected["name"] = name
         response = tested.get(f"/classes/{name}")

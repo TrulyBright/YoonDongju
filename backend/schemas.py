@@ -64,6 +64,7 @@ class UploadedFile(Base):
 class Class(Base):
     __tablename__ = "classes"
     name = Column(String, primary_key=True)
+    korean = Column(String, unique=True)
     moderator = Column(String)
     schedule = Column(String)
     description = Column(String)

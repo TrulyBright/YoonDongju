@@ -208,6 +208,7 @@ def update_class(db: Session, name: models.ClassName, class_data: models.ClassCr
     else:
         db_class = schemas.Class(
             name=name,
+            korean=class_data.korean,
             moderator=class_data.moderator,
             schedule=class_data.schedule,
             description=class_data.description,

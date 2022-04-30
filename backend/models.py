@@ -120,6 +120,7 @@ class ClassBase(BaseModel):
     moderator: str
     schedule: str
     description: str
+    korean: str
 
 
 class ClassCreate(ClassBase):
@@ -141,6 +142,7 @@ class ClassRecordBase(BaseModel):
 
 class ClassRecordCreate(ClassRecordBase):
     pass
+
 
 class ClassRecord(ClassRecordBase):
     class_name: ClassName
