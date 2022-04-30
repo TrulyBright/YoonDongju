@@ -199,8 +199,7 @@ async def delete_magazine(published: date, db: Session = Depends(get_db), delete
 
 @app.get("/classes", response_model=list[models.Class])
 async def get_classes(db: Session = Depends(get_db)):
-    crud.create_classes_with_default_values(db=db) # Depends() not working at startup.
-    return crud.get_classes(db=db)
+    return crud.get_classes(db=db) or crud.create_classes_with_default_values(db=db) # Depends() not working at startup.
 
 
 @app.get("/classes/{class_name}", response_model=models.Class)

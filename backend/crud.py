@@ -238,14 +238,16 @@ def get_classes(db: Session):
 
 
 def create_classes_with_default_values(db: Session):
-    db.add_all({schemas.Class(
+    created = [schemas.Class(
         name=name,
         korean=models.ClassKoreanName[name],
         moderator="홍길동",
         schedule="매주 월요일 오후 5시",
         description="이러쿵저러쿵"
-    ) for name in models.ClassName})
+    ) for name in models.ClassName]
+    db.add_all(created)
     db.commit()
+    return created
 
 
 def update_class(db: Session, name: models.ClassName, class_data: models.ClassCreate):
