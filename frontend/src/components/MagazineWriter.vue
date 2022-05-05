@@ -15,7 +15,14 @@ export default {
         year: null,
         cover: null,
         published: null,
-        contents: [],
+        contents: [
+          {
+            type: null,
+            title: null,
+            author: null,
+            language: null,
+          },
+        ],
       },
       coverName: null,
       uploaded: false,
@@ -69,14 +76,11 @@ export default {
 };
 </script>
 <template>
-  <form @submit.prevent="submit">
-    <label for="year"
-      >연도<input
-        type="number"
-        :value="form.year"
-        @input="(event) => (form.year = event.target.value)"
-        required
-    /></label>
+  <BForm @submit="submit">
+    <h1>문집 {{published ? "편집" : "추가"}}</h1>
+    <BFormGroup label="연도">
+      <BFormInput v-model="form.year" type="number" placeholder="2017" required></BFormInput>
+    </BFormGroup>
     <label for="cover"
       >표지
       <div v-if="published || uploaded">
@@ -92,48 +96,47 @@ export default {
         @upload="onUpload"
       ></FileUploader>
     </label>
-    <label for="published"
-      >발간일<input
-        type="date"
-        name="published"
-        :value="form.published"
-        @input="(event) => (form.published = event.target.value)"
-        required
-    /></label>
-    <label for="contents"
-      >수록작
+    <BFormGroup label="발간일">
+      <BFormInput v-model="form.published" type="date" required></BFormInput>
+    </BFormGroup>
+    <BFormGroup
+      label-for="contents"
+      label="수록작"
+      description="마지막 칸에서 Tab키를 눌러보세요."
+    >
       <div name="contents">
-        <li v-for="content in form.contents" :key="content">
-          <input
+        <div v-for="content in form.contents" :key="content">
+          <BFormInput
             type="text"
             placeholder="시, 소설, 희곡, 수필, ···"
-            :value="content.type"
-            @input="(event) => (content.type = event.target.value)"
-          />
-          <input
+            v-model="content.type"
+            required
+          ></BFormInput>
+          <BFormInput
             type="text"
             placeholder="제목"
-            :value="content.title"
-            @input="(event) => (content.title = event.target.value)"
-          />
-          <input
+            v-model="content.title"
+            required
+          ></BFormInput>
+          <BFormInput
             type="text"
             placeholder="작가"
-            :value="content.author"
-            @input="(event) => (content.author = event.target.value)"
-          />
-          <input
+            v-model="content.author"
+            required
+          ></BFormInput>
+          <BFormInput
             type="text"
             placeholder="언어"
-            :value="content.language"
-            @input="(event) => (content.language = event.target.value)"
-          />
-          <button type="button" @click="removeContentRow(content)">삭제</button>
-        </li>
+            v-model="content.language"
+            @keydown.tab="addContentRow"
+            required
+          ></BFormInput>
+          <BButton @click="removeContentRow(content)">제거</BButton>
+        </div>
       </div>
-      <button type="button" @click="addContentRow">수록작 추가</button>
-    </label>
-    <input type="submit" value="게시" />
-  </form>
+    </BFormGroup>
+    <BButton @click="addContentRow">수록작 추가</BButton>
+    <BButton type="submit">게시</BButton>
+  </BForm>
 </template>
 <style scoped></style>
