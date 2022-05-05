@@ -67,9 +67,27 @@ const router = createRouter({
       component: () => import("../views/MagazineWriteView.vue"),
     },
     {
-      path: "/classes",
-      name: "classes",
-      component: () => import("../views/ClassesView.vue"),
+      path: "/classes/:name",
+      name: "class",
+      component: () => import("../views/ClassView.vue"),
+      props: (route) => ({ name: route.params.name }),
+    },
+    {
+      path: "/classes/:name/:conducted",
+      name: "classRecord",
+      component: () => import("../views/ClassRecordView.vue"),
+      props: (route) => ({
+        name: route.params.name,
+        conducted: route.params.conducted,
+      }),
+    },
+    {
+      path: "/classes/:name/write",
+      name: "writeClassRecord",
+      component: () => import("../views/ClassRecordWriteView.vue"),
+      props: (route) => ({
+        name: route.params.name,
+      }),
     },
     {
       path: "/admin",

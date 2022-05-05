@@ -30,6 +30,7 @@ export default {
     :published="published"
     :modifier="modifier"
     :modified="modified"
+    :type="type"
   ></PostMetadata>
   <PostContent :content="content"></PostContent>
   <PostAttached v-for="a in attached" :key="a.uuid" v-bind="a"></PostAttached>

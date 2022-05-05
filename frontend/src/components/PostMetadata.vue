@@ -5,16 +5,22 @@ export default {
     published: String,
     modifier: String,
     modified: String,
+    type: String,
+  },
+  computed: {
+    isClassRecord() {
+      return this.type === "class-record";
+    },
   },
 };
 </script>
 
 <template>
   <div class="metadata">
-    <div>글쓴이 {{ author }}</div>
-    <div>게시일 {{ published }}</div>
-    <div>수정자 {{ modifier }}</div>
-    <div>수정일 {{ modified }}</div>
+    <div>{{ isClassRecord ? "분반장" : "글쓴이" }} {{ author }}</div>
+    <div>{{ isClassRecord ? "활동일" : "게시일" }} {{ published }}</div>
+    <div v-if="!isClassRecord">수정자 {{ modifier }}</div>
+    <div v-if="!isClassRecord">수정일 {{ modified }}</div>
   </div>
 </template>
 

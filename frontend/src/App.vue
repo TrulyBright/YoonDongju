@@ -138,4 +138,8 @@ nav a:first-of-type {
     margin-top: 1rem;
   }
 }
+.active {
+  background-color: pink;
+  border-color: pink;
+}
 </style>

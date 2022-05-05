@@ -1,7 +1,7 @@
 <script setup>
-import { RouterLink } from "vue-router";
 import LoginModal from "@/components/LoginModal.vue";
 import { useMemberStore } from "../stores/member";
+import axios from "axios";
 </script>
 <script>
 export default {
@@ -9,33 +9,44 @@ export default {
     return {
       openLoginModal: false,
       store: useMemberStore(),
+      classes: [],
     };
+  },
+  async created() {
+    const response = await axios.get("classes");
+    this.classes = response.data;
   },
 };
 </script>
 <template>
   <header>
-    <RouterLink to="/">연세문학회</RouterLink>
-    <RouterLink to="/about">소개</RouterLink>
-    <RouterLink to="/classes">분반</RouterLink>
-    <RouterLink to="/magazines">문집</RouterLink>
-    <RouterLink to="/notices">공지</RouterLink>
-    <RouterLink to="/admin" v-if="store.isAdmin">관리</RouterLink>
-    <RouterLink to="/me" v-if="store.isAuthenticated">내정보</RouterLink>
-    <a @click="openLoginModal = true" v-if="!store.isAuthenticated">로그인</a>
+    <BButton to="/">연세문학회</BButton>
+    <BButton to="/about">소개</BButton>
+    <BDropdown text="분반">
+      <BDropdownItem v-for="c in classes" :key="c" :to="'/classes/' + c.name">{{
+        c.korean
+      }}</BDropdownItem>
+    </BDropdown>
+    <BButton to="/magazines">문집</BButton>
+    <BButton to="/notices">공지</BButton>
+    <BButton to="/admin" v-if="store.isAdmin">관리</BButton>
+    <BButton to="/me" v-if="store.isAuthenticated">내정보</BButton>
+    <BButton @click="openLoginModal = true" v-if="!store.isAuthenticated"
+      >로그인</BButton
+    >
     <Teleport to="#app">
       <LoginModal
         v-if="openLoginModal"
         @close="openLoginModal = false"
       ></LoginModal>
     </Teleport>
-    <RouterLink to="/" @click="store.logOut()" v-if="store.isAuthenticated"
-      >로그아웃</RouterLink
+    <BButton to="/" @click="store.logOut" v-if="store.isAuthenticated"
+      >로그아웃</BButton
     >
   </header>
 </template>
 
-<style scoped>
+<style>
 header {
   display: flex;
   flex-direction: row;

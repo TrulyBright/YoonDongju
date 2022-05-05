@@ -5,6 +5,8 @@ import { useMemberStore } from "../stores/member";
 <script>
 export default {
   props: {
+    className: [String, null],
+    conducted: [String, null],
     no: Number,
     type: String,
   },
@@ -26,8 +28,18 @@ export default {
               no: this.no,
             },
           };
+        case "class-record":
+          return {
+            name: "writeClassRecord",
+            params: {
+              name: this.className,
+            },
+            query: {
+              conducted: this.conducted,
+            },
+          };
         default:
-          throw "unknown type: " + this.type;
+          throw "unknown type to set PostAction for: " + this.type;
       }
     },
     routeToDelete() {

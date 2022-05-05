@@ -6,9 +6,6 @@ const links = {
   "/admin/classes": "분반",
 };
 </script>
-<script>
-export default {};
-</script>
 <template>
   <h1>관리</h1>
   <BListGroup>
@@ -16,9 +13,10 @@ export default {};
       v-for="[link, name] of Object.entries(links)"
       :key="link"
       :active="$route.path === link"
-      variant="primary"
+      button
+      @click="$router.push(link)"
     >
-      <RouterLink :to="link">{{ name }}</RouterLink>
+      {{ name }}
     </BListGroupItem>
   </BListGroup>
   <RouterView></RouterView>
