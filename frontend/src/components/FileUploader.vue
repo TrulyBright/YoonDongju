@@ -50,9 +50,9 @@ export default {
 };
 </script>
 <template>
-  <form @submit.prevent="submit">
-    <input type="file" v-on:change="changeFile" :accept="accept" />
-    <input type="submit" value="올리기/교체하기" />
-  </form>
+  <BForm @submit="submit">
+    <input type="file" @change="changeFile" :accept="accept" />
+    <BButton type="submit">올리기/교체하기</BButton>
+  </BForm>
 </template>
 <style scoped></style>
