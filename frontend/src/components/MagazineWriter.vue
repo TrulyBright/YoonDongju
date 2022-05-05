@@ -77,17 +77,23 @@ export default {
 </script>
 <template>
   <BForm @submit="submit">
-    <h1>문집 {{published ? "편집" : "추가"}}</h1>
+    <h1>문집 {{ published ? "편집" : "추가" }}</h1>
     <BFormGroup label="연도">
-      <BFormInput v-model="form.year" type="number" placeholder="2017" required></BFormInput>
+      <BFormInput
+        v-model="form.year"
+        type="number"
+        placeholder="2017"
+        required
+      ></BFormInput>
     </BFormGroup>
     <label for="cover"
       >표지
       <div v-if="published || uploaded">
-        <img
+        <BImg
           :src="axios.defaults.baseURL + 'uploaded/' + form.cover"
           :alt="coverName"
-        />
+          fluid
+        ></BImg>
       </div>
       <FileUploader
         :uuid="form.cover"
