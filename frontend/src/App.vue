@@ -51,6 +51,7 @@ export default {
 
   font-weight: normal;
   font-family: "Gowun Batang", serif;
+  background: #ffdddd;
 }
 
 header {
