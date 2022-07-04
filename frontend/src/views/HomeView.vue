@@ -21,11 +21,11 @@ export default {
 };
 </script>
 <template>
-  <BImg
+  <img
     src="/대문 그림.jpg"
-    fluid
+    class="img-fluid"
     alt="연세문학회 문집 더미에 파묻힌 강아지가 바깥으로 몸을 반쯤 내밀고 숨을 돌리고 있다."
-  ></BImg>
+  />
   <div>
     <RouterLink to="notices">공지</RouterLink>
     <div class="recent-notices">
@@ -39,13 +39,43 @@ export default {
   </div>
   <div>
     <RouterLink to="magazines">문집</RouterLink>
-    <div class="recent-magazines">
-      <BImg
-        fluid
-        v-for="magazine in recentMagazines"
-        :key="magazine"
-        :src="axios.defaults.baseURL + 'uploaded/' + magazine.cover"
-      ></BImg>
+    <div
+      id="carouselExampleInterval"
+      class="carousel carousel-dark slide"
+      data-bs-ride="carousel"
+    >
+      <div class="carousel-inner">
+        <div
+          :class="'carousel-item' + (index === 0 ? ' active' : '')"
+          v-for="(magazine, index) in recentMagazines"
+          :key="magazine"
+          data-bs-interval="5000"
+        >
+          <img
+            :src="axios.defaults.baseURL + 'uploaded/' + magazine.cover"
+            class="img-fluid"
+            :alt="magazine.published + '에 발간된 문집 표지'"
+          />
+        </div>
+      </div>
+      <button
+        class="carousel-control-prev"
+        type="button"
+        data-bs-target="#carouselExampleInterval"
+        data-bs-slide="prev"
+      >
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">전</span>
+      </button>
+      <button
+        class="carousel-control-next"
+        type="button"
+        data-bs-target="#carouselExampleInterval"
+        data-bs-slide="next"
+      >
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">후</span>
+      </button>
     </div>
   </div>
 </template>
