@@ -24,6 +24,7 @@ export default {
   <img
     src="/대문 그림.jpg"
     class="img-fluid"
+    id="front-image"
     alt="연세문학회 문집 더미에 파묻힌 강아지가 바깥으로 몸을 반쯤 내밀고 숨을 돌리고 있다."
   />
   <div>
@@ -79,3 +80,10 @@ export default {
     </div>
   </div>
 </template>
+<style scoped>
+#front-image {
+  border-radius: 30px;
+  padding: 1em;
+  background: white;
+}
+</style>
