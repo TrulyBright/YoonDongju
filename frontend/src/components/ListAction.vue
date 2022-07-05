@@ -22,6 +22,6 @@ export default {
 };
 </script>
 <template>
-  <BButton :to="routeToWrite" v-if="store.isAdmin">글쓰기</BButton>
+  <RouterLink :to="routeToWrite" v-if="store.isAdmin">글쓰기</RouterLink>
 </template>
 <style></style>
