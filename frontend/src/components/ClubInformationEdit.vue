@@ -57,7 +57,12 @@ export default {
           v-model="form.president_name"
           placeholder="홍길동"
         />
-        <input type="tel" class="form-control" v-model="form.president_tel" placeholder="010-1234-5678"/>
+        <input
+          type="tel"
+          class="form-control"
+          v-model="form.president_tel"
+          placeholder="010-1234-5678"
+        />
         <input
           type="url"
           class="form-control"
