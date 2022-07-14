@@ -290,13 +290,20 @@ export default {
           <div class="mobile-info">
             <div>
               <h5>연락처</h5>
-              <p>📌 {{ address }}</p>
+              <p><span class="contact-icon">📌</span>{{ address }}</p>
               <p>
-                📧 <a :href="'mailto:' + email">{{ email }}</a>
+                <span class="contact-icon">📧</span
+                ><a :href="'mailto:' + email">{{ email }}</a>
               </p>
               <p>
-                📞 회장 {{ presidentName }}
+                <span class="contact-icon">📞</span>회장 {{ presidentName }}
                 <a :href="'tel:' + presidentTel">{{ presidentTel }}</a>
+              </p>
+              <p>
+                <span class="contact-icon">💻</span>개발자
+                <a href="mailto:trulybright@yonsei.ac.kr"
+                  >trulybright@yonsei.ac.kr</a
+                >
               </p>
             </div>
             <div>
@@ -343,11 +350,7 @@ export default {
 </template>
 
 <style>
-header {
-  display: flex;
-  flex-direction: row;
-  gap: 15px;
-}
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.0/font/bootstrap-icons.css");
 @media (min-width: 992px) {
   /* 992px: lg */
   .mobile-info {
@@ -368,5 +371,8 @@ header {
   #navbar-brand {
     margin-right: unset;
   }
+}
+.contact-icon {
+  margin-right: 3px;
 }
 </style>
