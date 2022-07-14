@@ -29,14 +29,14 @@ export default {
   <footer>
     <div>
       <p>연락처</p>
-      <div>📌 {{ address }}</div>
-      <div>
+      <p>📌 {{ address }}</p>
+      <p>
         📧 <a :href="'mailto:' + email">{{ email }}</a>
-      </div>
-      <div>
+      </p>
+      <p>
         📞 회장 {{ presidentName }}
         <a :href="'tel:' + presidentTel">{{ presidentTel }}</a>
-      </div>
+      </p>
     </div>
     <div>
       <p>가입</p>
@@ -69,12 +69,18 @@ export default {
 
 <style scoped>
 footer {
-  display: grid;
+  display: none;
   grid-template-columns: 1fr 1fr 1fr;
 }
 footer div {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+@media (min-width: 992px) {
+  /* 992px: lg */
+  footer {
+    display: grid;
+  }
 }
 </style>

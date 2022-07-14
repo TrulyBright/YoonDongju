@@ -76,24 +76,28 @@ export default {
 };
 </script>
 <template>
-  <BForm @submit="submit">
+  <form @submit="submit">
     <h1>문집 {{ published ? "편집" : "추가" }}</h1>
-    <BFormGroup label="연도">
-      <BFormInput
-        v-model="form.year"
+    <div class="input-group mb-3">
+      <span class="input-group-text" id="label-year">연도</span>
+      <input
         type="number"
-        placeholder="2017"
+        class="form-control"
+        placeholder="1970"
+        aria-label="year"
+        v-model="form.year"
+        aria-describedby="label-year"
         required
-      ></BFormInput>
-    </BFormGroup>
-    <label for="cover"
-      >표지
+      />
+    </div>
+    <div class="input-group mb-3">
+      <span class="input-group-text" id="label-cover">표지</span>
       <div v-if="published || uploaded">
-        <BImg
+        <img
           :src="axios.defaults.baseURL + 'uploaded/' + form.cover"
           :alt="coverName"
-          fluid
-        ></BImg>
+          class="img-fluid"
+        />
       </div>
       <FileUploader
         :uuid="form.cover"
@@ -101,48 +105,54 @@ export default {
         name="cover"
         @upload="onUpload"
       ></FileUploader>
-    </label>
-    <BFormGroup label="발간일">
-      <BFormInput v-model="form.published" type="date" required></BFormInput>
-    </BFormGroup>
-    <BFormGroup
-      label-for="contents"
-      label="수록작"
-      description="마지막 칸에서 Tab키를 눌러보세요."
-    >
-      <div name="contents">
-        <div v-for="content in form.contents" :key="content">
-          <BFormInput
-            type="text"
-            placeholder="시, 소설, 희곡, 수필, ···"
-            v-model="content.type"
-            required
-          ></BFormInput>
-          <BFormInput
-            type="text"
-            placeholder="제목"
-            v-model="content.title"
-            required
-          ></BFormInput>
-          <BFormInput
-            type="text"
-            placeholder="작가"
-            v-model="content.author"
-            required
-          ></BFormInput>
-          <BFormInput
-            type="text"
-            placeholder="언어"
-            v-model="content.language"
-            @keydown.tab="addContentRow"
-            required
-          ></BFormInput>
-          <BButton @click="removeContentRow(content)">제거</BButton>
-        </div>
+    </div>
+    <div class="input-group mb-3">
+      <span class="input-group-text" id="label-published">발간일</span>
+      <input
+        type="date"
+        class="form-control"
+        placeholder="1970"
+        aria-label="label-published"
+        v-model="form.published"
+        aria-describedby="label-published"
+        required
+      />
+    </div>
+    <label for="contents" class="form-label">수록작</label>
+    <div class="input-group mb-3" id="basic-url">
+      <div v-for="content in form.contents" :key="content">
+        <input
+          type="text"
+          placeholder="시, 소설, 희곡, 수필, ···"
+          v-model="content.type"
+          class="form-control"
+          required
+        />
+        <input
+          type="text"
+          placeholder="제목"
+          v-model="content.title"
+          class="form-control"
+          required
+        />
+        <input
+          type="text"
+          placeholder="작가"
+          v-model="content.author"
+          class="form-control"
+          required
+        />
+        <input
+          type="text"
+          placeholder="언어"
+          v-model="content.language"
+          @keydown.tab="addContentRow"
+          class="form-control"
+          required
+        />
       </div>
-    </BFormGroup>
-    <BButton @click="addContentRow">수록작 추가</BButton>
-    <BButton type="submit">게시</BButton>
-  </BForm>
+    </div>
+    <button type="submit" class="btn btn-primary">게시</button>
+  </form>
 </template>
 <style scoped></style>

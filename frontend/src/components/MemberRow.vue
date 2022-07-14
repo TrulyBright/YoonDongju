@@ -67,30 +67,45 @@ export default {
 };
 </script>
 <template>
-  <BTr>
-    <BTd>{{ username }}</BTd>
-    <BTd>{{ student_id }}</BTd>
-    <BTd>{{ real_name }}</BTd>
-    <BTd>{{ roleInKorean(role) }}</BTd>
-    <BTd>
-      <BDropdown text="작업" size="sm" class="action-dropdown">
-        <BDropdownHeader>직책 승강</BDropdownHeader>
-        <BDropdownItem
-          v-for="english in roles"
-          :key="english"
-          :disabled="english === role"
-          @click="patch(english)"
-          >{{ roleInKorean(english) }}으로</BDropdownItem
+  <tr>
+    <td>{{ student_id }}</td>
+    <td>{{ real_name }}</td>
+    <td>{{ roleInKorean(role) }}</td>
+    <td>
+      <div class="dropdown">
+        <button
+          type="button"
+          class="btn btn-secondary dropdown-toggle"
+          data-bs-toggle="action-dropdown"
+          aria-expanded="false"
         >
-        <BDropdownDivider></BDropdownDivider>
-        <BDropdownHeader>재적 변경</BDropdownHeader>
-        <BDropdownItem @click="kick" variant="danger">추방</BDropdownItem>
-      </BDropdown>
-    </BTd>
-  </BTr>
+          작업
+        </button>
+        <ul class="dropdown-menu">
+          <li><h6 class="dropdown-header">직책승강</h6></li>
+          <li v-for="english in roles" :key="english">
+            <button
+              type="button"
+              :class="'dropdown-item ' + (english === role ? 'disabled' : '')"
+              @click="patch(english)"
+            >
+              {{ roleInKorean(english) }}으로
+            </button>
+          </li>
+          <li><hr class="dropdown-divider" /></li>
+          <li><h6 class="dropdown-header">재적변경</h6></li>
+          <li>
+            <button
+              type="button"
+              @click="kick"
+              class="dropdown-item btn-danger"
+            >
+              추방
+            </button>
+          </li>
+        </ul>
+      </div>
+    </td>
+  </tr>
 </template>
-<style scoped>
-.action-dropdown {
-  position: static;
-}
-</style>
+<style scoped></style>

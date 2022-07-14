@@ -31,26 +31,26 @@ export default {
       <p>{{ info.description }}</p>
     </div>
   </div>
-  <BTableSimple hover small responsive>
-    <BThead>
-      <BTr>
-        <BTh>주제</BTh>
-        <BTh>분반장</BTh>
-        <BTh>활동일</BTh>
-      </BTr>
-    </BThead>
-    <BTbody>
-      <BTr v-for="record in records" :key="record">
-        <BTd>
-          <RouterLink :to="this.name + '/' + record.conducted">{{
-            record.topic
-          }}</RouterLink></BTd
-        >
-        <BTd>{{ record.moderator }}</BTd>
-        <BTd>{{ record.conducted }}</BTd>
-      </BTr>
-    </BTbody>
-  </BTableSimple>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>주제</th>
+          <th>활동일</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="record in records" :key="record">
+          <td>
+            <RouterLink :to="this.name + '/' + record.conducted">
+              {{ record.topic }}</RouterLink
+            >
+          </td>
+          <td>{{ record.conducted }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 <style scoped>
 th,

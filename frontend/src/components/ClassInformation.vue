@@ -38,35 +38,32 @@ export default {
 };
 </script>
 <template>
-  <BCard>
-    <h3>{{ class_name }}</h3>
-    <BForm @submit="submit">
-      <BFormInput
-        type="text"
-        v-model="form.korean"
-        placeholder="시반"
-        required
-      ></BFormInput>
-      <BFormInput
-        type="text"
-        v-model="form.moderator"
-        placeholder="홍길동"
-        required
-      ></BFormInput>
-      <BFormInput
-        type="text"
-        v-model="form.schedule"
-        placeholder="매주 월요일 오후 5시"
-        required
-      ></BFormInput>
-      <BFormTextarea
-        type="text"
-        v-model="form.description"
-        placeholder="이러쿵저러쿵"
-        required
-      ></BFormTextarea>
-      <BButton type="submit">변경</BButton>
-    </BForm>
-  </BCard>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">{{ class_name }}</h5>
+      <form @submit="submit">
+        <input type="text" v-model="form.korean" placeholder="시반" required />
+        <input
+          type="text"
+          v-model="form.moderator"
+          placeholder="홍길동"
+          required
+        />
+        <input
+          type="text"
+          v-model="form.schedule"
+          placeholder="매주 월요일 오후 5시"
+          required
+        />
+        <input
+          type="text"
+          v-model="form.description"
+          placeholder="이러쿵저러쿵"
+          required
+        />
+        <button type="submit" class="btn btn-primary">변경</button>
+      </form>
+    </div>
+  </div>
 </template>
 <style scoped></style>

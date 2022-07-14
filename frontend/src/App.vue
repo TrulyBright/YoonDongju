@@ -56,7 +56,10 @@ export default {
 .hanja {
   font-family: "Noto Serif KR", serif;
 }
-a {
+a:link {
   text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
 }
 </style>

@@ -63,12 +63,26 @@ export default {
 };
 </script>
 <template>
-  <BForm @submit="submit">
-    <BFormInput v-model="form.topic" placeholder="제목/주제" />
-    <BFormInput v-model="form.conducted" type="date"></BFormInput>
-    <BFormTextarea v-model="form.content" placeholder="본문"></BFormTextarea>
-    <BButton type="submit">게시</BButton>
-  </BForm>
+  <form @submit="submit">
+    <input
+      type="text"
+      class="form-control"
+      v-model="form.topic"
+      placeholder="제목/주제"
+    />
+    <input
+      type="date"
+      class="form-control"
+      v-model="form.conducted"
+      placeholder="활동일자"
+    />
+    <textarea
+      class="form-control"
+      v-model="form.content"
+      placeholder="본문"
+    ></textarea>
+    <button type="submit" class="btn btn-primary">게시</button>
+  </form>
   <PostPreview :source="form.content"></PostPreview>
 </template>
 <style scoped></style>

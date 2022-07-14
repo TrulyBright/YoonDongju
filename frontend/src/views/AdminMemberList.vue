@@ -22,26 +22,28 @@ export default {
 };
 </script>
 <template>
-  <BCard>
-    <h2>명부</h2>
-    <BTableSimple hover small caption-top responsive class="member-table">
-      <BThead>
-        <BTr>
-          <BTh>ID</BTh>
-          <BTh>학번</BTh>
-          <BTh>실명</BTh>
-          <BTh>직책</BTh>
-          <BTh>작업</BTh>
-        </BTr>
-      </BThead>
-      <BTbody>
-        <MemberRow v-for="m in list" v-bind="m" :key="m.student_id"></MemberRow>
-      </BTbody>
-    </BTableSimple>
-  </BCard>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">명부</h5>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>학번</th>
+              <th>실명</th>
+              <th>직책</th>
+              <th>작업</th>
+            </tr>
+          </thead>
+          <tbody>
+            <MemberRow
+              v-for="m in list"
+              v-bind="m"
+              :key="m.student_id"
+            ></MemberRow>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </template>
-<style scoped>
-.member-table {
-  overflow: visible;
-}
-</style>

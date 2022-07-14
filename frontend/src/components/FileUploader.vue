@@ -50,9 +50,14 @@ export default {
 };
 </script>
 <template>
-  <BForm @submit="submit">
-    <input type="file" @change="changeFile" :accept="accept" />
-    <BButton type="submit">올리기/교체하기</BButton>
-  </BForm>
+  <form @submit="submit">
+    <input
+      type="file"
+      class="form-control"
+      @change="changeFile"
+      :accept="accept"
+    />
+    <button type="submit" class="btn btn-primary">올리기/교체하기</button>
+  </form>
 </template>
 <style scoped></style>

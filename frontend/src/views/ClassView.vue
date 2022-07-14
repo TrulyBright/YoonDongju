@@ -20,16 +20,17 @@ export default {
 };
 </script>
 <template>
-  <BListGroup>
-    <BListGroupItem
+  <ul class="list-group">
+    <li
+      class="list-group-item"
       v-for="c in classes"
       :key="c.name"
       :active="name === c.name"
-      button
-      @click="$router.push(c.name)"
-      >{{ c.korean }}</BListGroupItem
+      @lick="$router.push(c.name)"
     >
-  </BListGroup>
+      {{ c.korean }}
+    </li>
+  </ul>
   <ClassWithRecords :name="name"></ClassWithRecords>
 </template>
 <style scoped>

@@ -104,15 +104,21 @@ export default {
 };
 </script>
 <template>
-  <BForm @submit="submit">
-    <!-- <PostInput>
-      <template #title>{{ title }}</template>
-      <template #content>{{ content }}</template>
-    </PostInput> -->
-    <BFormInput v-model="form.title" placeholder="제목" />
-    <BFormTextarea v-model="form.content" placeholder="본문"></BFormTextarea>
-    <BButton type="submit">게시</BButton>
-  </BForm>
+  <form @submit="submit">
+    <div class="form-floating mb-3">
+      <input type="text" class="form-control" id="title" v-model="form.title" />
+      <label for="title">제목</label>
+    </div>
+    <div class="form-floating">
+      <textarea
+        class="form-control"
+        id="content"
+        v-model="form.content"
+      ></textarea>
+      <label for="content">본문</label>
+    </div>
+    <button type="submit" class="btn btn-primary">게시</button>
+  </form>
   <PostPreview :source="form.content"></PostPreview>
 </template>
 <style scoped></style>

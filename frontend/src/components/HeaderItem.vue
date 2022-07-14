@@ -47,16 +47,19 @@ export default {
 </script>
 <template>
   <nav class="navbar navbar-expand-lg bg-light fixed-top">
-    <div class="container-fluid">
-      <RouterLink class="navbar-brand" to="/">연세문학회</RouterLink>
+    <div class="container-fluid" id="navbar-header">
+      <RouterLink class="navbar-brand" id="navbar-brand" to="/"
+        >연세문학회</RouterLink
+      >
       <button
         class="navbar-toggler"
+        id="navbar-toggler"
         type="button"
         data-bs-toggle="offcanvas"
         data-bs-target="#offcanvasNavbar"
         aria-controls="offcanvasNavbar"
       >
-        <span class="navbar-toggler-icon"></span>
+        <i class="bi-three-dots"></i>
       </button>
       <div
         class="offcanvas offcanvas-end"
@@ -101,9 +104,9 @@ export default {
                 aria-labelledby="offcanvasNavbarDropdown"
               >
                 <li v-for="c in classes" class="dropdown-item" :key="c">
-                  <RouterLink :to="'/classes/' + c.name"
-                    >{{ c.korean }}</RouterLink
-                  >
+                  <RouterLink :to="'/classes/' + c.name">{{
+                    c.korean
+                  }}</RouterLink>
                 </li>
               </ul>
             </li>
@@ -244,7 +247,7 @@ export default {
                     aria-describedby="IDHelp"
                   />
                   <small id="IDHelp">
-                    계정명은 최대 64자에, 한글을 비롯하여 어떤 문자든
+                    계정명은 최대 64자에, <u>한글을 비롯하여 어떤 문자든</u>
                     허용됩니다.
                   </small>
                   <input
@@ -260,7 +263,7 @@ export default {
                     type="password"
                     class="form-control"
                     v-model="registerForm.password"
-                    placeholder="사용할 비밀번호"
+                    placeholder="사용할 비밀번호 재입력"
                     pattern="^(?=.*[0-9])(?=.*[a-zA-Z]).{10,}$"
                     required
                   />
@@ -271,15 +274,20 @@ export default {
               </form>
             </li>
             <li class="nav-item" v-if="store.isAuthenticated">
-              <RouterLink
-                class="nav-link active"
-                aria-current="page"
-                to="/me"
+              <RouterLink class="nav-link active" aria-current="page" to="/me"
                 >내 정보 Profile</RouterLink
               >
             </li>
+            <li class="nav-item" v-if="store.isAdmin">
+              <RouterLink
+                class="nav-link active"
+                aria-current="page"
+                to="/admin"
+                >관리 Manage</RouterLink
+              >
+            </li>
           </ul>
-          <div>
+          <div class="mobile-info">
             <div>
               <h5>연락처</h5>
               <p>📌 {{ address }}</p>
@@ -314,8 +322,9 @@ export default {
                 <a href="https://github.com/TrulyBright/YoonDong-ju"
                   ><img
                     src="Github-Mark-32px.png"
-                    alt="깃허브 아이콘. 클릭하면 깃허브 프로젝트 레포지토리로 이동함."
-                /></a></p>
+                    alt="깃허브 아이콘. 클릭하면 깃허브의 연세문학회 프로젝트 레포지토리로 이동함."
+                /></a>
+              </p>
             </div>
           </div>
           <!-- <form class="d-flex" role="search">
@@ -338,5 +347,26 @@ header {
   display: flex;
   flex-direction: row;
   gap: 15px;
+}
+@media (min-width: 992px) {
+  /* 992px: lg */
+  .mobile-info {
+    display: none;
+  }
+}
+@media (max-width: 991px) {
+  #navbar-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+  #navbar-toggler {
+    position: absolute;
+    right: 0;
+  }
+  #navbar-brand {
+    margin-right: unset;
+  }
 }
 </style>

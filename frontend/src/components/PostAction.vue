@@ -71,8 +71,10 @@ export default {
 </script>
 <template>
   <div>
-    <BButton :to="routeToWrite">수정</BButton>
-    <BButton @click="deleteIfConfirmed">삭제</BButton>
+    <RouterLink :to="routeToWrite" class="btn btn-primary">수정</RouterLink>
+    <button type="button" class="btn btn-danger" @click="deleteIfConfirmed">
+      삭제
+    </button>
   </div>
 </template>
 <style></style>

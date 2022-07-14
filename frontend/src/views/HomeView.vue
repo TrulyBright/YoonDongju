@@ -28,9 +28,11 @@ export default {
     alt="연세문학회 문집 더미에 파묻힌 강아지가 바깥으로 몸을 반쯤 내밀고 숨을 돌리고 있다."
   />
   <div>
-    <RouterLink to="notices">공지</RouterLink>
+    <h3>
+      <strong><RouterLink to="notices">공지</RouterLink></strong>
+    </h3>
     <div class="recent-notices">
-      <div v-for="notice in recentNotices" :key="notice">
+      <div v-for="notice in recentNotices" :key="notice" class="recent-notice">
         <RouterLink :to="{ name: 'notice', params: { no: notice.no } }">{{
           notice.title
         }}</RouterLink>
@@ -39,7 +41,9 @@ export default {
     </div>
   </div>
   <div>
-    <RouterLink to="magazines">문집</RouterLink>
+    <h3>
+      <strong><RouterLink to="magazines">문집</RouterLink></strong>
+    </h3>
     <div
       id="carouselExampleInterval"
       class="carousel carousel-dark slide"
@@ -85,5 +89,11 @@ export default {
   border-radius: 30px;
   padding: 1em;
   background: white;
+}
+.recent-notice {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-bottom: 1px solid brown;
 }
 </style>

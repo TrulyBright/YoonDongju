@@ -76,8 +76,8 @@ export default {
 </script>
 <template>
   <div>
-    <div v-if="loading">
-      <BSpinner label="spinning"></BSpinner>
+    <div v-if="loading" class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
     </div>
     <div v-if="error">{{ error }}</div>
     <div @click="swap()">
@@ -88,12 +88,28 @@ export default {
       <p>{{ item.season }}</p>
       <p>{{ item.published }}</p>
     </div>
-    <BDropdown text="작업" v-if="item && store.isAdmin">
-      <BDropdownItem :to="'/magazines/write?published=' + item.published"
-        >편집</BDropdownItem
+    <div class="dropdown" v-if="item && store.isAdmin">
+      <button
+        class="btn btn-secondary dropdown-toggle"
+        type="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
       >
-      <BDropdownItem @click="deleteMagazine">삭제</BDropdownItem>
-    </BDropdown>
+        작업
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+        <li>
+          <RouterLink
+            :to="'/magazines/write?published=' + item.published"
+            class="dropdown-item"
+            >편집</RouterLink
+          >
+        </li>
+        <li>
+          <a @click="deleteMagazine" href="#" class="dropdown-item">삭제</a>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 <style></style>

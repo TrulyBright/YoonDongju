@@ -8,17 +8,17 @@ const links = {
 </script>
 <template>
   <h1>관리</h1>
-  <BListGroup>
-    <BListGroupItem
+  <ul class="list-group">
+    <li
+      class="list-group-item"
       v-for="[link, name] of Object.entries(links)"
       :key="link"
       :active="$route.path === link"
-      button
       @click="$router.push(link)"
     >
       {{ name }}
-    </BListGroupItem>
-  </BListGroup>
+    </li>
+  </ul>
   <RouterView></RouterView>
 </template>
 <style scoped></style>

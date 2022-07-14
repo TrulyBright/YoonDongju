@@ -35,41 +35,38 @@ export default {
 };
 </script>
 <template>
-  <BCard>
-    <h2>연락처</h2>
-    <BForm @submit.prevent="submit">
-      <BFormInput
-        type="text"
-        name="address"
-        placeholder="대강당 109호"
-        v-model="form.address"
-      />
-      <BFormInput
-        type="email"
-        name="email"
-        placeholder="roompennoyeah@gmail.com"
-        v-model="form.email"
-      />
-      <BFormInput
-        type="text"
-        name="president_name"
-        placeholder="홍길동"
-        v-model="form.president_name"
-      />
-      <BFormInput
-        type="tel"
-        name="president_tel"
-        placeholder="010-1234-5678"
-        v-model="form.president_tel"
-      />
-      <BFormInput
-        type="url"
-        name="join_form_url"
-        placeholder="https://example.com"
-        v-model="form.join_form_url"
-      />
-      <BButton type="submit">변경</BButton>
-    </BForm>
-  </BCard>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">연락처</h5>
+      <form @submit.prevent="submit">
+        <input
+          type="text"
+          class="form-control"
+          v-model="form.address"
+          placeholder="대강당 109호"
+        />
+        <input
+          type="email"
+          class="form-control"
+          v-model="form.email"
+          placeholder="roompennoyeah@gmail.com"
+        />
+        <input
+          type="text"
+          class="form-control"
+          v-model="form.president_name"
+          placeholder="홍길동"
+        />
+        <input type="tel" class="form-control" v-model="form.president_tel" placeholder="010-1234-5678"/>
+        <input
+          type="url"
+          class="form-control"
+          v-model="form.join_form_url"
+          placeholder="http://example.com"
+        />
+        <button type="submit" class="btn btn-primary">게시</button>
+      </form>
+    </div>
+  </div>
 </template>
 <style scoped></style>
