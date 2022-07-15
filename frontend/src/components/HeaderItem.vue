@@ -328,7 +328,7 @@ export default {
               <p>
                 <a href="https://github.com/TrulyBright/YoonDong-ju"
                   ><img
-                    src="Github-Mark-32px.png"
+                    src="@/assets/Github-Mark-32px.png"
                     alt="깃허브 아이콘. 클릭하면 깃허브의 연세문학회 프로젝트 레포지토리로 이동함."
                 /></a>
               </p>
