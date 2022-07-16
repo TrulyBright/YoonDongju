@@ -10,6 +10,12 @@ export default {
 </script>
 <template>
   <div>
-    <Markdown :source="source"></Markdown>
+    <Markdown class="markdown" :source="source"></Markdown>
   </div>
 </template>
+<style>
+.markdown * {
+  word-break: break-all;
+  hyphens: auto;
+}
+</style>
