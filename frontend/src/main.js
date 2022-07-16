@@ -9,7 +9,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
 
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = "http://localhost:8000/";
+axios.defaults.baseURL = "http://" + window.location.hostname + ":8000/";
 
 const app = createApp(App);
 
