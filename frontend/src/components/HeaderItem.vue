@@ -276,7 +276,7 @@ export default {
                 class="nav-link active"
                 aria-current="page"
                 to="/about"
-                >소개 About</RouterLink
+                ><span data-bs-dismiss="offcanvas">소개 About</span></RouterLink
               >
             </li>
             <li class="nav-item dropdown">
@@ -298,7 +298,9 @@ export default {
                   class="dropdown-item"
                   :key="c"
                   :to="'/classes/' + c.name"
-                  >{{ c.korean }}</RouterLink
+                  ><span data-bs-dismiss="offcanvas">{{
+                    c.korean
+                  }}</span></RouterLink
                 >
               </ul>
             </li>
@@ -307,7 +309,9 @@ export default {
                 class="nav-link active"
                 aria-current="page"
                 to="/magazines"
-                >문집 Magazine</RouterLink
+                ><span data-bs-dismiss="offcanvas"
+                  >문집 Magazine</span
+                ></RouterLink
               >
             </li>
             <li class="nav-item">
@@ -315,7 +319,9 @@ export default {
                 class="nav-link active"
                 aria-current="page"
                 to="/notices"
-                >공지 Notice</RouterLink
+                ><span data-bs-dismiss="offcanvas"
+                  >공지 Notice</span
+                ></RouterLink
               >
             </li>
             <li class="nav-item">
@@ -323,7 +329,7 @@ export default {
                 class="nav-link active"
                 aria-current="page"
                 to="/rules"
-                >회칙 Rules</RouterLink
+                ><span data-bs-dismiss="offcanvas">회칙 Rules</span></RouterLink
               >
             </li>
             <li class="nav-item" v-if="!store.isAuthenticated">
@@ -368,7 +374,9 @@ export default {
             </li>
             <li class="nav-item" v-if="store.isAuthenticated">
               <RouterLink class="nav-link active" aria-current="page" to="/me"
-                >내 정보 Profile</RouterLink
+                ><span data-bs-dismiss="offcanvas"
+                  >내 정보 Profile</span
+                ></RouterLink
               >
             </li>
             <li class="nav-item" v-if="store.isAdmin">
@@ -376,7 +384,9 @@ export default {
                 class="nav-link active"
                 aria-current="page"
                 to="/admin"
-                >관리 Manage</RouterLink
+                ><span data-bs-dismiss="offcanvas"
+                  >관리 Manage</span
+                ></RouterLink
               >
             </li>
           </ul>
