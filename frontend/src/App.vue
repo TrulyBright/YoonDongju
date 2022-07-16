@@ -34,8 +34,10 @@ export default {
 
 <template>
   <HeaderItem v-bind="contacts"></HeaderItem>
-  <RouterView :key="$route.path" />
-  <FooterItem v-bind="contacts"></FooterItem>
+  <div id="main">
+    <RouterView :key="$route.path" />
+  </div>
+  <FooterItem v-bind="contacts" id="footer"></FooterItem>
 </template>
 
 <style>
@@ -47,7 +49,6 @@ export default {
 #app {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
 
   font-weight: normal;
   font-family: "Gowun Batang", serif;
@@ -61,5 +62,11 @@ a:link {
 }
 a:hover {
   text-decoration: underline;
+}
+#main {
+  padding: 2em;
+}
+#footer {
+  background: white;
 }
 </style>

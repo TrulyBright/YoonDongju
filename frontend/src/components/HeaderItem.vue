@@ -252,10 +252,10 @@ export default {
         data-bs-target="#offcanvasNavbar"
         aria-controls="offcanvasNavbar"
       >
-        <i class="bi-three-dots"></i>
+        <span class="navbar-toggler-icon"></span>
       </button>
       <div
-        class="offcanvas offcanvas-end"
+        class="offcanvas offcanvas-end w-75"
         tabindex="-1"
         id="offcanvasNavbar"
         aria-labelledby="offcanvasNavbarLabel"
@@ -361,11 +361,7 @@ export default {
                   <a :href="joinFormUrl">동아리 가입</a>
                 </li>
                 <li class="dropdown-item">
-                  <a
-                    
-                data-bs-toggle="modal"
-                href="#register-modal"
-                role="button"
+                  <a data-bs-toggle="modal" href="#register-modal" role="button"
                     >사이트 가입</a
                   >
                 </li>
@@ -385,53 +381,6 @@ export default {
               >
             </li>
           </ul>
-          <div class="mobile-info">
-            <div>
-              <h5>연락처</h5>
-              <p><span class="contact-icon">📌</span>{{ address }}</p>
-              <p>
-                <span class="contact-icon">📧</span
-                ><a :href="'mailto:' + email">{{ email }}</a>
-              </p>
-              <p>
-                <span class="contact-icon">📞</span>회장 {{ presidentName }}
-                <a :href="'tel:' + presidentTel">{{ presidentTel }}</a>
-              </p>
-              <p>
-                <span class="contact-icon">💻</span>개발자
-                <a href="mailto:trulybright@yonsei.ac.kr"
-                  >trulybright@yonsei.ac.kr</a
-                >
-              </p>
-            </div>
-            <div>
-              <h5>서체</h5>
-              <p>
-                한글/영문:
-                <a
-                  href="https://fonts.google.com/specimen/Gowun+Batang?subset=korean"
-                  >고운 바탕</a
-                >
-              </p>
-              <p>
-                한자:
-                <a
-                  href="https://fonts.google.com/noto/specimen/Noto+Serif+KR?subset=korean"
-                  >Noto Serif Korean</a
-                >
-              </p>
-            </div>
-            <div>
-              <h5>사이트 정보</h5>
-              <p>
-                <a href="https://github.com/TrulyBright/YoonDong-ju"
-                  ><img
-                    src="@/assets/Github-Mark-32px.png"
-                    alt="깃허브 아이콘. 클릭하면 깃허브의 연세문학회 프로젝트 레포지토리로 이동함."
-                /></a>
-              </p>
-            </div>
-          </div>
           <!-- <form class="d-flex" role="search">
             <input
               class="form-control me-2"
@@ -448,7 +397,6 @@ export default {
 </template>
 
 <style>
-@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.0/font/bootstrap-icons.css");
 @media (min-width: 992px) {
   /* 992px: lg */
   .mobile-info {

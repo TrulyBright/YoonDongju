@@ -28,49 +28,55 @@ export default {
 <template>
   <footer>
     <div>
-      <p>연락처</p>
-      <p>📌 {{ address }}</p>
+      <h5>연락처</h5>
+      <p><span class="contact-icon">📌</span>{{ address }}</p>
       <p>
-        📧 <a :href="'mailto:' + email">{{ email }}</a>
+        <span class="contact-icon">📧</span
+        ><a :href="'mailto:' + email">{{ email }}</a>
       </p>
       <p>
-        📞 회장 {{ presidentName }}
+        <span class="contact-icon">📞</span>회장 {{ presidentName }}
         <a :href="'tel:' + presidentTel">{{ presidentTel }}</a>
       </p>
+      <p>
+        <span class="contact-icon">💻</span>개발자
+        <a href="mailto:trulybright@yonsei.ac.kr">trulybright@yonsei.ac.kr</a>
+      </p>
     </div>
     <div>
-      <p>가입</p>
-      <div><a :href="joinFormUrl">동아리 회원가입</a></div>
-      <div>
-        <a @click="openRegisterModal = true" v-if="!store.isAuthenticated"
-          >사이트 회원가입</a
+      <h5>서체</h5>
+      <p>
+        한글/영문:
+        <a href="https://fonts.google.com/specimen/Gowun+Batang?subset=korean"
+          >고운 바탕</a
         >
-      </div>
-      <Teleport to="#app">
-        <RegisterModal
-          v-if="openRegisterModal"
-          @close="openRegisterModal = false"
-        ></RegisterModal>
-      </Teleport>
+      </p>
+      <p>
+        한자:
+        <a
+          href="https://fonts.google.com/noto/specimen/Noto+Serif+KR?subset=korean"
+          >Noto Serif Korean</a
+        >
+      </p>
     </div>
     <div>
-      <p>정보</p>
-      <RouterLink to="/rules">동아리 회칙</RouterLink>
-      <div>
-        <a :href="'https://github.com/TrulyBright/YoonDong-ju'">Github</a>
-      </div>
-      <div>서체: 고운 바탕(한글/영문) / Noto Serif KR (한자)</div>
-      <div>
-        © {{ getTheYear }} 연세문학회 | 작품 저작권은 항상 작가에게 있습니다.
-      </div>
+      <h5>정보</h5>
+      <p>
+        <a href="https://github.com/TrulyBright/YoonDong-ju"
+          ><img
+            src="@/assets/Github-Mark-32px.png"
+            alt="깃허브 아이콘. 클릭하면 깃허브의 연세문학회 프로젝트 레포지토리로 이동함."
+        /></a>
+      </p>
     </div>
   </footer>
 </template>
 
 <style scoped>
 footer {
-  display: none;
-  grid-template-columns: 1fr 1fr 1fr;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
 }
 footer div {
   display: flex;
@@ -81,6 +87,7 @@ footer div {
   /* 992px: lg */
   footer {
     display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
   }
 }
 </style>
