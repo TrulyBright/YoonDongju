@@ -45,6 +45,7 @@ export default {
 @import "@/assets/base.css";
 * {
   font-family: inherit;
+  color: #564138;
 }
 #app {
   margin: 0 auto;
@@ -61,6 +62,9 @@ a:link {
 }
 a:hover {
   text-decoration: underline;
+}
+button.btn-light {
+  background-color: #ffdddd;
 }
 #main {
   padding: 2em;
