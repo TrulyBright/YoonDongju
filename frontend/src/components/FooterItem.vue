@@ -1,6 +1,4 @@
 <script setup>
-import { RouterLink } from "vue-router";
-import RegisterModal from "@/components/RegisterModal.vue";
 import { useMemberStore } from "../stores/member";
 </script>
 <script>
