@@ -16,6 +16,7 @@ export default {
         title: "",
         content: "",
         attached: [],
+        attachedScheduled: [],
       },
     };
   },
@@ -90,6 +91,25 @@ export default {
     async submit() {
       try {
         const store = useMemberStore();
+        const uploadPromises = [];
+        for (const [index, file] of Object.entries(
+          this.form.attachedScheduled
+        )) {
+          const formData = new FormData();
+          formData.append("uploaded", file);
+          uploadPromises.push(
+            axios.post("uploaded", formData, {
+              headers: {
+                Authorization: store.authorizationHeader,
+              },
+            })
+          );
+        }
+        const uploadResponses = await Promise.all(uploadPromises);
+        this.form.attached = [];
+        uploadResponses.forEach((response) => {
+          this.form.attached.push(response.data.uuid);
+        });
         const result = await this.method(this.WriteURI, this.form, {
           headers: {
             Authorization: store.authorizationHeader,
@@ -99,6 +119,9 @@ export default {
       } catch (error) {
         console.error(error);
       }
+    },
+    updateAttached(event) {
+      this.form.attachedScheduled = event.target.files;
     },
   },
 };
@@ -136,14 +159,18 @@ export default {
             type="file"
             id="form-file-multiple"
             class="form-control form-control-sm"
+            @change="updateAttached"
             multiple
           />
         </div>
+        <button type="submit" class="btn btn-light mt-1 d-none d-lg-block">
+          게시
+        </button>
       </form>
       <PostPreview :form="form" class="col d-none d-lg-block"></PostPreview>
     </div>
     <PostPreview :form="form" class="row d-lg-none"></PostPreview>
-    <button type="button" class="btn btn-light mt-1" @click="submit">
+    <button type="button" class="btn btn-light mt-1 d-lg-none" @click="submit">
       게시
     </button>
   </div>

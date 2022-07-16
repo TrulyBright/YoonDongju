@@ -15,8 +15,12 @@ export default {
     <hr />
     <div>
       <small>첨부파일</small>
-      <ul v-if="form.attached" class="list-group list-group-flush">
-        <li v-for="file in form.attached" :key="file" class="list-group-item">
+      <ul v-if="form.attachedScheduled" class="list-group list-group-flush">
+        <li
+          v-for="file in form.attachedScheduled"
+          :key="file"
+          class="list-group-item"
+        >
           <small
             ><i
               :class="
