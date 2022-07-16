@@ -67,7 +67,7 @@ button.btn.btn-pink {
   background-color: #ffdddd;
 }
 #main {
-  padding: 2em;
+  padding: 1.5em;
   padding-top: 5em;
 }
 #footer {
