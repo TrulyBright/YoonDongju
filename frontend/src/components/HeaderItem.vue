@@ -97,12 +97,12 @@ export default {
               />
               <label for="password-login">비밀번호 Password</label>
             </div>
-            <button type="submit" class="btn btn-light">접속</button>
+            <button type="submit" class="btn btn-pink">접속</button>
           </form>
         </div>
         <div class="modal-footer">
           <button
-            class="btn btn-light"
+            class="btn btn-pink"
             data-bs-target="#forgot-id-pw"
             data-bs-toggle="modal"
             data-bs-dismiss="modal"
@@ -110,7 +110,7 @@ export default {
             계정명을 모르시나요?
           </button>
           <button
-            class="btn btn-light"
+            class="btn btn-pink"
             data-bs-target="#forgot-id-pw"
             data-bs-toggle="modal"
             data-bs-dismiss="modal"
@@ -142,7 +142,7 @@ export default {
         <div class="modal-body">계정명을 입력하세요.</div>
         <div class="modal-footer">
           <button
-            class="btn btn-light"
+            class="btn btn-pink"
             data-bs-target="#login-modal"
             data-bs-toggle="modal"
             data-bs-dismiss="modal"
@@ -256,7 +256,7 @@ export default {
           </form>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-light" data-bs-dismiss="modal" @click="submit">
+          <button type="button" class="btn btn-pink" data-bs-dismiss="modal" @click="submit">
             가입
           </button>
         </div>

@@ -63,7 +63,7 @@ a:link {
 a:hover {
   text-decoration: underline;
 }
-button.btn-light {
+button.btn.btn-pink {
   background-color: #ffdddd;
 }
 #main {
