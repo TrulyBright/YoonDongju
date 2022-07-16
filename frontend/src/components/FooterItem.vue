@@ -67,6 +67,7 @@ footer {
   display: flex;
   flex-direction: column;
   background-color: white;
+  padding-top: 1em;
 }
 footer div {
   display: flex;
