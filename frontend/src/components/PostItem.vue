@@ -33,6 +33,7 @@ export default {
     :type="type"
   ></PostMetadata>
   <PostContent :content="content"></PostContent>
-  <PostAttached v-for="a in attached" :key="a.uuid" v-bind="a"></PostAttached>
+  <hr />
+  <PostAttached :data="attached"></PostAttached>
   <PostAction :type="type" :no="no" v-if="store.isAdmin"></PostAction>
 </template>
