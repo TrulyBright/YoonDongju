@@ -4,13 +4,15 @@ import Markdown from "vue3-markdown-it";
 <script>
 export default {
   props: {
-    source: String,
+    form: Object,
   },
 };
 </script>
 <template>
   <div>
-    <Markdown class="markdown" :source="source"></Markdown>
+    <h1>{{ form.title }}</h1>
+    <Markdown class="markdown" :source="form.content"></Markdown>
+    <div>{{ form.attached }}</div>
   </div>
 </template>
 <style>
