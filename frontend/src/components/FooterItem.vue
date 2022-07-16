@@ -38,10 +38,6 @@ export default {
         <span class="contact-icon">📞</span>회장 {{ presidentName }}
         <a :href="'tel:' + presidentTel">{{ presidentTel }}</a>
       </p>
-      <p>
-        <span class="contact-icon">💻</span>개발자
-        <a href="mailto:trulybright@yonsei.ac.kr">trulybright@yonsei.ac.kr</a>
-      </p>
     </div>
     <div>
       <h5>서체</h5>
