@@ -104,21 +104,47 @@ export default {
 };
 </script>
 <template>
-  <form @submit="submit">
-    <div class="form-floating mb-3">
-      <input type="text" class="form-control" id="title" v-model="form.title" />
-      <label for="title">제목</label>
+  <div class="container-fluid">
+    <div class="row">
+      <form class="col">
+        <div class="form-floating mb-1">
+          <input
+            type="text"
+            class="form-control"
+            id="title"
+            v-model="form.title"
+            placeholder="제목"
+            required
+          />
+          <label for="title">제목</label>
+        </div>
+        <div class="form-floating mb-1">
+          <textarea
+            class="form-control"
+            id="content"
+            v-model="form.content"
+            placeholder="본문"
+            required
+          ></textarea>
+          <label for="content">본문</label>
+        </div>
+        <div>
+          <label for="form-file-multiple"
+            ><small>첨부파일(여러 개 올릴 수 있습니다)</small></label
+          >
+          <input
+            type="file"
+            id="form-file-multiple"
+            class="form-control form-control-sm"
+            multiple
+          />
+        </div>
+      </form>
+      <PostPreview :form="form" class="col d-none d-lg-block"></PostPreview>
     </div>
-    <div class="form-floating">
-      <textarea
-        class="form-control"
-        id="content"
-        v-model="form.content"
-      ></textarea>
-      <label for="content">본문</label>
-    </div>
-    <button type="submit" class="btn btn-primary">게시</button>
-  </form>
-  <PostPreview :source="form.content"></PostPreview>
+    <PostPreview :form="form" class="row d-lg-none"></PostPreview>
+    <button type="button" class="btn btn-light mt-1" @click="submit">
+      게시
+    </button>
+  </div>
 </template>
-<style scoped></style>
