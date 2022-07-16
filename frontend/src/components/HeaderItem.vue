@@ -75,21 +75,27 @@ export default {
         </div>
         <div class="modal-body">
           <form @submit.prevent="submit">
-            <div class="mb-3">
+            <div class="form-floating">
               <input
                 type="text"
                 class="form-control"
+                id="username-login"
                 placeholder="계정명 ID"
                 required
                 v-model="loginForm.username"
               />
+              <label for="username-login">계정명 ID</label>
+            </div>
+            <div class="form-floating mb-1">
               <input
                 type="password"
                 class="form-control"
+                id="password-login"
                 placeholder="비밀번호 Password"
                 required
                 v-model="loginForm.password"
               />
+              <label for="password-login">비밀번호 Password</label>
             </div>
             <button type="submit" class="btn btn-light">접속</button>
           </form>
