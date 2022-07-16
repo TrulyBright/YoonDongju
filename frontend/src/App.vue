@@ -47,7 +47,6 @@ export default {
   font-family: inherit;
 }
 #app {
-  max-width: 1280px;
   margin: 0 auto;
 
   font-weight: normal;
@@ -65,6 +64,7 @@ a:hover {
 }
 #main {
   padding: 2em;
+  padding-top: 5em;
 }
 #footer {
   background: white;
