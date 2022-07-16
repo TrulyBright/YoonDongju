@@ -256,7 +256,12 @@ export default {
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-pink" data-bs-dismiss="modal" @click="submit">
+          <button
+            type="button"
+            class="btn btn-pink"
+            data-bs-dismiss="modal"
+            @click="submit"
+          >
             가입
           </button>
         </div>
