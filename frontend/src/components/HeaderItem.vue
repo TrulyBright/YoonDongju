@@ -90,8 +90,8 @@ export default {
                 required
                 v-model="loginForm.password"
               />
-              <button type="submit" class="btn btn-primary">접속</button>
             </div>
+            <button type="submit" class="btn btn-light">접속</button>
           </form>
         </div>
         <div class="modal-footer">
@@ -229,7 +229,7 @@ export default {
         </div>
         <div class="modal-footer">
           <button
-            class="btn btn-primary"
+            class="btn btn-light"
             data-bs-dismiss="modal"
             @click="submit"
           >
@@ -239,7 +239,7 @@ export default {
       </div>
     </div>
   </div>
-  <nav class="navbar navbar-expand-lg bg-light fixed-top">
+  <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container-fluid" id="navbar-header">
       <div id="dummy" tableindex="-1"></div>
       <RouterLink class="navbar-brand" to="/">연세문학회</RouterLink>
@@ -418,5 +418,16 @@ export default {
 }
 #offcanvasNavbar {
   max-width: 75%;
+}
+nav,
+.offcanvas-header,
+.offcanvas-body {
+  background-color: #ffdddd;
+}
+.navbar {
+  box-shadow: 0 3px 5px rgb(57 63 72 / 30%);
+}
+.nav-link {
+  color: #564138 !important;
 }
 </style>
