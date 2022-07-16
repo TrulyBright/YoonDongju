@@ -56,7 +56,8 @@ export default {
       <h5>정보</h5>
       <p>
         <a href="https://github.com/TrulyBright/YoonDong-ju"
-          ><i class="bi-github"></i></a>
+          ><i class="bi-github"></i
+        ></a>
       </p>
     </div>
   </footer>
@@ -80,5 +81,8 @@ footer div {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
   }
+}
+i.bi-github {
+  font-size: 2rem;
 }
 </style>
