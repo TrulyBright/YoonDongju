@@ -96,7 +96,7 @@ export default {
         </div>
         <div class="modal-footer">
           <button
-            class="btn btn-primary"
+            class="btn btn-light"
             data-bs-target="#forgot-id-pw"
             data-bs-toggle="modal"
             data-bs-dismiss="modal"
@@ -104,7 +104,7 @@ export default {
             계정명을 모르시나요?
           </button>
           <button
-            class="btn btn-primary"
+            class="btn btn-light"
             data-bs-target="#forgot-id-pw"
             data-bs-toggle="modal"
             data-bs-dismiss="modal"
@@ -136,7 +136,7 @@ export default {
         <div class="modal-body">계정명을 입력하세요.</div>
         <div class="modal-footer">
           <button
-            class="btn btn-primary"
+            class="btn btn-light"
             data-bs-target="#login-modal"
             data-bs-toggle="modal"
             data-bs-dismiss="modal"
@@ -241,12 +241,10 @@ export default {
   </div>
   <nav class="navbar navbar-expand-lg bg-light fixed-top">
     <div class="container-fluid" id="navbar-header">
-      <RouterLink class="navbar-brand" id="navbar-brand" to="/"
-        >연세문학회</RouterLink
-      >
+      <div id="dummy" tableindex="-1"></div>
+      <RouterLink class="navbar-brand" to="/">연세문학회</RouterLink>
       <button
         class="navbar-toggler"
-        id="navbar-toggler"
         type="button"
         data-bs-toggle="offcanvas"
         data-bs-target="#offcanvasNavbar"
@@ -255,7 +253,7 @@ export default {
         <span class="navbar-toggler-icon"></span>
       </button>
       <div
-        class="offcanvas offcanvas-end w-75"
+        class="offcanvas offcanvas-end"
         tabindex="-1"
         id="offcanvasNavbar"
         aria-labelledby="offcanvasNavbarLabel"
@@ -283,8 +281,7 @@ export default {
             </li>
             <li class="nav-item dropdown">
               <a
-                class="nav-link dropdown-toggle"
-                href="#"
+                class="nav-link active dropdown-toggle"
                 id="offcanvasNavbarDropdown"
                 role="button"
                 data-bs-toggle="dropdown"
@@ -296,11 +293,13 @@ export default {
                 class="dropdown-menu"
                 aria-labelledby="offcanvasNavbarDropdown"
               >
-                <li v-for="c in classes" class="dropdown-item" :key="c">
-                  <RouterLink :to="'/classes/' + c.name">{{
-                    c.korean
-                  }}</RouterLink>
-                </li>
+                <RouterLink
+                  v-for="c in classes"
+                  class="dropdown-item"
+                  :key="c"
+                  :to="'/classes/' + c.name"
+                  >{{ c.korean }}</RouterLink
+                >
               </ul>
             </li>
             <li class="nav-item">
@@ -329,7 +328,7 @@ export default {
             </li>
             <li class="nav-item" v-if="!store.isAuthenticated">
               <a
-                class="nav-link"
+                class="nav-link active"
                 data-bs-toggle="modal"
                 href="#login-modal"
                 role="button"
@@ -346,7 +345,7 @@ export default {
             </li>
             <li class="nav-item dropdown">
               <a
-                class="nav-link dropdown-toggle"
+                class="nav-link active dropdown-toggle"
                 role="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
@@ -357,14 +356,14 @@ export default {
                 class="dropdown-menu"
                 aria-labelledby="offcanvasNavbarDropdown"
               >
-                <li class="dropdown-item">
-                  <a :href="joinFormUrl">동아리 가입</a>
-                </li>
-                <li class="dropdown-item">
-                  <a data-bs-toggle="modal" href="#register-modal" role="button"
-                    >사이트 가입</a
-                  >
-                </li>
+                <a :href="joinFormUrl" class="dropdown-item">동아리 가입</a>
+                <a
+                  data-bs-toggle="modal"
+                  href="#register-modal"
+                  role="button"
+                  class="dropdown-item"
+                  >사이트 가입</a
+                >
               </ul>
             </li>
             <li class="nav-item" v-if="store.isAuthenticated">
@@ -397,28 +396,17 @@ export default {
 </template>
 
 <style>
-@media (min-width: 992px) {
-  /* 992px: lg */
-  .mobile-info {
-    display: none;
-  }
-}
 @media (max-width: 991px) {
-  #navbar-header {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-  }
-  #navbar-toggler {
+  .navbar-brand {
     position: absolute;
-    right: 0;
-  }
-  #navbar-brand {
-    margin-right: unset;
+    left: 50%;
+    transform: translate(-50%, 0);
   }
 }
 .contact-icon {
   margin-right: 3px;
+}
+#offcanvasNavbar {
+  max-width: 75%;
 }
 </style>
