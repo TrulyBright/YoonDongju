@@ -16,18 +16,19 @@ export default {
 </script>
 
 <template>
-  <div class="metadata">
-    <div>{{ isClassRecord ? "분반장" : "글쓴이" }} {{ author }}</div>
-    <div>{{ isClassRecord ? "활동일" : "게시일" }} {{ published }}</div>
-    <div v-if="!isClassRecord">수정자 {{ modifier }}</div>
-    <div v-if="!isClassRecord">수정일 {{ modified }}</div>
+  <div class="container metadata">
+    <div class="row row-cols-auto">
+      <small class="col">{{ author }}</small>
+      <small class="col">{{ published }}</small>
+      <small class="col" v-if="!isClassRecord">{{ modifier }}</small>
+      <small class="col" v-if="!isClassRecord">{{ modified }}</small>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.metadata {
-  display: flex;
-  flex-direction: row;
-  gap: 15px;
+.container.metadata {
+  padding-left: unset;
+  margin-left: unset;
 }
 </style>
