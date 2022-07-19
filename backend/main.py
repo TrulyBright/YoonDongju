@@ -31,7 +31,7 @@ Path("uploaded").mkdir(exist_ok=True)
 
 
 class RegisterForm(BaseModel):
-    portal_id: int
+    portal_id: str
     portal_pw: str
     real_name: str
     username: str
@@ -247,7 +247,7 @@ async def register(form: RegisterForm, db: Session = Depends(get_db)):
     id_pattern = "^.{1,65}$"  # 1자 이상 64자 이하에 어떤 문자든 허용됨
     # 10자 이상에 숫자와 영문이 하나씩은 있어야 함.
     password_pattern = "^(?=.*[0-9])(?=.*[a-zA-Z]).{10,}$"
-    if str(form.portal_id)[4] != "1":
+    if str(form.portal_id)[4] == "2":
         raise HTTPException(
             status_code=403,
             detail="신촌캠만 가입할 수 있습니다."
