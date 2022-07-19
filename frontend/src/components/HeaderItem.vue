@@ -46,10 +46,31 @@ export default {
     );
   },
   methods: {
-    async submit() {
+    async loginSubmit() {
       const store = useMemberStore();
       await store.requestToken(this.loginForm);
       await store.whoAmI();
+    },
+    async registerSubmit() {
+      if (this.validate()) {
+        try {
+          await useMemberStore().register(this.registerForm);
+          this.registerError = "";
+          this.$router.push({ name: "home" });
+          this.$emit("close");
+        } catch (error) {
+          console.log(error.response);
+          this.registerError = `${error.response.status}: ${error.response.data.detail}`;
+        }
+      }
+    },
+    validate() {
+      if (this.registerForm.password === this.registerForm.passwordConfirm) {
+        this.registerError = "";
+        return true;
+      }
+      this.registerError = "재입력된 비밀번호가 다릅니다.";
+      return false;
     },
   },
 };
@@ -74,7 +95,7 @@ export default {
           ></button>
         </div>
         <div class="modal-body">
-          <form @submit.prevent="submit">
+          <form @submit.prevent="loginSubmit">
             <div class="form-floating">
               <input
                 type="text"
@@ -175,7 +196,7 @@ export default {
         </div>
         <div class="modal-body">
           <p>동아리 회원가입은 따로 하셔야 합니다.</p>
-          <form @submit="submit">
+          <form @submit="registerSubmit">
             <div class="form-floating">
               <input
                 type="text"
@@ -260,7 +281,7 @@ export default {
             type="button"
             class="btn btn-pink"
             data-bs-dismiss="modal"
-            @click="submit"
+            @click="registerSubmit"
           >
             가입
           </button>
