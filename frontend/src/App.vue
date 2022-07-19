@@ -70,6 +70,12 @@ button.btn.btn-pink {
   padding: 1.5em;
   padding-top: 5em;
 }
+@media (min-width: 992px) {
+  #main {
+    padding-left: 20%;
+    padding-right: 20%;
+  }
+}
 #footer {
   background: white;
 }
