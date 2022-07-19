@@ -1,7 +1,6 @@
 <script setup>
 import PostTitle from "./PostTitle.vue";
 import axios from "axios";
-import PostAction from "./PostAction.vue";
 import PostMetadata from "./PostMetadata.vue";
 import PostContent from "./PostContent.vue";
 import { useMemberStore } from "../stores/member";
@@ -43,13 +42,9 @@ export default {
     :author="moderator"
     :published="conducted"
     type="class-record"
-  ></PostMetadata>
-  <PostContent v-if="content" :content="content"></PostContent>
-  <PostAction
-    type="class-record"
     :className="name"
     :conducted="conducted"
-    v-if="store.isAdmin"
-  ></PostAction>
+  ></PostMetadata>
+  <PostContent v-if="content" :content="content"></PostContent>
 </template>
 <style scoped></style>
