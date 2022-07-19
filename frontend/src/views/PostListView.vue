@@ -2,6 +2,7 @@
 import axios from "axios";
 import PostOutlineItem from "../components/PostOutlineItem.vue";
 import ListAction from "../components/ListAction.vue";
+import PostNavigator from "../components/PostNavigator.vue";
 </script>
 <script>
 export default {
@@ -30,6 +31,7 @@ export default {
 </script>
 <template>
   <main>
+    <PostNavigator></PostNavigator>
     <PostOutlineItem
       v-for="item in items"
       v-bind="item"
