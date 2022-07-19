@@ -446,7 +446,7 @@ export default {
   margin-right: 3px;
 }
 #offcanvasNavbar {
-  max-width: 60%;
+  max-width: 65%;
 }
 @media (min-width: 335px) {
   #offcanvasNavbar {
