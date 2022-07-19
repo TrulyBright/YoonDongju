@@ -89,6 +89,7 @@ export default {
         id="action-for-post"
         data-bs-toggle="dropdown"
         aria-expanded="false"
+        v-if="store.isAdmin"
       >
       </i>
       <ul class="dropdown-menu" aria-labelledby="action-for-post">
@@ -97,7 +98,7 @@ export default {
           class="dropdown-item"
           id="delete-button"
           @click="deleteIfConfirmed"
-          v-if="store.isAdmin && type !== 'about'"
+          v-if="type !== 'about' && type !== 'rules'"
         >
           삭제
         </button>
