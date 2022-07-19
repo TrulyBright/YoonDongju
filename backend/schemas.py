@@ -30,14 +30,6 @@ class Member(Base):
     password = Column(String)
     role = Column(String)
 
-
-class PostUploadedFileAssociation(Base):
-    __tablename__ = "postUploadedFileAssociation"
-    post_no = Column(Integer, ForeignKey("posts.no"), index=True)
-    file_uuid = Column(String, ForeignKey("uploadedFiles.uuid"))
-    __table_args__ = (PrimaryKeyConstraint("post_no", "file_uuid"),)
-
-
 class Post(Base):
     __tablename__ = "posts"
     no = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -50,7 +42,8 @@ class Post(Base):
     modifier = Column(String, nullable=True)
     attached = relationship(
         "UploadedFile",
-        secondary=PostUploadedFileAssociation.__tablename__,
+        cascade="all,delete",
+        passive_deletes=True,
     )
 
 
@@ -58,6 +51,7 @@ class UploadedFile(Base):
     __tablename__ = "uploadedFiles"
     uuid = Column(String, primary_key=True)
     name = Column(String)
+    post_no = Column(Integer, ForeignKey("posts.no", ondelete="CASCADE"), nullable=True)
     content_type = Column(String)
 
 

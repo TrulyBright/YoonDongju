@@ -111,15 +111,10 @@ def update_post(db: Session, post: models.PostCreate, modifier: models.Member, n
 
 
 def delete_post(db: Session, type: models.PostType, no: int):
-    queried = db.query(schemas.Post).filter(
-        schemas.Post.no == no and schemas.Post.type == type)
-    if queried.first():
-        db.query(schemas.PostUploadedFileAssociation).filter(
-            schemas.PostUploadedFileAssociation.post_no == no).delete()
-        queried.delete()
-        db.commit()
-        return True
-    return False
+    deleted = db.query(schemas.Post).filter(
+        schemas.Post.no == no and schemas.Post.type == type).delete()
+    db.commit()
+    return deleted
 
 
 def get_club_information(db: Session):
