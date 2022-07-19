@@ -12,7 +12,7 @@ export default {
 <template>
   <div>
     <small>첨부파일</small>
-    <ul v-if="data" class="list-group list-group-flush">
+    <ul v-if="data" class="list-group list-group-flush rounded">
       <li v-for="file in data" :key="file" class="list-group-item">
         <a :href="axios.defaults.baseURL + 'uploaded/' + file.uuid">
           <small
