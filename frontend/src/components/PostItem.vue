@@ -3,7 +3,6 @@ import PostTitle from "./PostTitle.vue";
 import PostContent from "./PostContent.vue";
 import PostAttached from "./PostAttached.vue";
 import PostMetadata from "./PostMetadata.vue";
-import PostAction from "./PostAction.vue";
 import { useMemberStore } from "../stores/member";
 const store = useMemberStore();
 </script>
@@ -31,9 +30,15 @@ export default {
     :modifier="modifier"
     :modified="modified"
     :type="type"
+    :no="no"
+    :isAdmin="store.isAdmin"
   ></PostMetadata>
   <PostContent :content="content"></PostContent>
   <hr />
   <PostAttached :data="attached"></PostAttached>
-  <PostAction :type="type" :no="no" v-if="store.isAdmin"></PostAction>
 </template>
+<style scoped>
+.bi-gear {
+  display: inline;
+}
+</style>
