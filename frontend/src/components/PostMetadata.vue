@@ -84,14 +84,14 @@ export default {
     <div class="row row-cols-auto">
       <small class="col">{{ author }}</small>
       <small class="col">{{ published }}</small>
-      <i
-        class="bi-gear"
+      <small
         id="action-for-post"
         data-bs-toggle="dropdown"
         aria-expanded="false"
         v-if="store.isAdmin"
       >
-      </i>
+        <i class="bi-gear"> </i>
+      </small>
       <ul class="dropdown-menu" aria-labelledby="action-for-post">
         <RouterLink class="dropdown-item" :to="routeToWrite">수정</RouterLink>
         <button
@@ -116,7 +116,6 @@ export default {
 }
 #action-for-post {
   cursor: pointer;
-  font-size: 14px;
 }
 #delete-button {
   color: red;
