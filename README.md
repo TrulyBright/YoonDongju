@@ -6,5 +6,5 @@
 - python >= 3.10
 ## Solutions
 - [FastAPI](https://fastapi.tiangolo.com/)
-- [Vue](https://vuejs.org/)
+- [Vue](https://vuejs.org/) & [Bootstrap 5](https://getbootstrap.com/)
 - [SQLite](https://sqlite.org/index.html)
