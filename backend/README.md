@@ -1,7 +1,7 @@
 # Backend
 ## Run
 1. `pip install -r requirements.txt`
-1. `uvicorn main:app`
+1. `gunicorn -k uvicorn.workers.UvicornWorker main:app -w (할당할 스레드 수)`
 ## Test
 1. `test.env` 파일을 생성하고 다음 값을 넣습니다.
     - `test_portal_id=연세포탈 ID(즉 학번)`
