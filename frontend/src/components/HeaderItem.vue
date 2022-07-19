@@ -445,10 +445,12 @@ export default {
 .contact-icon {
   margin-right: 3px;
 }
-#offcanvasNavbar {
-  max-width: 65%;
+@media (max-width: 334px) {
+  #offcanvasNavbar {
+    max-width: 65%;
+  }
 }
-@media (min-width: 335px) {
+@media only screen and (min-width: 335px) and (max-width: 991px) {
   #offcanvasNavbar {
     max-width: 50%;
   }
