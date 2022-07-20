@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pydantic import BaseSettings
+from fastapi_jwt_auth import AuthJWT
 
 
 class Settings(BaseSettings):

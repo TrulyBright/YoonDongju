@@ -8,6 +8,8 @@ export const useMemberStore = defineStore({
     member: useLocalStorage("member", ""),
     token: useLocalStorage("token", ""),
     tokenType: useLocalStorage("tokenType", ""),
+    expiresAt: useLocalStorage("expiresAt", ""),
+    refreshToken: useLocalStorage("refresh_token", ""),
   }),
   getters: {
     isAuthenticated: (state) => state.member !== "",
@@ -16,7 +18,16 @@ export const useMemberStore = defineStore({
       state.isAuthenticated &&
       (state.stateMember.role === "board" ||
         state.stateMember.role === "president"),
-    authorizationHeader: (state) => state.tokenType + " " + state.token,
+    authorizationHeader: function (state) {
+      // why not arrow lambda?: to use "this".
+      return (
+        state.tokenType +
+        " " +
+        (state.expiresAt - 120 <= Date.now() / 1000
+          ? this.refreshAccessToken()
+          : state.token)
+      );
+    },
   },
   actions: {
     async register(form) {
@@ -39,25 +50,39 @@ export const useMemberStore = defineStore({
       const result = await axios.post("/token", data);
       this.token = result.data.access_token;
       this.tokenType = result.data.token_type;
+      this.refreshToken = result.data.refreshToken;
+      this.expiresAt = result.data.expires_at;
     },
-    whoAmI() {
-      axios
-        .get("/me", {
-          headers: {
-            Authorization: this.authorizationHeader,
-          },
-        })
-        .then((response) => {
-          this.member = JSON.stringify({
-            username: response.data.username,
-            realName: response.data.real_name,
-            studentId: response.data.student_id,
-            role: response.data.role,
+    refreshAccessToken() {
+      try {
+        axios
+          .post("/refresh", {
+            headers: {
+              Authorization: this.tokenType + " " + this.refreshToken,
+            },
+          })
+          .then((response) => {
+            this.token = response.data.access_token;
+            this.expiresAt = response.data.expiresAt;
           });
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+        return this.token;
+      } catch {
+        // refresh token also expired.
+        // TODO
+      }
+    },
+    async whoAmI() {
+      const response = await axios.get("/me", {
+        headers: {
+          Authorization: this.authorizationHeader,
+        },
+      });
+      this.member = JSON.stringify({
+        username: response.data.username,
+        realName: response.data.real_name,
+        studentId: response.data.student_id,
+        role: response.data.role,
+      });
       return this.stateMember;
     },
     logOut() {

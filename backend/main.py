@@ -1,6 +1,6 @@
 import re
 from functools import lru_cache
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Union
 from uuid import UUID
 from pathlib import Path
@@ -309,7 +309,13 @@ async def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
         expires_delta=access_token_expires
     )
     refresh_token = Authorize.create_refresh_token(subject=member.username)
-    return {"access_token": access_token, "token_type": "Bearer", "refresh_token": refresh_token}
+    return {
+        "access_token": access_token,
+        "token_type": "Bearer",
+        "refresh_token": refresh_token,
+        "expires_at": (datetime.now()+access_token_expires).timestamp()
+    }
+
 
 @app.post("/refresh")
 def refresh(Authorize: AuthJWT = Depends()):
@@ -326,4 +332,7 @@ def refresh(Authorize: AuthJWT = Depends()):
         data={"sub": current_user},
         expires_delta=access_token_expires
     )
-    return {"access_token": new_access_token}
+    return {
+        "access_token": new_access_token,
+        "expires_at": (datetime.now()+access_token_expires).timestamp()
+    }

@@ -6,8 +6,11 @@ import MeItem from "../components/MeItem.vue";
 export default {
   data() {
     return {
-      member: useMemberStore().whoAmI(),
+      member: null,
     };
+  },
+  async created() {
+    this.member = await useMemberStore().whoAmI();
   },
 };
 </script>
