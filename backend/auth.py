@@ -7,6 +7,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from fastapi_jwt_auth import AuthJWT
 
 import crud
 import database
@@ -32,6 +33,11 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 app = FastAPI()
+
+
+@AuthJWT.load_config
+def get_config():
+    return get_settings()
 
 
 def authenticate(db: Session, username: str, password: str):
