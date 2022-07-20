@@ -1,31 +1,15 @@
 <script setup>
 import { useMemberStore } from "../stores/member";
-import { Tooltip } from "bootstrap";
 import axios from "axios";
+import LoginModal from "./LoginModal.vue";
+import RegisterModal from "./RegisterModal.vue";
 </script>
 <script>
 export default {
   data() {
     return {
-      openLoginForm: false,
       store: useMemberStore(),
       classes: [],
-      loginForm: {
-        username: null,
-        password: null,
-      },
-      registerForm: {
-        portal_id: null,
-        portal_pw: null,
-        real_name: null,
-        username: null,
-        password: null,
-        passwordConfirm: null,
-      },
-      loginError: "",
-      registerError: "",
-      repeated: "",
-      confirmElement: null,
     };
   },
   props: {
@@ -38,257 +22,18 @@ export default {
   async created() {
     const response = await axios.get("classes");
     this.classes = response.data;
-    const tooltipTriggerList = document.querySelectorAll(
-      '[data-bs-toggle="tooltip"]'
-    );
-    [...tooltipTriggerList].map(
-      (tooltipTriggerEl) => new Tooltip(tooltipTriggerEl)
-    );
   },
   methods: {
-    async loginSubmit() {
-      const store = useMemberStore();
-      await store.requestToken(this.loginForm);
-      await store.whoAmI();
-    },
-    async registerSubmit() {
-      if (this.validate()) {
-        try {
-          await useMemberStore().register(this.registerForm);
-          this.registerError = "";
-          this.$router.push({ name: "home" });
-          this.$emit("close");
-        } catch (error) {
-          console.log(error.response);
-          this.registerError = `${error.response.status}: ${error.response.data.detail}`;
-        }
-      }
-    },
-    validate() {
-      if (this.registerForm.password === this.registerForm.passwordConfirm) {
-        this.registerError = "";
-        return true;
-      }
-      this.registerError = "재입력된 비밀번호가 다릅니다.";
-      return false;
+    logout() {
+      this.store.logOut();
+      this.$router.replace("/");
     },
   },
 };
 </script>
 <template>
-  <div
-    class="modal fade"
-    id="login-modal"
-    aria-hidden="true"
-    aria-labelledby="exampleModalToggleLabel"
-    tabindex="-1"
-  >
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalToggleLabel">접속</h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="modal-body">
-          <form @submit.prevent="loginSubmit">
-            <div class="form-floating">
-              <input
-                type="text"
-                class="form-control"
-                id="username-login"
-                placeholder="계정명 ID"
-                required
-                v-model="loginForm.username"
-              />
-              <label for="username-login">계정명 ID</label>
-            </div>
-            <div class="form-floating mb-1">
-              <input
-                type="password"
-                class="form-control"
-                id="password-login"
-                placeholder="비밀번호 Password"
-                required
-                v-model="loginForm.password"
-              />
-              <label for="password-login">비밀번호 Password</label>
-            </div>
-            <button type="submit" class="btn btn-pink">접속</button>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button
-            class="btn btn-pink"
-            data-bs-target="#forgot-id-pw"
-            data-bs-toggle="modal"
-            data-bs-dismiss="modal"
-          >
-            계정명을 모르시나요?
-          </button>
-          <button
-            class="btn btn-pink"
-            data-bs-target="#forgot-id-pw"
-            data-bs-toggle="modal"
-            data-bs-dismiss="modal"
-          >
-            비밀번호를 모르시나요?
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div
-    class="modal fade"
-    id="forgot-id-pw"
-    aria-hidden="true"
-    aria-labelledby="exampleModalToggleLabel2"
-    tabindex="-1"
-  >
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalToggleLabel2">계정명 찾기</h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="modal-body">계정명을 입력하세요.</div>
-        <div class="modal-footer">
-          <button
-            class="btn btn-pink"
-            data-bs-target="#login-modal"
-            data-bs-toggle="modal"
-            data-bs-dismiss="modal"
-          >
-            접속 창으로 돌아가기
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div
-    class="modal fade"
-    id="register-modal"
-    aria-hidden="true"
-    aria-labelledby="exampleModalToggleLabel"
-    tabindex="-1"
-  >
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalToggleLabel">
-            사이트 회원가입
-          </h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="modal-body">
-          <p>동아리 회원가입은 따로 하셔야 합니다.</p>
-          <form @submit="registerSubmit">
-            <div class="form-floating">
-              <input
-                type="text"
-                class="form-control"
-                id="portal-id"
-                v-model="registerForm.portal_id"
-                placeholder="연세포탈 ID"
-                required
-              />
-              <label for="portal-id">연세포탈 ID</label>
-            </div>
-            <div class="form-floating">
-              <input
-                type="password"
-                class="form-control"
-                id="portal-pw"
-                v-model="registerForm.portal_pw"
-                placeholder="연세포탈 비밀번호"
-                data-bs-toggle="tooltip"
-                data-bs-placement="bottom"
-                title="저장되지 않고, 신촌캠 구성원 확인에만 일회용됩니다."
-                required
-              />
-              <label for="portal-pw">연세포탈 비밀번호</label>
-            </div>
-            <div class="form-floating">
-              <input
-                type="text"
-                class="form-control"
-                id="real-name"
-                v-model="registerForm.real_name"
-                placeholder="실명"
-                required
-              />
-              <label for="real-name">실명</label>
-            </div>
-            <div class="form-floating">
-              <input
-                type="text"
-                class="form-control"
-                id="username"
-                v-model="registerForm.username"
-                placeholder="사용할 계정명 (ID)"
-                pattern="^.{1,65}$"
-                required
-                data-bs-toggle="tooltip"
-                data-bs-placement="bottom"
-                title="최대 64자에, 한글을 비롯하여 어떤 문자든 허용됩니다."
-              />
-              <label for="username">사용할 계정명 (ID)</label>
-            </div>
-            <div class="form-floating">
-              <input
-                type="password"
-                class="form-control"
-                id="password"
-                v-model="registerForm.password"
-                placeholder="사용할 비밀번호"
-                pattern="^(?=.*[0-9])(?=.*[a-zA-Z]).{10,}$"
-                data-bs-toggle="tooltip"
-                data-bs-placement="bottom"
-                title="10자 이상에 숫자와 영문이 하나씩은 있어야 합니다."
-                required
-              />
-              <label for="password">사용할 비밀번호</label>
-            </div>
-            <div class="form-floating">
-              <input
-                type="password"
-                class="form-control"
-                id="password-confirm"
-                placeholder="사용할 비밀번호 재입력"
-                v-model="registerForm.passwordConfirm"
-                required
-              />
-              <label for="password-confirm">사용할 비밀번호 재입력</label>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-pink"
-            data-bs-dismiss="modal"
-            @click="registerSubmit"
-          >
-            가입
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <LoginModal id="login-modal"></LoginModal>
+  <RegisterModal id="register-modal"></RegisterModal>
   <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container-fluid" id="navbar-header">
       <div id="dummy" tableindex="-1"></div>
@@ -392,11 +137,8 @@ export default {
               >
             </li>
             <li class="nav-item" v-else>
-              <RouterLink
-                to="/logout"
-                class="nav-link active"
-                aria-current="page"
-                >접속해제 Logout</RouterLink
+              <a role="button" class="nav-link active" @click="logout"
+                >접속해제 Logout</a
               >
             </li>
             <li class="nav-item dropdown">
@@ -486,5 +228,8 @@ nav,
 }
 .nav-link {
   color: #564138 !important;
+}
+#login-loading {
+  display: none;
 }
 </style>
