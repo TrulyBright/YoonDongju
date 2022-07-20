@@ -115,7 +115,7 @@ export default {
         </div>
       </div>
     </div>
-    <Teleport to="body">
+    <Teleport to="#app">
       <div
         class="modal fade"
         id="forgot-id-pw"
