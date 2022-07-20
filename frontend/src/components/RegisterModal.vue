@@ -37,6 +37,7 @@ export default {
           await useMemberStore().register(this.registerForm);
           this.registerError = "";
           this.$router.push({ name: "home" });
+          document.querySelector("#close-register-modal").click();
         } catch (error) {
           this.registerError = `${error.response.status}: ${error.response.data.detail}`;
         }
@@ -65,6 +66,7 @@ export default {
           <button
             type="button"
             class="btn-close"
+            id="close-register-modal"
             data-bs-dismiss="modal"
             aria-label="Close"
           ></button>
