@@ -14,7 +14,8 @@ export const useMemberStore = defineStore({
     stateMember: (state) => JSON.parse(state.member),
     isAdmin: (state) =>
       state.isAuthenticated &&
-      (state.stateMember.role === "board" || state.stateMember.role === "president"),
+      (state.stateMember.role === "board" ||
+        state.stateMember.role === "president"),
     authorizationHeader: (state) => state.tokenType + " " + state.token,
   },
   actions: {
