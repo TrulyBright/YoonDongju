@@ -3,6 +3,7 @@ import MagazineItem from "../components/MagazineItem.vue";
 import axios from "axios";
 import MagazineListAction from "../components/MagazineListAction.vue";
 import { useMemberStore } from "../stores/member";
+import PostNavigator from "../components/PostNavigator.vue";
 const store = useMemberStore();
 </script>
 <script>
@@ -20,6 +21,7 @@ export default {
 </script>
 <template>
   <div>
+    <PostNavigator></PostNavigator>
     <MagazineListAction v-if="store.isAdmin"></MagazineListAction>
     <MagazineItem
       v-for="volume in magazines"
