@@ -58,7 +58,7 @@ export const useMemberStore = defineStore({
         .catch((error) => {
           console.error(error);
         });
-      return this.member;
+      return this.stateMember;
     },
     logOut() {
       this.member = "";
