@@ -30,17 +30,18 @@ export default {
   },
   methods: {
     async registerSubmit() {
+      const spinner = document.querySelector("#register-loading");
+      spinner.style.display = "inline-block";
       if (this.validate()) {
         try {
           await useMemberStore().register(this.registerForm);
           this.registerError = "";
           this.$router.push({ name: "home" });
-          this.$emit("close");
         } catch (error) {
-          console.log(error.response);
           this.registerError = `${error.response.status}: ${error.response.data.detail}`;
         }
       }
+      spinner.style.removeProperty("display");
     },
     validate() {
       if (this.registerForm.password === this.registerForm.passwordConfirm) {
@@ -54,12 +55,7 @@ export default {
 };
 </script>
 <template>
-  <div
-    class="modal fade"
-    aria-hidden="true"
-    aria-labelledby="exampleModalToggleLabel"
-    tabindex="-1"
-  >
+  <div class="modal fade" aria-hidden="true" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
@@ -75,7 +71,7 @@ export default {
         </div>
         <div class="modal-body">
           <p>동아리 회원가입은 따로 하셔야 합니다.</p>
-          <form @submit="registerSubmit">
+          <form @submit.prevent="registerSubmit">
             <div class="form-floating">
               <input
                 type="text"
@@ -142,7 +138,7 @@ export default {
               />
               <label for="password">사용할 비밀번호</label>
             </div>
-            <div class="form-floating">
+            <div class="form-floating mb-2">
               <input
                 type="password"
                 class="form-control"
@@ -153,19 +149,26 @@ export default {
               />
               <label for="password-confirm">사용할 비밀번호 재입력</label>
             </div>
+            <div>
+              <button type="submit" class="btn btn-pink">
+                가입<span
+                  class="spinner-border spinner-border-sm"
+                  role="status"
+                  aria-hidden="true"
+                  id="register-loading"
+                  ><span class="visually-hidden">가입 중...</span></span
+                >
+              </button>
+              <span class="text-danger">{{ registerError }}</span>
+            </div>
           </form>
-        </div>
-        <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-pink"
-            data-bs-dismiss="modal"
-            @click="registerSubmit"
-          >
-            가입
-          </button>
         </div>
       </div>
     </div>
   </div>
 </template>
+<style>
+#register-loading {
+  display: none;
+}
+</style>

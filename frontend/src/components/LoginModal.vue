@@ -30,6 +30,7 @@ export default {
         await store.requestToken(this.loginForm);
         await store.whoAmI();
         this.loginError = "";
+        this.$emit("close");
         document.querySelector("#close-login-modal").click();
       } catch (e) {
         this.loginError = "계정명이나 비밀번호가 틀렸습니다.";
@@ -40,12 +41,7 @@ export default {
 };
 </script>
 <template>
-  <div
-    class="modal fade"
-    aria-hidden="true"
-    aria-labelledby="exampleModalToggleLabel"
-    tabindex="-1"
-  >
+  <div class="modal fade" aria-hidden="true" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
@@ -90,8 +86,8 @@ export default {
                   role="status"
                   aria-hidden="true"
                   id="login-loading"
-                ></span>
-                <span class="visually-hidden">인증 중...</span>
+                  ><span class="visually-hidden">인증 중...</span></span
+                >
               </button>
               <span class="text-danger">{{ loginError }}</span>
             </div>
@@ -155,3 +151,8 @@ export default {
     </Teleport>
   </div>
 </template>
+<style>
+#login-loading {
+  display: none;
+}
+</style>

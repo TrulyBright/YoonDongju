@@ -229,7 +229,4 @@ nav,
 .nav-link {
   color: #564138 !important;
 }
-#login-loading {
-  display: none;
-}
 </style>
