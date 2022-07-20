@@ -1,30 +1,31 @@
 import { defineStore } from "pinia";
+import { useLocalStorage } from "@vueuse/core";
 import axios from "axios";
 
 export const useMemberStore = defineStore({
   id: "member",
   state: () => ({
-    member: null,
-    token: "",
-    tokenType: "",
+    member: useLocalStorage("member", ""),
+    token: useLocalStorage("token", ""),
+    tokenType: useLocalStorage("tokenType", ""),
   }),
   getters: {
-    isAuthenticated: (state) => state.member !== null,
-    stateMember: (state) => state.member,
+    isAuthenticated: (state) => state.member !== "",
+    stateMember: (state) => JSON.parse(state.member),
     isAdmin: (state) =>
       state.isAuthenticated &&
-      (state.member.role === "board" || state.member.role === "president"),
+      (state.stateMember.role === "board" || state.stateMember.role === "president"),
     authorizationHeader: (state) => state.tokenType + " " + state.token,
   },
   actions: {
     async register(form) {
       const response = await axios.post("/register", form);
-      this.member = {
+      this.member = JSON.stringify({
         username: response.data.username,
         realName: response.data.real_name,
         studentId: response.data.student_id,
         role: response.data.role,
-      };
+      });
       await this.requestToken({
         username: form.username,
         password: form.password,
@@ -46,12 +47,12 @@ export const useMemberStore = defineStore({
           },
         })
         .then((response) => {
-          this.member = {
+          this.member = JSON.stringify({
             username: response.data.username,
             realName: response.data.real_name,
             studentId: response.data.student_id,
             role: response.data.role,
-          };
+          });
         })
         .catch((error) => {
           console.error(error);
@@ -59,7 +60,7 @@ export const useMemberStore = defineStore({
       return this.member;
     },
     logOut() {
-      this.member = null;
+      this.member = "";
       this.token = "";
       this.tokenType = "";
     },
