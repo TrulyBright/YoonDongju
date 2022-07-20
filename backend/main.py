@@ -139,9 +139,11 @@ async def update_member(student_id: int, member: models.MemberModify, db: Sessio
 
 
 @app.delete("/members/{student_id:int}")
-async def delete_member(student_id: int, db: Session = Depends(get_db), deleter: schemas.Member = Depends(auth.get_current_member_board_only)):
+async def delete_member(student_id: int, db: Session = Depends(get_db), deleter: schemas.Member = Depends(auth.get_current_member)):
+    if deleter.student_id != student_id and deleter.role not in {models.Role.board, models.Role.president}:
+        raise HTTPException(403)
     if not crud.delete_member(db=db, student_id=student_id):
-        raise HTTPException(404, "가입되지 않은 학번입니다.")
+        raise HTTPException(404)
 
 
 @app.get("/uploaded/{uuid}")
@@ -199,7 +201,8 @@ async def delete_magazine(published: date, db: Session = Depends(get_db), delete
 
 @app.get("/classes", response_model=list[models.Class])
 async def get_classes(db: Session = Depends(get_db)):
-    return crud.get_classes(db=db) or crud.create_classes_with_default_values(db=db) # Depends() not working at startup.
+    # Depends() not working at startup.
+    return crud.get_classes(db=db) or crud.create_classes_with_default_values(db=db)
 
 
 @app.get("/classes/{class_name}", response_model=models.Class)
