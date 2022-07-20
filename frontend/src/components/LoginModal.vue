@@ -30,6 +30,7 @@ export default {
         await store.requestToken(this.loginForm);
         await store.whoAmI();
         this.loginError = "";
+        document.querySelector("#close-login-modal").click();
       } catch (e) {
         this.loginError = "계정명이나 비밀번호가 틀렸습니다.";
       }
@@ -52,6 +53,7 @@ export default {
           <button
             type="button"
             class="btn-close"
+            id="close-login-modal"
             data-bs-dismiss="modal"
             aria-label="Close"
           ></button>
