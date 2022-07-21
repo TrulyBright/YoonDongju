@@ -109,3 +109,8 @@ export default {
   gap: 15px;
 }
 </style>
+<style scoped>
+a {
+  color: #564138 !important;
+}
+</style>
