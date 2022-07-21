@@ -45,14 +45,14 @@ export default {
 @import "@/assets/base.css";
 * {
   font-family: inherit;
-  color: #564138;
+  color: var(--color-brown);
 }
 #app {
   margin: 0 auto;
 
   font-weight: normal;
   font-family: "Gowun Batang", serif;
-  background: #ffdddd;
+  background: var(--vt-c-pink);
 }
 .hanja {
   font-family: "Noto Serif KR", serif;
@@ -64,7 +64,7 @@ a:hover {
   text-decoration: underline;
 }
 button.btn.btn-pink {
-  background-color: #ffdddd;
+  background-color: var(--vt-c-pink);
 }
 #main {
   padding: 1.5em;

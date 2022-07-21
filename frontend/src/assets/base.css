@@ -10,6 +10,8 @@
 
   --vt-c-indigo: #2c3e50;
 
+  --vt-c-pink: #ffdddd;
+
   --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
   --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);
   --vt-c-divider-dark-1: rgba(84, 84, 84, 0.65);
@@ -32,6 +34,8 @@
 
   --color-heading: var(--vt-c-text-light-1);
   --color-text: var(--vt-c-text-light-1);
+
+  --color-brown: #564138;
 
   --section-gap: 160px;
 }

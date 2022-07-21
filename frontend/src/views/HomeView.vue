@@ -43,7 +43,7 @@ export default {
           <RouterLink :to="{ name: 'notice', params: { no: notice.no } }">{{
             notice.title
           }}</RouterLink>
-          <div>{{ notice.published }}</div>
+          <small class="date-published align-self-center">{{ notice.published.split("-").slice(1, ).join("-") }}</small>
         </div>
       </div>
     </div>
@@ -111,6 +111,6 @@ export default {
 </style>
 <style scoped>
 a {
-  color: #564138 !important;
+  color: var(--color-brown) !important;
 }
 </style>

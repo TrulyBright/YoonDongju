@@ -221,12 +221,12 @@ export default {
 nav,
 .offcanvas-header,
 .offcanvas-body {
-  background-color: #ffdddd;
+  background-color: var(--vt-c-pink);
 }
 .navbar {
   box-shadow: 0 3px 5px rgb(57 63 72 / 30%);
 }
 .nav-link {
-  color: #564138 !important;
+  color: var(--color-brown) !important;
 }
 </style>
