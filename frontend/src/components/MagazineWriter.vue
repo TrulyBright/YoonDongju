@@ -76,7 +76,7 @@ export default {
 };
 </script>
 <template>
-  <form @submit="submit">
+  <form @submit.prevent="submit">
     <h1>문집 {{ published ? "편집" : "추가" }}</h1>
     <div class="input-group mb-3">
       <span class="input-group-text" id="label-year">연도</span>

@@ -50,7 +50,7 @@ export default {
 };
 </script>
 <template>
-  <form @submit="submit">
+  <form @submit.prevent="submit">
     <input
       type="file"
       class="form-control"
