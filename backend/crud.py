@@ -155,6 +155,7 @@ async def delete_uploaded_file(db: Session, uuid: uuid.UUID):
         schemas.UploadedFile.uuid == str(uuid)).delete()
     if deleted:
         db.commit()
+        Path.unlink(Path("uploaded/"+str(uuid)))
     return deleted
 
 
