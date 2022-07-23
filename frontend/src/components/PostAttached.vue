@@ -1,5 +1,5 @@
 <script setup>
-import axios from "axios";
+import FileUploaded from "./FileUploaded.vue";
 </script>
 <script>
 export default {
@@ -14,19 +14,7 @@ export default {
     <small>첨부파일</small>
     <ul v-if="data" class="list-group list-group-flush rounded">
       <li v-for="file in data" :key="file" class="list-group-item">
-        <a :href="axios.defaults.baseURL + 'uploaded/' + file.uuid">
-          <small
-            ><i
-              :class="
-                'bi-filetype-' +
-                file.name
-                  .split('.')
-                  [file.name.split('.').length - 1].toLowerCase()
-              "
-            ></i
-            >{{ file.name }}</small
-          ></a
-        >
+        <FileUploaded :uuid="file.uuid"></FileUploaded>
       </li>
     </ul>
     <div v-else>첨부된 파일이 없습니다.</div>

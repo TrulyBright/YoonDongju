@@ -16,6 +16,7 @@ export default {
     };
   },
   async created() {
+    console.log(this.uuid);
     const response = await axios.get("uploaded-info/" + this.uuid);
     this.file.uuid = response.data.uuid;
     this.file.name = response.data.name;
@@ -25,9 +26,17 @@ export default {
 </script>
 <template>
   <div>
-    <a :href="axios.defaults.baseURL + 'uploaded/' + file.uuid" download>{{
-      file.name
-    }}</a>
+    <a :href="axios.defaults.baseURL + 'uploaded/' + file.uuid" download>
+      <small
+        ><i
+          :class="
+            'bi-filetype-' +
+            file.name.split('.')[file.name.split('.').length - 1].toLowerCase()
+          "
+        ></i
+        >{{ file.name }}</small
+      ></a
+    >
   </div>
 </template>
 <style scoped></style>

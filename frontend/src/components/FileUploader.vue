@@ -1,12 +1,13 @@
 <script setup>
 import axios from "axios";
 import { useMemberStore } from "../stores/member";
+import FileUploaded from "./FileUploaded.vue";
 </script>
 <script>
 const store = useMemberStore();
 export default {
   props: {
-    uuid: [String, null],
+    uuid: String,
     accept: [String, null],
   },
   data() {
@@ -20,29 +21,27 @@ export default {
   },
   async created() {
     if (this.uuid) {
-      console.log("before");
       const response = await axios.get("uploaded-info/" + this.uuid);
-      console.log("after");
-      console.log("after");
       this.applyUpload(response.data);
     }
   },
   methods: {
     applyUpload(data) {
       this.uploaded = true;
-      this.$emit("upload", {
-        name: data.name,
-        uuid: data.uuid,
-      });
+      this.uploadData = data;
     },
     async removeUploaded() {
-      this.uploaded = false;
-      this.$emit("uploadedRemove");
-      await axios.delete(`uploaded/${this.uploadData.uuid}`, {
-        headers: {
-          Authorization: store.authorizationHeader,
-        },
-      });
+      if (confirm("이 파일을 서버에서 즉시 삭제합니다. 취소할 수 없습니다.")) {
+        this.uploaded = false;
+        this.$emit("uploadedRemove", {
+          uuid: this.uploadData.uuid,
+        });
+        await axios.delete(`uploaded/${this.uploadData.uuid}`, {
+          headers: {
+            Authorization: store.authorizationHeader,
+          },
+        });
+      }
     },
     async submit() {
       this.uploading = true;
@@ -61,7 +60,9 @@ export default {
       this.applyUpload(response.data);
       this.uploading = false;
       this.uploaded = true;
-      this.uploadData = response.data;
+      this.$emit("upload", {
+        uuid: this.uploadData.uuid,
+      });
     },
     changeFile(event) {
       const file = event.target.files[0];
@@ -85,22 +86,10 @@ export default {
         class="uploaded-name text-primary rounded list-group list-group-flush"
         v-else
       >
-        <a
-          :href="axios.defaults.baseURL + 'uploaded/' + uploadData.uuid"
+        <FileUploaded
+          :uuid="uploadData.uuid"
           class="list-group-item"
-        >
-          <small
-            ><i
-              :class="
-                'bi-filetype-' +
-                uploadData.name
-                  .split('.')
-                  [uploadData.name.split('.').length - 1].toLowerCase()
-              "
-            ></i
-            >{{ uploadData.name }}</small
-          ></a
-        >
+        ></FileUploaded>
       </div>
     </div>
     <div class="feedback">
@@ -117,14 +106,14 @@ export default {
       <button
         type="submit"
         v-if="!uploaded && !uploading"
-        class="btn btn-primary"
+        class="btn btn-outline-primary"
       >
         올리기
       </button>
       <button
         type="button"
         v-if="uploaded"
-        class="btn btn-danger"
+        class="btn btn-outline-danger"
         @click="removeUploaded"
       >
         삭제
