@@ -136,8 +136,16 @@ async def get_myself(db: Session = Depends(get_db), me: schemas.Member = Depends
 
 
 @app.patch("/members/{student_id:int}", response_model=models.Member)
-async def update_member(student_id: int, member: models.MemberModify, db: Session = Depends(get_db), author: schemas.Member = Depends(auth.get_current_member_board_only)):
-    return crud.update_member(db=db, student_id=student_id, member=member)
+async def update_member(student_id: int, member: models.MemberModify, db: Session = Depends(get_db), author: schemas.Member = Depends(auth.get_current_member)):
+    if author.role not in {
+        models.Role.board,
+        models.Role.president
+    } and member.role is not None:
+        raise HTTPException(403)
+    try:
+        return crud.update_member(db=db, student_id=student_id, member=member)
+    except ValueError:
+        raise HTTPException(422, "비밀번호가 규칙에 맞지 않습니다.")
 
 
 @app.delete("/members/{student_id:int}")

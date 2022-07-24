@@ -2,8 +2,9 @@ from __future__ import annotations
 from datetime import date
 from enum import Enum
 import json
+import re
 from uuid import UUID
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from fastapi import UploadFile
 
 
@@ -81,6 +82,7 @@ class MemberCreate(MemberBase):
 
 class MemberModify(BaseModel):
     role: Role | None = None
+    password: str | None = None
 
 
 class Member(MemberBase):

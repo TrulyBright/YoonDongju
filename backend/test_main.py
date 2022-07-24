@@ -13,6 +13,7 @@ import models
 import crud
 import schemas
 import main
+import auth
 
 SQLALCHEMY_DATABASE_URL = "sqlite://"
 engine = create_engine(
@@ -416,7 +417,8 @@ def test_get_me():
 
 def test_update_member():
     data = {
-        "role": models.Role.member.value  # downgrade? LOL
+        "role": models.Role.member.value,  # downgrade? LOL
+        "password": "1234"
     }
     response = tested.patch(f"/members/{settings.test_portal_id}", json=data)
     assert response.status_code == 401
@@ -426,6 +428,18 @@ def test_update_member():
         f"/members/{settings.test_portal_id}", json=data, headers=get_jwt_header())
     assert response.status_code == 403
 
+    del data["role"]
+    change_role(models.Role.member)
+    response = tested.patch(
+        f"/members/{settings.test_portal_id}", json=data, headers=get_jwt_header())
+    assert response.status_code == 422
+
+    data["password"] = "This is 1 Pattern-Matching Password"
+    response = tested.patch(
+        f"/members/{settings.test_portal_id}", json=data, headers=get_jwt_header())
+    assert response.status_code == 200
+
+    data["role"] = models.Role.member.value
     change_role(models.Role.board)
     response = tested.patch(
         f"/members/{settings.test_portal_id}", json=data, headers=get_jwt_header())

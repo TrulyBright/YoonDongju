@@ -1,3 +1,4 @@
+import re
 import bcrypt
 from datetime import datetime, date
 from pathlib import Path
@@ -42,7 +43,11 @@ def update_member(db: Session, student_id: int, member: models.MemberModify):
     updated = db.query(schemas.Member).filter(
         schemas.Member.student_id == student_id)
     actual_object: schemas.Member = updated.first()
-    to = member.dict()
+    if member.password:
+        if not re.match(auth.password_pattern, member.password):
+            raise ValueError("Password do not match the required pattern")
+        member.password = auth.pwd_context.hash(member.password)
+    to = {key:value for key, value in member.dict().items() if value is not None}
     updated.update(to)
     db.commit()
     db.refresh(actual_object)
