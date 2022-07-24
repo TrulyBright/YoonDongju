@@ -23,7 +23,7 @@ export const useMemberStore = defineStore({
       return (
         state.tokenType +
         " " +
-        (state.expiresAt - 120 <= Date.now() / 1000
+        (state.expiresAt <= Date.now() / 1000
           ? this.refreshAccessToken()
           : state.token)
       );
@@ -50,7 +50,7 @@ export const useMemberStore = defineStore({
       const result = await axios.post("/token", data);
       this.token = result.data.access_token;
       this.tokenType = result.data.token_type;
-      this.refreshToken = result.data.refreshToken;
+      this.refreshToken = result.data.refresh_token;
       this.expiresAt = result.data.expires_at;
     },
     refreshAccessToken() {
