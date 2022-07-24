@@ -3,34 +3,24 @@ import requests
 from fastapi import Depends, FastAPI, HTTPException, status
 import fastapi
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from fastapi_jwt_auth import AuthJWT
+from fastapi_jwt_auth.exceptions import InvalidHeaderError
 
 import crud
 import database
 import models
 from settings import get_settings
 
-SECRET_KEY = get_settings().jwt_secret
+SECRET_KEY = get_settings().authjwt_secret_key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 id_pattern = "^.{1,65}$"  # 1자 이상 64자 이하에 어떤 문자든 허용됨
 # 10자 이상에 숫자와 영문이 하나씩은 있어야 함.
 password_pattern = "^(?=.*[0-9])(?=.*[a-zA-Z]).{10,}$"
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-class TokenData(BaseModel):
-    username: str | None = None
-
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -52,32 +42,19 @@ def authenticate(db: Session, username: str, password: str):
         return False
     return member
 
-
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-
-async def get_current_member(db: Session = Depends(database.get_db), token: str = Depends(oauth2_scheme)):
+async def get_current_member(db: Session = Depends(database.get_db), Authorize: AuthJWT = Depends()):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"}
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
+        username: str = Authorize.get_jwt_subject()
         if username is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
+    except InvalidHeaderError:
         raise credentials_exception
-    member = crud.get_member_by_username(db, username=token_data.username)
+    member = crud.get_member_by_username(db, username=username)
     if member is None:
         raise credentials_exception
     return member

@@ -4,7 +4,6 @@ from fastapi_jwt_auth import AuthJWT
 
 
 class Settings(BaseSettings):
-    jwt_secret: str
     authjwt_secret_key: str
 
     class Config:

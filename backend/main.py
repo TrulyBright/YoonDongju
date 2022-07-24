@@ -309,10 +309,7 @@ async def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
             headers={"WWW-Authenticate": "Bearer"}
         )
     access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = auth.create_access_token(
-        data={"sub": member.username},
-        expires_delta=access_token_expires
-    )
+    access_token = Authorize.create_access_token(member.username, expires_time=access_token_expires)
     refresh_token = Authorize.create_refresh_token(subject=member.username)
     return {
         "access_token": access_token,
@@ -329,14 +326,11 @@ def refresh(Authorize: AuthJWT = Depends()):
     with refresh_token in the header
     Authorization: Bearer <refresh_token>
     """
-    Authorize.jwt_refresh_token_required()
+    Authorize.jwt_refresh_token_required(auth_from="headers")
 
     current_user = Authorize.get_jwt_subject()
     access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
-    new_access_token = auth.create_access_token(
-        data={"sub": current_user},
-        expires_delta=access_token_expires
-    )
+    new_access_token = Authorize.create_access_token(current_user.username, expires_time=access_token_expires)
     return {
         "access_token": new_access_token,
         "expires_at": (datetime.now()+access_token_expires).timestamp()
