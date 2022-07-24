@@ -160,6 +160,7 @@ export default {
                   href="#register-modal"
                   role="button"
                   class="dropdown-item"
+                  v-if="!store.isAuthenticated"
                   >사이트 가입</a
                 >
               </ul>
