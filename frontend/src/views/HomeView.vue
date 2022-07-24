@@ -43,7 +43,9 @@ export default {
           <RouterLink :to="{ name: 'notice', params: { no: notice.no } }">{{
             notice.title
           }}</RouterLink>
-          <small class="date-published align-self-center">{{ notice.published.split("-").slice(1, ).join("-") }}</small>
+          <small class="date-published align-self-center">{{
+            notice.published.split("-").slice(1).join("-")
+          }}</small>
         </div>
       </div>
     </div>
