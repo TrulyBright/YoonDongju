@@ -9,7 +9,7 @@ export const useMemberStore = defineStore({
     token: useLocalStorage("token", ""),
     tokenType: useLocalStorage("tokenType", ""),
     expiresAt: useLocalStorage("expiresAt", ""),
-    refreshToken: useLocalStorage("refresh_token", ""),
+    refreshToken: useLocalStorage("refreshToken", ""),
   }),
   getters: {
     isAuthenticated: (state) => state.member !== "",
@@ -23,7 +23,7 @@ export const useMemberStore = defineStore({
       return (
         state.tokenType +
         " " +
-        (state.expiresAt <= Date.now() / 1000
+        (state.expiresAt <= Date.now() / 1000 + 60
           ? this.refreshAccessToken()
           : state.token)
       );
