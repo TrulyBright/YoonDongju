@@ -18,6 +18,10 @@ SECRET_KEY = get_settings().jwt_secret
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+id_pattern = "^.{1,65}$"  # 1자 이상 64자 이하에 어떤 문자든 허용됨
+# 10자 이상에 숫자와 영문이 하나씩은 있어야 함.
+password_pattern = "^(?=.*[0-9])(?=.*[a-zA-Z]).{10,}$"
+
 
 class Token(BaseModel):
     access_token: str

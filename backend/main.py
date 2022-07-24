@@ -249,9 +249,6 @@ async def delete_class_record(class_name: models.ClassName, conducted: date, rec
 
 @app.post("/register", response_model=models.Member)
 async def register(form: RegisterForm, db: Session = Depends(get_db)):
-    id_pattern = "^.{1,65}$"  # 1자 이상 64자 이하에 어떤 문자든 허용됨
-    # 10자 이상에 숫자와 영문이 하나씩은 있어야 함.
-    password_pattern = "^(?=.*[0-9])(?=.*[a-zA-Z]).{10,}$"
     if str(form.portal_id)[4] == "2":
         raise HTTPException(
             status_code=403,
@@ -272,12 +269,12 @@ async def register(form: RegisterForm, db: Session = Depends(get_db)):
             status_code=409,
             detail="이미 있는 ID입니다."
         )
-    if not re.match(password_pattern, form.password):
+    if not re.match(auth.password_pattern, form.password):
         raise HTTPException(
             status_code=422,
             detail="비밀번호가 안전하지 않습니다."
         )
-    if not re.match(id_pattern, form.username):
+    if not re.match(auth.id_pattern, form.username):
         raise HTTPException(
             status_code=422,
             detail="이런 ID는 쓸 수 없습니다."
