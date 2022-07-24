@@ -19,18 +19,19 @@ export default {
         attached: [],
       },
       uploadProgress: 0,
+      fileUploaderNextKey: 1,
+      fileUploaderMap: {},
     };
   },
   async created() {
     if (!this.GETURI) return;
-    try {
-      const result = await axios.get(this.GETURI);
-      this.form.title = result.data.title;
-      this.form.content = result.data.content;
-      this.form.attached = result.data.attached;
-    } catch (error) {
-      console.error(error);
-    }
+    const result = await axios.get(this.GETURI);
+    this.form.title = result.data.title;
+    this.form.content = result.data.content;
+    this.form.attached = result.data.attached.map(item=>item.uuid);
+    this.form.attached.forEach((uuid)=>{
+      this.fileUploaderMap[this.fileUploaderNextKey++]=uuid;
+    });
   },
   computed: {
     method() {
@@ -66,11 +67,6 @@ export default {
           throw "unknown type: " + this.type;
       }
     },
-    formWithEmptyAttachedRemoved() {
-      const reduced = Object.create(this.form);
-      reduced.attached = this.form.attached.filter(item => item !== "");
-      return reduced;
-    }
   },
   methods: {
     routeToReturn(no) {
@@ -105,7 +101,6 @@ export default {
     async submit() {
       try {
         const store = useMemberStore();
-        this.form.attached = this.form.attached.filter(item=>item!=="");
         const result = await this.method(this.WriteURI, this.form, {
           headers: {
             Authorization: store.authorizationHeader,
@@ -117,7 +112,7 @@ export default {
       }
     },
     newUploader() {
-      this.form.attached.push("");
+      this.fileUploaderMap[this.fileUploaderNextKey++]="";
     },
   },
 };
@@ -152,9 +147,10 @@ export default {
           <FileUploader
             @upload="fileUploaded"
             @uploadedRemove="fileRemoved"
-            v-for="file in form.attached"
-            :key="file"
-            :uuid="file.uuid"
+            v-for="[key, uuid] of Object.entries(fileUploaderMap)"
+            :key="key"
+            :uuid="uuid"
+            class="uploader"
           ></FileUploader>
           <button type="button" class="btn btn-light mt-1" @click="newUploader">
             첨부파일 추가
@@ -164,7 +160,7 @@ export default {
           게시
         </button>
       </form>
-      <PostPreview :form="formWithEmptyAttachedRemoved" class="col d-none d-lg-block"></PostPreview>
+      <PostPreview :form="form" class="col d-none d-lg-block"></PostPreview>
     </div>
     <PostPreview :form="form" class="row d-lg-none"></PostPreview>
     <button type="button" class="btn btn-light mt-1 d-lg-none" @click="submit">

@@ -7,7 +7,7 @@ import FileUploaded from "./FileUploaded.vue";
 const store = useMemberStore();
 export default {
   props: {
-    uuid: String,
+    uuid: [String, null],
     accept: [String, null],
   },
   data() {
@@ -65,8 +65,7 @@ export default {
       });
     },
     changeFile(event) {
-      const file = event.target.files[0];
-      this.input = file;
+      this.input = event.target.files[0];
     },
   },
 };

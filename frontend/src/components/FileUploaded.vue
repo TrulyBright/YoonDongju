@@ -16,7 +16,6 @@ export default {
     };
   },
   async created() {
-    console.log(this.uuid);
     const response = await axios.get("uploaded-info/" + this.uuid);
     this.file.uuid = response.data.uuid;
     this.file.name = response.data.name;
