@@ -11,7 +11,7 @@ export default {
 <template>
   <div>{{ type }}</div>
   <div>{{ title }}</div>
-  <div>{{ author }}</div>
-  <div>{{ language }}</div>
+  <div class="text-center">{{ author }}</div>
+  <div class="text-center">{{ language }}</div>
 </template>
 <style></style>

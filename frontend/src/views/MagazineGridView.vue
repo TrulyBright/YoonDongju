@@ -22,6 +22,7 @@ export default {
 <template>
   <div>
     <PostNavigator></PostNavigator>
+    <h6>표지를 눌러보세요.</h6>
     <MagazineListAction v-if="store.isAdmin"></MagazineListAction>
     <MagazineItem
       v-for="volume in magazines"

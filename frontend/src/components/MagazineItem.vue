@@ -1,16 +1,11 @@
 <script setup>
 import axios from "axios";
-import MagazineCover from "./MagazineCover.vue";
 import MagazineContents from "./MagazineContents.vue";
 import { useMemberStore } from "../stores/member";
+const store = useMemberStore();
 </script>
 <script>
-const store = useMemberStore();
 export default {
-  components: {
-    MagazineCover,
-    MagazineContents,
-  },
   props: {
     cover: String,
     published: String,
@@ -20,47 +15,28 @@ export default {
       loading: false,
       item: null,
       error: null,
-      shown: "MagazineCover",
+      showContents: false,
     };
   },
-  created() {
-    this.$watch(
-      () => this.published,
-      () => {
-        this.fetchVolume();
-      },
-      { immediate: true }
-    );
+  async created() {
+    this.error = this.item = null;
+    this.loading = true;
+    const response = await axios.get("magazines/" + this.published);
+    this.item = {
+      cover: response.data.cover,
+      year: response.data.year,
+      season: response.data.season,
+      contents: response.data.contents,
+      published: response.data.published,
+    };
+    this.loading = false;
+  },
+  computed: {
+    contentsHeight() {
+      return this.$el.querySelector("img.img-fluid").clientHeight;
+    },
   },
   methods: {
-    swap() {
-      this.shown =
-        this.shown === "MagazineCover" ? "MagazineContents" : "MagazineCover";
-    },
-    shownProperties() {
-      return this.shown === "MagazineCover"
-        ? { cover: this.item.cover, published: this.item.published }
-        : { contents: this.item.contents };
-    },
-    fetchVolume() {
-      this.error = this.item = null;
-      this.loading = true;
-      axios
-        .get("/magazines/" + this.published)
-        .then((response) => {
-          this.item = {
-            cover: response.data.cover,
-            year: response.data.year,
-            season: response.data.season,
-            contents: response.data.contents,
-            published: response.data.published,
-          };
-          this.loading = false;
-        })
-        .catch((error) => {
-          this.error = error;
-        });
-    },
     async deleteMagazine() {
       if (confirm(`${this.item.published}에 발간된 문집을 삭제합니다.`)) {
         await axios.delete("magazines/" + this.item.published, {
@@ -75,29 +51,37 @@ export default {
 };
 </script>
 <template>
-  <div>
+  <div class="card">
     <div v-if="loading" class="spinner-border" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
     <div v-if="error">{{ error }}</div>
-    <div @click="swap()">
-      <component v-if="item" :is="shown" v-bind="shownProperties()"></component>
+    <div class="card-body" v-if="!loading && !error">
+      <img
+        :src="axios.defaults.baseURL + 'uploaded/' + item.cover"
+        :alt="item.published + '에 발행된 문집 표지'"
+        @click="showContents = true"
+        v-if="!showContents"
+        class="img-fluid"
+      />
+      <MagazineContents
+        v-else
+        :contents="item.contents"
+        @close="showContents = false"
+        class="contents"
+        :style="`height:${contentsHeight}px;`"
+      ></MagazineContents>
     </div>
-    <div v-if="item && shown === 'MagazineCover'">
-      <p>{{ item.year }}</p>
-      <p>{{ item.season }}</p>
-      <p>{{ item.published }}</p>
-    </div>
-    <div class="dropdown" v-if="item && store.isAdmin">
-      <button
-        class="btn btn-secondary dropdown-toggle"
-        type="button"
-        data-bs-toggle="dropdown"
+    <div class="card-footer text-center" v-if="!loading && !error">
+      {{ item.published }} 발행
+      <i
+        class="bi-gear"
+        id="magazine-action"
         aria-expanded="false"
-      >
-        작업
-      </button>
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+        data-bs-toggle="dropdown"
+        v-if="store.isAdmin"
+      ></i>
+      <ul class="dropdown-menu" aria-labelledby="magazine-action">
         <li>
           <RouterLink
             :to="'/magazines/write?published=' + item.published"
@@ -106,10 +90,23 @@ export default {
           >
         </li>
         <li>
-          <a @click="deleteMagazine" href="#" class="dropdown-item">삭제</a>
+          <a @click="deleteMagazine" class="dropdown-item text-danger">삭제</a>
         </li>
       </ul>
     </div>
   </div>
 </template>
-<style></style>
+<style>
+i.bi-gear {
+  cursor: pointer;
+}
+.dropdown-item {
+  cursor: pointer;
+}
+img {
+  cursor: pointer;
+}
+.card-body {
+  overflow: auto;
+}
+</style>
