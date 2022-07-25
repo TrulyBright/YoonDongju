@@ -10,10 +10,12 @@ const links = {
   <h1>관리</h1>
   <ul class="list-group">
     <li
-      class="list-group-item"
+      :class="
+        'list-group-item list-group-item-action' +
+        ($route.path === link ? ' active' : '')
+      "
       v-for="[link, name] of Object.entries(links)"
       :key="link"
-      :active="$route.path === link"
       @click="$router.push(link)"
     >
       {{ name }}
@@ -21,4 +23,8 @@ const links = {
   </ul>
   <RouterView></RouterView>
 </template>
-<style scoped></style>
+<style scoped>
+.list-group-item {
+  cursor: pointer;
+}
+</style>
