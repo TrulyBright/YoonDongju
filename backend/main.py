@@ -8,8 +8,6 @@ from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi_jwt_auth import AuthJWT
-from fastapi_jwt_auth.exceptions import AuthJWTException
 from sqlalchemy.orm import Session
 from pydantic import UUID5, BaseModel, BaseSettings
 import models
@@ -299,7 +297,7 @@ async def register(form: RegisterForm, db: Session = Depends(get_db)):
 
 
 @app.post("/token")
-async def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
+async def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     member = auth.authenticate(
         db=db, username=form.username, password=form.password)
     if not member:
@@ -309,29 +307,8 @@ async def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
             headers={"WWW-Authenticate": "Bearer"}
         )
     access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = Authorize.create_access_token(member.username, expires_time=access_token_expires)
-    refresh_token = Authorize.create_refresh_token(subject=member.username)
-    return {
-        "access_token": access_token,
-        "token_type": "Bearer",
-        "refresh_token": refresh_token,
-        "expires_at": (datetime.now()+access_token_expires).timestamp()
-    }
-
-
-@app.post("/refresh")
-def refresh(Authorize: AuthJWT = Depends()):
-    """For accessing /refresh endpoint,
-    remember to change access_token
-    with refresh_token in the header
-    Authorization: Bearer <refresh_token>
-    """
-    Authorize.jwt_refresh_token_required(auth_from="headers")
-
-    current_user = Authorize.get_jwt_subject()
-    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
-    new_access_token = Authorize.create_access_token(current_user, expires_time=access_token_expires)
-    return {
-        "access_token": new_access_token,
-        "expires_at": (datetime.now()+access_token_expires).timestamp()
-    }
+    access_token = auth.create_access_token(
+        data={"sub": member.username},
+        expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "Bearer"}

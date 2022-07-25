@@ -1,20 +1,18 @@
 from datetime import datetime, timedelta
 import requests
 from fastapi import Depends, FastAPI, HTTPException, status
-import fastapi
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from fastapi_jwt_auth import AuthJWT
-from fastapi_jwt_auth.exceptions import InvalidHeaderError
 
 import crud
 import database
 import models
 from settings import get_settings
 
-SECRET_KEY = get_settings().authjwt_secret_key
+SECRET_KEY = get_settings().jwt_secret
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -22,16 +20,21 @@ id_pattern = "^.{1,65}$"  # 1자 이상 64자 이하에 어떤 문자든 허용�
 # 10자 이상에 숫자와 영문이 하나씩은 있어야 함.
 password_pattern = "^(?=.*[0-9])(?=.*[a-zA-Z]).{10,}$"
 
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: str | None = None
+
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 app = FastAPI()
-
-
-@AuthJWT.load_config
-def get_config():
-    return get_settings()
 
 
 def authenticate(db: Session, username: str, password: str):
@@ -42,19 +45,32 @@ def authenticate(db: Session, username: str, password: str):
         return False
     return member
 
-async def get_current_member(db: Session = Depends(database.get_db), Authorize: AuthJWT = Depends()):
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(days=30)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+async def get_current_member(db: Session = Depends(database.get_db), token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"}
     )
     try:
-        username: str = Authorize.get_jwt_subject()
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-    except InvalidHeaderError:
+        token_data = TokenData(username=username)
+    except JWTError:
         raise credentials_exception
-    member = crud.get_member_by_username(db, username=username)
+    member = crud.get_member_by_username(db, username=token_data.username)
     if member is None:
         raise credentials_exception
     return member

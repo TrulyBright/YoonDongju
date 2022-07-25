@@ -1,10 +1,9 @@
 from functools import lru_cache
 from pydantic import BaseSettings
-from fastapi_jwt_auth import AuthJWT
 
 
 class Settings(BaseSettings):
-    authjwt_secret_key: str
+    jwt_secret: str
 
     class Config:
         env_file = "prod.env"
