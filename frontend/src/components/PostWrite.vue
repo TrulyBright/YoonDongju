@@ -28,9 +28,9 @@ export default {
     const result = await axios.get(this.GETURI);
     this.form.title = result.data.title;
     this.form.content = result.data.content;
-    this.form.attached = result.data.attached.map(item=>item.uuid);
-    this.form.attached.forEach((uuid)=>{
-      this.fileUploaderMap[this.fileUploaderNextKey++]=uuid;
+    this.form.attached = result.data.attached.map((item) => item.uuid);
+    this.form.attached.forEach((uuid) => {
+      this.fileUploaderMap[this.fileUploaderNextKey++] = uuid;
     });
   },
   computed: {
@@ -112,7 +112,7 @@ export default {
       }
     },
     newUploader() {
-      this.fileUploaderMap[this.fileUploaderNextKey++]="";
+      this.fileUploaderMap[this.fileUploaderNextKey++] = "";
     },
   },
 };
