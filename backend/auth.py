@@ -14,7 +14,6 @@ from settings import get_settings
 
 SECRET_KEY = get_settings().jwt_secret
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 id_pattern = "^.{1,65}$"  # 1자 이상 64자 이하에 어떤 문자든 허용됨
 # 10자 이상에 숫자와 영문이 하나씩은 있어야 함.
@@ -53,7 +52,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     else:
         expire = datetime.utcnow() + timedelta(days=30)
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM), expire.timestamp()
 
 
 async def get_current_member(db: Session = Depends(database.get_db), token: str = Depends(oauth2_scheme)):

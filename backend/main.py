@@ -306,9 +306,9 @@ async def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
             detail="ID나 비밀번호가 틀렸습니다.",
             headers={"WWW-Authenticate": "Bearer"}
         )
-    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = auth.create_access_token(
+    access_token_expires = timedelta(days=30)
+    access_token, expires_at = auth.create_access_token(
         data={"sub": member.username},
         expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "Bearer"}
+    return {"access_token": access_token, "token_type": "Bearer", "expires_at": expires_at}

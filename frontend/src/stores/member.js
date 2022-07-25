@@ -9,10 +9,10 @@ export const useMemberStore = defineStore({
     token: useLocalStorage("token", ""),
     tokenType: useLocalStorage("tokenType", ""),
     expiresAt: useLocalStorage("expiresAt", ""),
-    refreshToken: useLocalStorage("refreshToken", ""),
   }),
   getters: {
-    isAuthenticated: (state) => state.member !== "",
+    isAuthenticated: (state) =>
+      state.member !== "" && Date.now() / 1000 < state.expiresAt,
     stateMember: (state) => JSON.parse(state.member),
     isAdmin: (state) =>
       state.isAuthenticated &&
@@ -20,13 +20,7 @@ export const useMemberStore = defineStore({
         state.stateMember.role === "president"),
     authorizationHeader: function (state) {
       // why not arrow lambda?: to use "this".
-      return (
-        state.tokenType +
-        " " +
-        (state.expiresAt <= Date.now() / 1000 + 60
-          ? this.refreshAccessToken()
-          : state.token)
-      );
+      return state.tokenType + " " + state.token;
     },
   },
   actions: {
@@ -50,26 +44,7 @@ export const useMemberStore = defineStore({
       const result = await axios.post("/token", data);
       this.token = result.data.access_token;
       this.tokenType = result.data.token_type;
-      this.refreshToken = result.data.refresh_token;
       this.expiresAt = result.data.expires_at;
-    },
-    refreshAccessToken() {
-      try {
-        axios
-          .post("/refresh", {
-            headers: {
-              Authorization: this.tokenType + " " + this.refreshToken,
-            },
-          })
-          .then((response) => {
-            this.token = response.data.access_token;
-            this.expiresAt = response.data.expiresAt;
-          });
-        return this.token;
-      } catch {
-        // refresh token also expired.
-        // TODO
-      }
     },
     async whoAmI() {
       const response = await axios.get("/me", {
