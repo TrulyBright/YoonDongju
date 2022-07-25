@@ -87,7 +87,7 @@ async def update_rules(rules: models.PostCreate, db: Session = Depends(get_db), 
 
 
 @app.get("/notices", response_model=list[models.PostOutline])
-async def get_notices(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def get_notices(skip: int = 0, limit: int | None = None, db: Session = Depends(get_db)):
     return crud.get_posts(db=db, type=models.PostType.notice, skip=skip, limit=limit)
 
 

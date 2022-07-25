@@ -61,7 +61,7 @@ def delete_member(db: Session, student_id: int):
     return False
 
 
-def get_posts(db: Session, type: models.PostType, skip: int = 0, limit: int = 100):
+def get_posts(db: Session, type: models.PostType, skip: int = 0, limit: int | None = None):
     return db.query(schemas.Post.no, schemas.Post.author, schemas.Post.title, schemas.Post.published).filter(schemas.Post.type == type.value).order_by(schemas.Post.no.desc()).offset(skip).limit(limit).all()
 
 
