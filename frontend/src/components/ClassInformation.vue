@@ -41,26 +41,52 @@ export default {
   <div class="card">
     <div class="card-body">
       <h5 class="card-title">{{ class_name }}</h5>
-      <form @submit="submit">
-        <input type="text" v-model="form.korean" placeholder="시반" required />
-        <input
-          type="text"
-          v-model="form.moderator"
-          placeholder="홍길동"
-          required
-        />
-        <input
-          type="text"
-          v-model="form.schedule"
-          placeholder="매주 월요일 오후 5시"
-          required
-        />
-        <input
-          type="text"
-          v-model="form.description"
-          placeholder="이러쿵저러쿵"
-          required
-        />
+      <form @submit.prevent="submit">
+        <div class="form-floating">
+          <input
+            class="form-control"
+            id="class-title"
+            type="text"
+            v-model="form.korean"
+            placeholder="시반"
+            required
+          />
+          <label for="class-title">분반명</label>
+        </div>
+        <div class="form-floating">
+          <input
+            class="form-control"
+            type="text"
+            v-model="form.moderator"
+            placeholder="홍길동"
+            id="class-moderator"
+            required
+          />
+          <label for="class-moderator">분반장</label>
+        </div>
+        <div class="form-floating">
+          <input
+            class="form-control"
+            type="text"
+            v-model="form.schedule"
+            placeholder="매주 월요일 오후 5시"
+            id="class-schedule"
+            required
+          />
+          <label for="class-schedule">운영일정</label>
+        </div>
+        <div class="form-floating">
+          <input
+            class="form-control"
+            type="text"
+            v-model="form.description"
+            placeholder="이러쿵저러쿵"
+            required
+            id="class-description"
+          />
+          <label for="class-description">설명</label>
+        </div>
+
         <button type="submit" class="btn btn-primary">변경</button>
       </form>
     </div>
