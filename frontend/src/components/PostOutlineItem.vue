@@ -14,24 +14,32 @@ export default {
 
 <template>
   <div class="container">
-    <div class="row text-center">
-      <div class="col col-lg-auto d-none d-lg-block">{{ no }}</div>
-      <RouterLink class="col" :to="{ name: 'notice', params: { no: no } }">{{
+    <div class="row text-center d-none d-lg-grid">
+      <div class="post-no">{{ no }}</div>
+      <RouterLink
+        class="post-title"
+        :to="{ name: 'notice', params: { no: no } }"
+        >{{ title }}</RouterLink
+      >
+      <div class="post-author">{{ author }}</div>
+      <small class="post-published align-self-center">{{ published }}</small>
+    </div>
+    <div class="d-flex flex-row justify-content-between d-lg-none">
+      <RouterLink :to="{ name: 'notice', params: { no: no } }">{{
         title
       }}</RouterLink>
-      <div class="col col-lg-auto d-none d-lg-block">{{ author }}</div>
-      <small class="col col-lg-auto d-lg-none align-self-center">{{
+      <small class="align-self-center">{{
         published.split("-").slice(1).join("-")
-      }}</small>
-      <small class="col col-lg-auto d-none d-lg-block align-self-center">{{
-        published
       }}</small>
     </div>
   </div>
 </template>
-
 <style scoped>
 a {
   color: var(--color-brown) !important;
+}
+.row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
 }
 </style>
