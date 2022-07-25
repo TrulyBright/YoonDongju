@@ -75,7 +75,7 @@ export default {
           />
           <label for="class-schedule">운영일정</label>
         </div>
-        <div class="form-floating">
+        <div class="form-floating mb-1">
           <input
             class="form-control"
             type="text"
@@ -86,7 +86,6 @@ export default {
           />
           <label for="class-description">설명</label>
         </div>
-
         <button type="submit" class="btn btn-primary">변경</button>
       </form>
     </div>
