@@ -164,7 +164,7 @@ export default {
           @keydown.tab="
             if (index === form.contents.length - 1) addContentRow();
           "
-          class="form-control col"
+          class="form-control col me-1"
           required
         />
         <button
