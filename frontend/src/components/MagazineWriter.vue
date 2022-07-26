@@ -68,7 +68,7 @@ export default {
   },
   computed: {
     existingVolume() {
-      return this.published === "string";
+      return typeof this.published === "string";
     },
     method() {
       return this.existingVolume ? axios.patch : axios.post;
