@@ -19,7 +19,6 @@ export default {
         v-for="content in contents"
         :key="content"
         v-bind="content"
-        class="row"
       ></MagazineContent>
     </div>
   </div>
