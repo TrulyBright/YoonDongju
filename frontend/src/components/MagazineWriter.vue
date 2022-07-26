@@ -2,7 +2,6 @@
 import FileUploader from "./FileUploader.vue";
 import axios from "axios";
 import { useMemberStore } from "../stores/member";
-const store = useMemberStore();
 </script>
 <script>
 export default {
@@ -39,7 +38,7 @@ export default {
     async submit() {
       await this.method(this.URI, this.form, {
         headers: {
-          Authorization: store.authorizationHeader,
+          Authorization: useMemberStore().authorizationHeader,
         },
       });
       this.$router.push({
