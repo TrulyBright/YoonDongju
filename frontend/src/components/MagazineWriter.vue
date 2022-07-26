@@ -103,7 +103,7 @@ export default {
         <img
           :src="axios.defaults.baseURL + 'uploaded/' + form.cover"
           :alt="coverName"
-          class="img-fluid"
+          class="img-fluid mb-1"
           :key="form.cover"
         />
       </div>
@@ -114,6 +114,7 @@ export default {
         name="cover"
         @upload="onUpload"
         @uploadRemove="onUploadRemove"
+        class="w-100"
       ></FileUploader>
     </div>
     <div class="input-group mb-3">
