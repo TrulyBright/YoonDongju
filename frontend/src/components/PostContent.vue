@@ -10,5 +10,15 @@ export default {
 </script>
 
 <template>
-  <div><Markdown :source="content"></Markdown></div>
+  <div><Markdown :source="content" class="markdown"></Markdown></div>
 </template>
+<style>
+.markdown * {
+  word-break: break-all;
+  hyphens: auto;
+}
+.markdown img {
+  max-width: 100%;
+  height: auto;
+}
+</style>

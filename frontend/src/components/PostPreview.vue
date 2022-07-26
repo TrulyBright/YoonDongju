@@ -30,4 +30,8 @@ export default {
   word-break: break-all;
   hyphens: auto;
 }
+.markdown img {
+  max-width: 100%;
+  height: auto;
+}
 </style>

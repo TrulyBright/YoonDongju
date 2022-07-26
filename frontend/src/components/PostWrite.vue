@@ -117,6 +117,16 @@ export default {
     newUploader() {
       this.fileUploaderMap[this.fileUploaderNextKey++] = "";
     },
+    async uploadImageInsidePost(event) {
+      const formData = new FormData();
+      formData.append("uploaded", event.target.files[0]);
+      const response = await axios.post("uploaded", formData, {
+        headers: {
+          Authorization: useMemberStore().authorizationHeader,
+        },
+      });
+      this.form.content += `![맹인용 대체설명](${axios.defaults.baseURL}uploaded/${response.data.uuid})`;
+    },
   },
 };
 </script>
@@ -134,6 +144,31 @@ export default {
             required
           />
           <label for="title">제목</label>
+        </div>
+        <div class="function-bar">
+          <i class="bi-type-h1" @click="form.content += '\n# 제목1'"></i>
+          <i class="bi-type-h2" @click="form.content += '\n## 제목2'"></i>
+          <i class="bi-type-h3" @click="form.content += '\n### 제목3'"></i>
+          <i class="bi-type-italic" @click="form.content += '*기울임*'"></i>
+          <i
+            class="bi-type-strikethrough"
+            @click="form.content += '~~취소선~~'"
+          ></i>
+          <i class="bi-type-bold" @click="form.content += '**굵게**'"></i>
+          <label for="image-inside-post">
+            <i class="bi-card-image"></i>
+          </label>
+          <input
+            type="file"
+            id="image-inside-post"
+            @change="uploadImageInsidePost"
+            accept="image/*"
+            hidden
+          />
+          <i
+            class="bi-link"
+            @click="form.content += '[바로가기](http://yonseimunhak.com)'"
+          ></i>
         </div>
         <div class="form-floating mb-1">
           <textarea
@@ -174,5 +209,10 @@ export default {
 <style scoped>
 textarea#content {
   min-height: 50vh;
+}
+.function-bar i {
+  font-size: 1.5rem;
+  margin: auto 5px auto 5px;
+  cursor: pointer;
 }
 </style>
