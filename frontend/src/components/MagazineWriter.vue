@@ -130,7 +130,7 @@ export default {
     </div>
     <div class="input-group mb-3" id="basic-url">
       <label for="contents" class="form-label">수록작</label>
-      <p class="d-none d-lg-block">'언어' 칸에서 Tab키를 눌러보세요.</p>
+      <p class="d-none d-lg-block">네 번째 칸에서 Tab키를 눌러보세요.</p>
       <div
         v-for="[index, content] in form.contents.entries()"
         :key="content"
@@ -138,28 +138,28 @@ export default {
       >
         <input
           type="text"
-          placeholder="시, 소설, 희곡, 수필, ···"
+          placeholder="르포르타주"
           v-model="content.type"
           class="form-control col me-1"
           required
         />
         <input
           type="text"
-          placeholder="제목"
+          placeholder="카탈로니아 찬가"
           v-model="content.title"
           class="form-control col me-1"
           required
         />
         <input
           type="text"
-          placeholder="작가"
+          placeholder="조지 오웰"
           v-model="content.author"
           class="form-control col me-1"
           required
         />
         <input
           type="text"
-          placeholder="언어"
+          placeholder="영어"
           v-model="content.language"
           @keydown.tab="
             if (index === form.contents.length - 1) addContentRow();
