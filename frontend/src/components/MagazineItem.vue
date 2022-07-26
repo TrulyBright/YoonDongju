@@ -41,7 +41,7 @@ export default {
       if (confirm(`${this.item.published}에 발간된 문집을 삭제합니다.`)) {
         await axios.delete("magazines/" + this.item.published, {
           headers: {
-            Authorization: store.authorizationHeader,
+            Authorization: useMemberStore().authorizationHeader,
           },
         });
         this.$router.go(); // refresh
