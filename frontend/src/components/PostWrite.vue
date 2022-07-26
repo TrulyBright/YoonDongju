@@ -24,7 +24,7 @@ export default {
     };
   },
   async created() {
-    if (!this.GETURI) return;
+    if (this.GETURI === undefined) return;
     const result = await axios.get(this.GETURI);
     this.form.title = result.data.title;
     this.form.content = result.data.content;
@@ -34,13 +34,16 @@ export default {
     });
   },
   computed: {
+    createNormalPost() {
+      return typeof this.no === "number" && !isNaN(this.no);
+    },
     method() {
       switch (this.type) {
         case "about":
         case "rules":
           return axios.put;
         case "notices":
-          return this.no === undefined ? axios.post : axios.patch;
+          return this.createNormalPost ? axios.patch : axios.post;
         default:
           throw "unknown type: " + this.type;
       }
@@ -51,7 +54,7 @@ export default {
         case "rules":
           return this.type;
         case "notices":
-          return this.no === undefined ? null : `notices/${this.no}`;
+          return this.createNormalPost ? `notices/${this.no}` : undefined;
         default:
           throw "unknown type: " + this.type;
       }
@@ -62,7 +65,7 @@ export default {
         case "rules":
           return this.type;
         case "notices":
-          return this.no === undefined ? "notices" : `notices/${this.no}`;
+          return this.createNormalPost ? `notices/${this.no}` : "notices";
         default:
           throw "unknown type: " + this.type;
       }
