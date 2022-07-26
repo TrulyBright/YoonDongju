@@ -47,7 +47,8 @@ def update_member(db: Session, student_id: int, member: models.MemberModify):
         if not re.match(auth.password_pattern, member.password):
             raise ValueError("Password do not match the required pattern")
         member.password = auth.pwd_context.hash(member.password)
-    to = {key:value for key, value in member.dict().items() if value is not None}
+    to = {key: value for key, value in member.dict().items()
+          if value is not None}
     updated.update(to)
     db.commit()
     db.refresh(actual_object)
@@ -63,6 +64,10 @@ def delete_member(db: Session, student_id: int):
 
 def get_posts(db: Session, type: models.PostType, skip: int = 0, limit: int | None = None):
     return db.query(schemas.Post.no, schemas.Post.author, schemas.Post.title, schemas.Post.published).filter(schemas.Post.type == type.value).order_by(schemas.Post.no.desc()).offset(skip).limit(limit).all()
+
+
+def get_post_count(db: Session, type: models.PostType):
+    return db.query(schemas.Post).filter(schemas.Post.type == type.value).count()
 
 
 def get_post(db: Session, type: models.PostType, no: int = None):

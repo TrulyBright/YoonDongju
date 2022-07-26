@@ -91,6 +91,11 @@ async def get_notices(skip: int = 0, limit: int | None = None, db: Session = Dep
     return crud.get_posts(db=db, type=models.PostType.notice, skip=skip, limit=limit)
 
 
+@app.get("/notice-count", response_model=int)
+async def get_notice_count(db: Session = Depends(get_db)):
+    return crud.get_post_count(db=db, type=models.PostType.notice)
+
+
 @app.get("/notices/{no:int}", response_model=models.Post)
 async def get_notice(no: int, db: Session = Depends(get_db)):
     if notice := crud.get_post(db=db, type=models.PostType.notice, no=no):

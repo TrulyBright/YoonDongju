@@ -222,6 +222,16 @@ def test_get_rules():
     assert posted["author"] == settings.test_real_name
 
 
+def test_get_notice_count():
+    count = 17
+    for _ in range(count):
+        test_create_notice()
+
+    response = tested.get("/notice-count")
+    assert response.status_code == 200
+    assert response.json() == count
+
+
 def test_get_recent_notices():
     for _ in range(10):
         test_create_notice()
