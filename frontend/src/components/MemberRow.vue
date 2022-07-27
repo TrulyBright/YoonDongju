@@ -8,7 +8,7 @@ export default {
   props: {
     username: String,
     real_name: String,
-    student_id: Number,
+    student_id: String,
     role: String,
   },
   computed: {
