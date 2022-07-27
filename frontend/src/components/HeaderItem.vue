@@ -212,6 +212,11 @@ export default {
     flex-direction: row-reverse;
   }
 }
+@include media-breakpoint-up(lg) {
+  .navbar-brand {
+    margin-left: 5%;
+  }
+}
 .contact-icon {
   margin-right: 3px;
 }
