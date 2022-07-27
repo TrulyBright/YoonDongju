@@ -72,40 +72,30 @@ export default {
     <td>{{ real_name }}</td>
     <td>{{ roleInKorean(role) }}</td>
     <td>
-      <div class="dropdown">
-        <button
-          type="button"
-          class="btn btn-secondary dropdown-toggle"
-          data-bs-toggle="action-dropdown"
-          aria-expanded="false"
+      <i class="bi-gear" data-bs-toggle="dropdown" aria-expanded="false"></i>
+      <ul class="dropdown-menu">
+        <li class="dropdown-header">직책승강</li>
+        <li
+          v-for="english in roles"
+          :key="english"
+          :class="'dropdown-item ' + (english === role ? 'disabled' : '')"
+          @click="patch(english)"
         >
-          작업
-        </button>
-        <ul class="dropdown-menu">
-          <li><h6 class="dropdown-header">직책승강</h6></li>
-          <li v-for="english in roles" :key="english">
-            <button
-              type="button"
-              :class="'dropdown-item ' + (english === role ? 'disabled' : '')"
-              @click="patch(english)"
-            >
-              {{ roleInKorean(english) }}으로
-            </button>
-          </li>
-          <li><hr class="dropdown-divider" /></li>
-          <li><h6 class="dropdown-header">재적변경</h6></li>
-          <li>
-            <button
-              type="button"
-              @click="kick"
-              class="dropdown-item btn-danger"
-            >
-              추방
-            </button>
-          </li>
-        </ul>
-      </div>
+          {{ roleInKorean(english) }}으로
+        </li>
+        <li class="dropdown-divider"></li>
+        <li class="dropdown-header">재적변경</li>
+        <li class="dropdown-item text-danger" @click="kick">추방</li>
+      </ul>
     </td>
   </tr>
 </template>
-<style scoped></style>
+<style scoped>
+i.bi-gear,
+.dropdown-item {
+  cursor: pointer;
+}
+.dropdown-menu {
+  position: fixed !important;
+}
+</style>
