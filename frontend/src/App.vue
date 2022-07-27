@@ -24,7 +24,7 @@ export default {
       this.contacts.email = res.data.email;
       this.contacts.presidentName = res.data.president_name;
       this.contacts.presidentTel = res.data.president_tel;
-      this.contacts.joinFormUrl = res.data.joinFormUrl;
+      this.contacts.joinFormUrl = res.data.join_form_url;
     } catch (error) {
       console.log(error);
     }
