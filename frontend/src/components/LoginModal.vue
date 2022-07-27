@@ -45,7 +45,7 @@ export default {
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalToggleLabel">접속</h5>
+          <h5 class="modal-title" id="exampleModalToggleLabel">회원접속</h5>
           <button
             type="button"
             class="btn-close"
