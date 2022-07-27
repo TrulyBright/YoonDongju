@@ -146,7 +146,7 @@ export default {
                 가입
               </a>
               <ul
-                class="dropdown-menu"
+                class="dropdown-menu dropdown-menu-end"
                 aria-labelledby="offcanvasNavbarDropdown"
               >
                 <a :href="joinFormUrl" class="dropdown-item">동아리 가입</a>
