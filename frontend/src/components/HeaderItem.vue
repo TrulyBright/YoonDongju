@@ -103,9 +103,7 @@ export default {
                 class="nav-link active"
                 aria-current="page"
                 to="/magazines"
-                ><span data-bs-dismiss="offcanvas"
-                  >문집</span
-                ></RouterLink
+                ><span data-bs-dismiss="offcanvas">문집</span></RouterLink
               >
             </li>
             <li class="nav-item">
@@ -113,9 +111,7 @@ export default {
                 class="nav-link active"
                 aria-current="page"
                 to="/notices"
-                ><span data-bs-dismiss="offcanvas"
-                  >공지</span
-                ></RouterLink
+                ><span data-bs-dismiss="offcanvas">공지</span></RouterLink
               >
             </li>
             <li class="nav-item">
@@ -166,9 +162,7 @@ export default {
             </li>
             <li class="nav-item" v-if="store.isAuthenticated">
               <RouterLink class="nav-link active" aria-current="page" to="/me"
-                ><span data-bs-dismiss="offcanvas"
-                  >내 정보</span
-                ></RouterLink
+                ><span data-bs-dismiss="offcanvas">내 정보</span></RouterLink
               >
             </li>
             <li class="nav-item" v-if="store.isAdmin">
@@ -176,9 +170,7 @@ export default {
                 class="nav-link active"
                 aria-current="page"
                 to="/admin"
-                ><span data-bs-dismiss="offcanvas"
-                  >관리</span
-                ></RouterLink
+                ><span data-bs-dismiss="offcanvas">관리</span></RouterLink
               >
             </li>
           </ul>
@@ -212,10 +204,16 @@ export default {
     flex-direction: row-reverse;
   }
 }
+@include media-breakpoint-up(lg) {
+  .navbar-brand {
+    margin-left: 5%;
+  }
+}
 .contact-icon {
   margin-right: 3px;
 }
-@media (max-width: 334px) { // Galaxy Fold
+@media (max-width: 334px) {
+  // Galaxy Fold
   #offcanvasNavbar {
     max-width: 65%;
   }
