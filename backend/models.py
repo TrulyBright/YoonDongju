@@ -86,7 +86,7 @@ class MemberModify(BaseModel):
 
 
 class Member(MemberBase):
-    student_id: int
+    student_id: str
     role: Role = Role.member
 
     class Config:
