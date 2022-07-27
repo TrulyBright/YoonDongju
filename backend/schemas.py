@@ -24,11 +24,12 @@ class ClubInformation(Base):
 
 class Member(Base):
     __tablename__ = "members"
-    student_id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(String, primary_key=True, index=True)
     real_name = Column(String)
     username = Column(String, unique=True, index=True)
     password = Column(String)
     role = Column(String)
+
 
 class Post(Base):
     __tablename__ = "posts"
@@ -51,7 +52,8 @@ class UploadedFile(Base):
     __tablename__ = "uploadedFiles"
     uuid = Column(String, primary_key=True)
     name = Column(String)
-    post_no = Column(Integer, ForeignKey("posts.no", ondelete="CASCADE"), nullable=True)
+    post_no = Column(Integer, ForeignKey(
+        "posts.no", ondelete="CASCADE"), nullable=True)
     content_type = Column(String)
 
 

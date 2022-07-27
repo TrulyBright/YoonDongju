@@ -126,8 +126,8 @@ async def get_members(skip: int = 0, limit: int = 100, db: Session = Depends(get
     return crud.get_members(db, skip, limit)
 
 
-@app.get("/members/{student_id:int}", response_model=models.Member)
-async def get_member(student_id: int, db: Session = Depends(get_db), accessing: schemas.Member = Depends(auth.get_current_member_board_only)):
+@app.get("/members/{student_id:str}", response_model=models.Member)
+async def get_member(student_id: str, db: Session = Depends(get_db), accessing: schemas.Member = Depends(auth.get_current_member_board_only)):
     if db_member := crud.get_member(db, student_id):
         return db_member
     raise HTTPException(404, "가입되지 않은 학번입니다.")
@@ -138,8 +138,8 @@ async def get_myself(db: Session = Depends(get_db), me: schemas.Member = Depends
     return me
 
 
-@app.patch("/members/{student_id:int}", response_model=models.Member)
-async def update_member(student_id: int, member: models.MemberModify, db: Session = Depends(get_db), author: schemas.Member = Depends(auth.get_current_member)):
+@app.patch("/members/{student_id:str}", response_model=models.Member)
+async def update_member(student_id: str, member: models.MemberModify, db: Session = Depends(get_db), author: schemas.Member = Depends(auth.get_current_member)):
     if author.role not in {
         models.Role.board,
         models.Role.president
@@ -151,8 +151,8 @@ async def update_member(student_id: int, member: models.MemberModify, db: Sessio
         raise HTTPException(422, "비밀번호가 규칙에 맞지 않습니다.")
 
 
-@app.delete("/members/{student_id:int}")
-async def delete_member(student_id: int, db: Session = Depends(get_db), deleter: schemas.Member = Depends(auth.get_current_member)):
+@app.delete("/members/{student_id:str}")
+async def delete_member(student_id: str, db: Session = Depends(get_db), deleter: schemas.Member = Depends(auth.get_current_member)):
     if deleter.student_id != student_id and deleter.role not in {models.Role.board, models.Role.president}:
         raise HTTPException(403)
     if not crud.delete_member(db=db, student_id=student_id):
