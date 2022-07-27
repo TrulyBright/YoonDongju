@@ -9,7 +9,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
 
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = "http://" + window.location.hostname + ":8000/";
+axios.defaults.baseURL = "https://api." + window.location.hostname;
 
 const app = createApp(App);
 
