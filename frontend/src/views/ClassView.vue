@@ -22,11 +22,10 @@ export default {
 <template>
   <ul class="list-group">
     <li
-      class="list-group-item"
+      :class="'list-group-item' + (name===c.name ? ' active':'')"
       v-for="c in classes"
       :key="c.name"
-      :active="name === c.name"
-      @lick="$router.push(c.name)"
+      @click="$router.push(c.name)"
     >
       {{ c.korean }}
     </li>
@@ -37,5 +36,8 @@ export default {
 .active.list-group-item {
   background-color: pink;
   border-color: pink;
+}
+.list-group-item {
+  cursor: pointer;
 }
 </style>
