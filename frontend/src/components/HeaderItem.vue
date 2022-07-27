@@ -36,7 +36,6 @@ export default {
   <RegisterModal id="register-modal"></RegisterModal>
   <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container-fluid" id="navbar-header">
-      <div id="dummy" tableindex="-1"></div>
       <RouterLink class="navbar-brand" to="/">연세문학회</RouterLink>
       <button
         class="navbar-toggler"
@@ -71,7 +70,7 @@ export default {
                 class="nav-link active"
                 aria-current="page"
                 to="/about"
-                ><span data-bs-dismiss="offcanvas">소개 About</span></RouterLink
+                ><span data-bs-dismiss="offcanvas">소개</span></RouterLink
               >
             </li>
             <li class="nav-item dropdown">
@@ -82,7 +81,7 @@ export default {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                분반 Class
+                분반
               </a>
               <ul
                 class="dropdown-menu"
@@ -105,7 +104,7 @@ export default {
                 aria-current="page"
                 to="/magazines"
                 ><span data-bs-dismiss="offcanvas"
-                  >문집 Magazine</span
+                  >문집</span
                 ></RouterLink
               >
             </li>
@@ -115,7 +114,7 @@ export default {
                 aria-current="page"
                 to="/notices"
                 ><span data-bs-dismiss="offcanvas"
-                  >공지 Notice</span
+                  >공지</span
                 ></RouterLink
               >
             </li>
@@ -124,7 +123,7 @@ export default {
                 class="nav-link active"
                 aria-current="page"
                 to="/rules"
-                ><span data-bs-dismiss="offcanvas">회칙 Rules</span></RouterLink
+                ><span data-bs-dismiss="offcanvas">회칙</span></RouterLink
               >
             </li>
             <li class="nav-item" v-if="!store.isAuthenticated">
@@ -133,12 +132,12 @@ export default {
                 data-bs-toggle="modal"
                 href="#login-modal"
                 role="button"
-                >접속 Login</a
+                >회원접속</a
               >
             </li>
             <li class="nav-item" v-else>
               <a role="button" class="nav-link active" @click="logout"
-                >접속해제 Logout</a
+                >접속해제</a
               >
             </li>
             <li class="nav-item dropdown">
@@ -148,7 +147,7 @@ export default {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                가입 Join
+                가입
               </a>
               <ul
                 class="dropdown-menu"
@@ -168,7 +167,7 @@ export default {
             <li class="nav-item" v-if="store.isAuthenticated">
               <RouterLink class="nav-link active" aria-current="page" to="/me"
                 ><span data-bs-dismiss="offcanvas"
-                  >내 정보 Profile</span
+                  >내 정보</span
                 ></RouterLink
               >
             </li>
@@ -178,7 +177,7 @@ export default {
                 aria-current="page"
                 to="/admin"
                 ><span data-bs-dismiss="offcanvas"
-                  >관리 Manage</span
+                  >관리</span
                 ></RouterLink
               >
             </li>
@@ -198,18 +197,25 @@ export default {
   </nav>
 </template>
 
-<style>
-@media (max-width: 991px) {
+<style lang="scss">
+@import "../node_modules/bootstrap/scss/functions";
+@import "../node_modules/bootstrap/scss/variables";
+@import "../node_modules/bootstrap/scss/mixins";
+
+@include media-breakpoint-down(lg) {
   .navbar-brand {
     position: absolute;
     left: 50%;
     transform: translate(-50%, 0);
   }
+  #navbar-header {
+    flex-direction: row-reverse;
+  }
 }
 .contact-icon {
   margin-right: 3px;
 }
-@media (max-width: 334px) {
+@media (max-width: 334px) { // Galaxy Fold
   #offcanvasNavbar {
     max-width: 65%;
   }
