@@ -331,9 +331,11 @@ async def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
 
 @app.post("/find-id")
 async def find_ID(form: FindIDForm, db: Session = Depends(get_db)):
-    if auth.is_yonsei_member(form.portal_id, form.portal_pw):
-        return crud.get_member(db=db, student_id=form.portal_id).username
-    raise HTTPException(401)
+    if not auth.is_yonsei_member(form.portal_id, form.portal_pw):
+        raise HTTPException(401)
+    if member := crud.get_member(db=db, student_id=form.portal_id):
+        return member.username
+    raise HTTPException(404)
 
 
 @app.post("/find-pw")
@@ -341,8 +343,9 @@ async def find_PW(form: FindPWForm, db: Session = Depends(get_db)):
     if not auth.is_yonsei_member(form.portal_id, form.portal_pw):
         raise HTTPException(401)
     try:
-        crud.update_member(db=db, student_id=form.portal_id, member=models.MemberModify(
+        if crud.update_member(db=db, student_id=form.portal_id, member=models.MemberModify(
             password=form.new_pw
-        ))
+        )) is None:
+            raise HTTPException(404)
     except ValueError:
         raise HTTPException(400)

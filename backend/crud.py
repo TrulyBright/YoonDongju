@@ -45,13 +45,15 @@ def update_member(db: Session, student_id: str, member: models.MemberModify):
     Raises:
         `ValueError`: 비밀번호가 `pattern`에 맞지 않아 보안이 취약한 경우.
     """
-    updated = db.query(schemas.Member).filter(
-        schemas.Member.student_id == student_id)
-    actual_object: schemas.Member = updated.first()
     if member.password:
         if not re.match(auth.password_pattern, member.password):
             raise ValueError("Password do not match the required pattern")
         member.password = auth.pwd_context.hash(member.password)
+    updated = db.query(schemas.Member).filter(
+        schemas.Member.student_id == student_id)
+    actual_object: schemas.Member = updated.first()
+    if actual_object is None:
+        return actual_object
     to = {key: value for key, value in member.dict().items()
           if value is not None}
     updated.update(to)

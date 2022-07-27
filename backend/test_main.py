@@ -1007,3 +1007,37 @@ def test_delete_member():
     response = tested.delete(
         f"/members/{settings.test_portal_id}", headers=get_jwt_header())
     assert response.status_code == 200
+
+
+def test_find_ID_nonexistent():
+    response = tested.post("/find-id", json={
+        "portal_id": settings.test_portal_id,
+        "portal_pw": "!23412341234",
+    })
+    assert response.status_code == 401
+    response = tested.post("/find-id", json={
+        "portal_id": settings.test_portal_id,
+        "portal_pw": settings.test_portal_pw
+    })
+    assert response.status_code == 404
+
+
+def test_find_PW_nonexistent():
+    response = tested.post("/find-pw", json={
+        "portal_id": settings.test_portal_id,
+        "portal_pw": "!23412341234",
+        "new_pw": settings.test_new_pw
+    })
+    assert response.status_code == 401
+    response = tested.post("/find-pw", json={
+        "portal_id": settings.test_portal_id,
+        "portal_pw": settings.test_portal_pw,
+        "new_pw": "12341234"
+    })
+    assert response.status_code == 400
+    response = tested.post("/find-pw", json={
+        "portal_id": settings.test_portal_id,
+        "portal_pw": settings.test_portal_pw,
+        "new_pw": settings.test_new_pw
+    })
+    assert response.status_code == 404
