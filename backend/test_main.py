@@ -47,6 +47,7 @@ class Settings(BaseSettings):
     test_real_name: str
     test_username: str
     test_password: str
+    test_new_pw: str
 
     class Config:
         env_file = "test.env"
@@ -117,7 +118,7 @@ def test_register():
     response = tested.post("/register", json=data)
     assert response.status_code == 200
     created: dict = response.json()
-    assert created["student_id"] == int(settings.test_portal_id)
+    assert created["student_id"] == settings.test_portal_id
     assert created["real_name"] == settings.test_real_name
     assert created["username"] == settings.test_username
     assert created["role"] == models.Role.member.value
@@ -409,7 +410,7 @@ def test_get_member():
         f"/members/{settings.test_portal_id}", headers=get_jwt_header())
     assert response.status_code == 200
     parsed = response.json()
-    assert parsed["student_id"] == int(settings.test_portal_id)
+    assert parsed["student_id"] == settings.test_portal_id
     assert parsed["username"] == settings.test_username
     assert parsed["role"] == models.Role.president
     assert parsed["real_name"] == settings.test_real_name
@@ -419,7 +420,7 @@ def test_get_me():
     response = tested.get("/me", headers=get_jwt_header())
     assert response.status_code == 200
     parsed = response.json()
-    assert parsed["student_id"] == int(settings.test_portal_id)
+    assert parsed["student_id"] == settings.test_portal_id
     assert parsed["username"] == settings.test_username
     assert parsed["role"] == models.Role.president
     assert parsed["real_name"] == settings.test_real_name
@@ -953,6 +954,41 @@ def test_delete_class_record():
         response = tested.get(f"/classes/{name}/records")
         assert response.status_code == 200
         assert response.json() == []
+
+
+def test_find_ID():
+    response = tested.post("/find-id", json={
+        "portal_id": settings.test_portal_id,
+        "portal_pw": "!23412341234",
+    })
+    assert response.status_code == 401
+    response = tested.post("/find-id", json={
+        "portal_id": settings.test_portal_id,
+        "portal_pw": settings.test_portal_pw
+    })
+    assert response.status_code == 200
+    assert response.json() == settings.test_username
+
+
+def test_find_PW():
+    response = tested.post("/find-pw", json={
+        "portal_id": settings.test_portal_id,
+        "portal_pw": "!23412341234",
+        "new_pw": settings.test_new_pw
+    })
+    assert response.status_code == 401
+    response = tested.post("/find-pw", json={
+        "portal_id": settings.test_portal_id,
+        "portal_pw": settings.test_portal_pw,
+        "new_pw": "12341234"
+    })
+    assert response.status_code == 400
+    response = tested.post("/find-pw", json={
+        "portal_id": settings.test_portal_id,
+        "portal_pw": settings.test_portal_pw,
+        "new_pw": settings.test_new_pw
+    })
+    assert response.status_code == 200
 
 
 def test_delete_member():

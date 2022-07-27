@@ -37,6 +37,16 @@ class RegisterForm(BaseModel):
     username: str
     password: str
 
+class FindIDForm(BaseModel):
+    portal_id: str
+    portal_pw: str
+
+
+class FindPWForm(BaseModel):
+    portal_id: str
+    portal_pw: str
+    new_pw: str
+
 
 @app.get("/club-information", response_model=models.ClubInformation)
 async def get_club_information(db: Session = Depends(get_db)):
@@ -317,3 +327,22 @@ async def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
         expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "Bearer", "expires_at": expires_at}
+
+
+@app.post("/find-id")
+async def find_ID(form: FindIDForm, db: Session = Depends(get_db)):
+    if auth.is_yonsei_member(form.portal_id, form.portal_pw):
+        return crud.get_member(db=db, student_id=form.portal_id).username
+    raise HTTPException(401)
+
+
+@app.post("/find-pw")
+async def find_PW(form: FindPWForm, db: Session = Depends(get_db)):
+    if not auth.is_yonsei_member(form.portal_id, form.portal_pw):
+        raise HTTPException(401)
+    try:
+        crud.update_member(db=db, student_id=form.portal_id, member=models.MemberModify(
+            password=form.new_pw
+        ))
+    except ValueError:
+        raise HTTPException(400)

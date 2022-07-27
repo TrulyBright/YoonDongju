@@ -13,7 +13,7 @@ import models
 import schemas
 
 
-def get_member(db: Session, student_id: int) -> schemas.Member:
+def get_member(db: Session, student_id: str) -> schemas.Member:
     return db.query(schemas.Member).filter(schemas.Member.student_id == student_id).first()
 
 
@@ -25,7 +25,7 @@ def get_members(db: Session, skip: int = 0, limit: int = 100) -> list[schemas.Me
     return db.query(schemas.Member).offset(skip).limit(limit).all()
 
 
-def create_member(db: Session, student_id: int, member: models.MemberCreate):
+def create_member(db: Session, student_id: str, member: models.MemberCreate):
     db_member = schemas.Member(
         student_id=student_id,
         real_name=member.real_name,
@@ -39,7 +39,12 @@ def create_member(db: Session, student_id: int, member: models.MemberCreate):
     return db_member
 
 
-def update_member(db: Session, student_id: int, member: models.MemberModify):
+def update_member(db: Session, student_id: str, member: models.MemberModify):
+    """`password`는 평문으로 주세요. 이 함수에서 `hash`해줍니다.
+    
+    Raises:
+        `ValueError`: 비밀번호가 `pattern`에 맞지 않아 보안이 취약한 경우.
+    """
     updated = db.query(schemas.Member).filter(
         schemas.Member.student_id == student_id)
     actual_object: schemas.Member = updated.first()
@@ -55,7 +60,7 @@ def update_member(db: Session, student_id: int, member: models.MemberModify):
     return actual_object
 
 
-def delete_member(db: Session, student_id: int):
+def delete_member(db: Session, student_id: str):
     if db.query(schemas.Member).filter(schemas.Member.student_id == student_id).delete():
         db.commit()
         return True
