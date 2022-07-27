@@ -73,7 +73,7 @@ export default {
                 ><span data-bs-dismiss="offcanvas">소개</span></RouterLink
               >
             </li>
-            <li class="nav-item dropdown">
+            <!-- <li class="nav-item dropdown">
               <a
                 class="nav-link active dropdown-toggle"
                 id="offcanvasNavbarDropdown"
@@ -97,7 +97,7 @@ export default {
                   }}</span></RouterLink
                 >
               </ul>
-            </li>
+            </li> -->
             <li class="nav-item">
               <RouterLink
                 class="nav-link active"
