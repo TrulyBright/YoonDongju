@@ -116,7 +116,7 @@ export default {
         </div>
         <div class="modal-body">
           <form @submit.prevent="loginSubmit">
-            <div class="form-floating">
+            <div class="form-floating mb-1">
               <input
                 type="text"
                 class="form-control"
