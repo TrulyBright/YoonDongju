@@ -22,7 +22,7 @@ export default {
 <template>
   <ul class="list-group">
     <li
-      :class="'list-group-item' + (name===c.name ? ' active':'')"
+      :class="'list-group-item' + (name === c.name ? ' active' : '')"
       v-for="c in classes"
       :key="c.name"
       @click="$router.push(c.name)"
