@@ -130,8 +130,10 @@ export default {
       />
     </div>
     <div class="input-group mb-3" id="basic-url">
-      <label for="contents" class="form-label">수록작</label>
-      <p class="d-none d-lg-block">네 번째 칸에서 Tab키를 눌러보세요.</p>
+      <div>
+        <label for="contents" class="form-label"><h4>수록작</h4></label>
+        <p class="d-none d-lg-block">네 번째 칸에서 Tab키를 눌러보세요.</p>
+      </div>
       <div
         v-for="[index, content] in form.contents.entries()"
         :key="content"
