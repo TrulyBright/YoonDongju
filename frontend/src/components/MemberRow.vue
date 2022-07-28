@@ -95,7 +95,4 @@ i.bi-gear,
 .dropdown-item {
   cursor: pointer;
 }
-.dropdown-menu {
-  position: fixed !important;
-}
 </style>
