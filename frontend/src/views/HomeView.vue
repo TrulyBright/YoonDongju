@@ -35,18 +35,15 @@ export default {
         <strong><RouterLink to="notices">공지</RouterLink></strong>
       </h3>
       <div class="recent-notices">
-        <div
-          v-for="notice in recentNotices"
-          :key="notice"
-          class="recent-notice"
-        >
+        <template v-for="notice in recentNotices" :key="notice">
           <RouterLink :to="{ name: 'notice', params: { no: notice.no } }">{{
             notice.title
           }}</RouterLink>
           <small class="date-published align-self-center">{{
             notice.published.split("-").slice(1).join("-")
           }}</small>
-        </div>
+          <hr class="line-between-notices" />
+        </template>
       </div>
     </div>
     <div>
@@ -100,11 +97,14 @@ export default {
   padding: 1em;
   background: white;
 }
-.recent-notice {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  border-bottom: 1px solid brown;
+.recent-notices {
+  display: grid;
+  grid-template-columns: 1fr auto;
+}
+hr.line-between-notices {
+  grid-column: 1 / -1;
+  margin: 0;
+  border-top: 1px solid brown;
 }
 .home {
   display: grid;
