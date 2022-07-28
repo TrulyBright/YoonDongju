@@ -169,7 +169,7 @@ export default {
     </div>
   </div>
 </template>
-<style>
+<style scoped>
 #register-loading {
   display: none;
 }

@@ -354,7 +354,7 @@ export default {
     </Teleport>
   </div>
 </template>
-<style>
+<style scoped>
 span.spinner-border {
   display: none;
 }

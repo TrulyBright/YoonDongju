@@ -23,7 +23,7 @@ export default {
     </div>
   </div>
 </template>
-<style>
+<style scoped>
 .rows {
   display: grid;
   grid-template-columns: auto 1fr auto auto;

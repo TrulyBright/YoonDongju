@@ -96,7 +96,7 @@ export default {
     </div>
   </div>
 </template>
-<style>
+<style scoped>
 i.bi-gear {
   cursor: pointer;
 }
