@@ -39,18 +39,18 @@ export default {
     <div>
       <h5>서체</h5>
       <p>
-        한글/영문:
+        <!-- 한글/영문: -->
         <a href="https://fonts.google.com/specimen/Gowun+Batang?subset=korean"
           >고운 바탕</a
         >
       </p>
-      <p>
+      <!-- <p>
         한자:
         <a
           href="https://fonts.google.com/noto/specimen/Noto+Serif+KR?subset=korean"
           >Noto Serif Korean</a
         >
-      </p>
+      </p> -->
     </div>
     <div>
       <h5>정보</h5>
