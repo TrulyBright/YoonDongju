@@ -19,3 +19,5 @@ https://api.yonseimunhak.com/docs
 https://api.yonseimunhak.com/redoc
 ## Notes
 - 500 에러인데 클라이언트에서는 CORS 에러로 보일 때가 종종 있으니 조심하세요.
+## Code Convention
+[Black](https://github.com/psf/black)
