@@ -9,8 +9,9 @@ SQLALCHEMY_DATEBASE_URL = "sqlite:///./sql/YoonDong-ju.db"
 engine = create_engine(
     SQLALCHEMY_DATEBASE_URL, connect_args={"check_same_thread": False}
 )
-sqlevent.listen(engine, "connect", lambda conn,
-                rec: conn.execute("PRAGMA foreign_keys=ON;"))
+sqlevent.listen(
+    engine, "connect", lambda conn, rec: conn.execute("PRAGMA foreign_keys=ON;")
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

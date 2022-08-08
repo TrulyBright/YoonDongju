@@ -8,7 +8,7 @@ from sqlalchemy import (
     UniqueConstraint,
     ForeignKeyConstraint,
     PrimaryKeyConstraint,
-    Table
+    Table,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -52,8 +52,7 @@ class UploadedFile(Base):
     __tablename__ = "uploadedFiles"
     uuid = Column(String, primary_key=True)
     name = Column(String)
-    post_no = Column(Integer, ForeignKey(
-        "posts.no", ondelete="CASCADE"), nullable=True)
+    post_no = Column(Integer, ForeignKey("posts.no", ondelete="CASCADE"), nullable=True)
     content_type = Column(String)
 
 
@@ -69,8 +68,9 @@ class Class(Base):
 
 class ClassRecord(Base):
     __tablename__ = "classRecords"
-    class_name = Column(String, ForeignKey("classes.name"),
-                        index=True, primary_key=True)
+    class_name = Column(
+        String, ForeignKey("classes.name"), index=True, primary_key=True
+    )
     conducted = Column(Date, index=True, primary_key=True)
     moderator = Column(String)
     topic = Column(String)
@@ -84,7 +84,7 @@ class Magazine(Base):
     cover = Column(String, ForeignKey("uploadedFiles.uuid"))  # 표지 파일 UUID
     published = Column(Date, primary_key=True)
     contents = relationship("MagazineContent")
-    __table_args__ = (UniqueConstraint('year', 'season'),)
+    __table_args__ = (UniqueConstraint("year", "season"),)
 
 
 class MagazineContent(Base):

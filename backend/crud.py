@@ -14,7 +14,9 @@ import schemas
 
 
 def get_member(db: Session, student_id: str) -> schemas.Member:
-    return db.query(schemas.Member).filter(schemas.Member.student_id == student_id).first()
+    return (
+        db.query(schemas.Member).filter(schemas.Member.student_id == student_id).first()
+    )
 
 
 def get_member_by_username(db: Session, username: str) -> schemas.Member:
@@ -31,7 +33,7 @@ def create_member(db: Session, student_id: str, member: models.MemberCreate):
         real_name=member.real_name,
         username=member.username,
         password=auth.pwd_context.hash(member.password),
-        role=models.Role.member.value
+        role=models.Role.member.value,
     )
     db.add(db_member)
     db.commit()
@@ -41,7 +43,7 @@ def create_member(db: Session, student_id: str, member: models.MemberCreate):
 
 def update_member(db: Session, student_id: str, member: models.MemberModify):
     """`password`는 평문으로 주세요. 이 함수에서 `hash`해줍니다.
-    
+
     Raises:
         `ValueError`: 비밀번호가 `pattern`에 맞지 않아 보안이 취약한 경우.
     """
@@ -49,13 +51,11 @@ def update_member(db: Session, student_id: str, member: models.MemberModify):
         if not re.match(auth.password_pattern, member.password):
             raise ValueError("Password do not match the required pattern")
         member.password = auth.pwd_context.hash(member.password)
-    updated = db.query(schemas.Member).filter(
-        schemas.Member.student_id == student_id)
+    updated = db.query(schemas.Member).filter(schemas.Member.student_id == student_id)
     actual_object: schemas.Member = updated.first()
     if actual_object is None:
         return actual_object
-    to = {key: value for key, value in member.dict().items()
-          if value is not None}
+    to = {key: value for key, value in member.dict().items() if value is not None}
     updated.update(to)
     db.commit()
     db.refresh(actual_object)
@@ -63,14 +63,32 @@ def update_member(db: Session, student_id: str, member: models.MemberModify):
 
 
 def delete_member(db: Session, student_id: str):
-    if db.query(schemas.Member).filter(schemas.Member.student_id == student_id).delete():
+    if (
+        db.query(schemas.Member)
+        .filter(schemas.Member.student_id == student_id)
+        .delete()
+    ):
         db.commit()
         return True
     return False
 
 
-def get_posts(db: Session, type: models.PostType, skip: int = 0, limit: int | None = None):
-    return db.query(schemas.Post.no, schemas.Post.author, schemas.Post.title, schemas.Post.published).filter(schemas.Post.type == type.value).order_by(schemas.Post.no.desc()).offset(skip).limit(limit).all()
+def get_posts(
+    db: Session, type: models.PostType, skip: int = 0, limit: int | None = None
+):
+    return (
+        db.query(
+            schemas.Post.no,
+            schemas.Post.author,
+            schemas.Post.title,
+            schemas.Post.published,
+        )
+        .filter(schemas.Post.type == type.value)
+        .order_by(schemas.Post.no.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 def get_post_count(db: Session, type: models.PostType):
@@ -78,10 +96,17 @@ def get_post_count(db: Session, type: models.PostType):
 
 
 def get_post(db: Session, type: models.PostType, no: int = None):
-    return db.query(schemas.Post).options(joinedload(schemas.Post.attached)).filter(schemas.Post.no == no if no else schemas.Post.type == type.value).first()
+    return (
+        db.query(schemas.Post)
+        .options(joinedload(schemas.Post.attached))
+        .filter(schemas.Post.no == no if no else schemas.Post.type == type.value)
+        .first()
+    )
 
 
-def create_post(db: Session, author: models.Member, post: models.PostCreate, type: models.PostType):
+def create_post(
+    db: Session, author: models.Member, post: models.PostCreate, type: models.PostType
+):
     db_post = schemas.Post(
         type=type.value,
         title=post.title,
@@ -89,27 +114,37 @@ def create_post(db: Session, author: models.Member, post: models.PostCreate, typ
         content=post.content,
         published=datetime.today().date(),
         attached=db.query(schemas.UploadedFile)
-        .filter(schemas.UploadedFile.uuid.in_(
-            [str(id) for id in post.attached]
-        )).all()
+        .filter(schemas.UploadedFile.uuid.in_([str(id) for id in post.attached]))
+        .all(),
     )
     db.add(db_post)
     db.commit()
     return db_post
 
 
-def update_post(db: Session, post: models.PostCreate, modifier: models.Member, no: int = None,  type: models.PostType = None):
+def update_post(
+    db: Session,
+    post: models.PostCreate,
+    modifier: models.Member,
+    no: int = None,
+    type: models.PostType = None,
+):
     """`no`가 있으면 `no`번 `Post`를, 없으면 `type`이 `type`인 `Post`를 수정합니다."""
     if no:
         updated = db.query(schemas.Post).filter(schemas.Post.no == no)
-        updated.update({
-            "title": post.title,
-            "content": post.content,
-            "modified": datetime.today().date(),
-            "modifier": modifier.real_name,
-        })
-        updated.first().attached = db.query(schemas.UploadedFile).filter(
-            schemas.UploadedFile.uuid.in_([str(id) for id in post.attached])).all()
+        updated.update(
+            {
+                "title": post.title,
+                "content": post.content,
+                "modified": datetime.today().date(),
+                "modifier": modifier.real_name,
+            }
+        )
+        updated.first().attached = (
+            db.query(schemas.UploadedFile)
+            .filter(schemas.UploadedFile.uuid.in_([str(id) for id in post.attached]))
+            .all()
+        )
         db.commit()
         return updated.first()
     db.query(schemas.Post).filter(schemas.Post.type == type.value).delete()
@@ -119,8 +154,9 @@ def update_post(db: Session, post: models.PostCreate, modifier: models.Member, n
         author=modifier.real_name,
         content=post.content,
         published=datetime.today().date(),
-        attached=db.query(schemas.UploadedFile).filter(
-            schemas.UploadedFile.uuid.in_([str(id) for id in post.attached])).all()
+        attached=db.query(schemas.UploadedFile)
+        .filter(schemas.UploadedFile.uuid.in_([str(id) for id in post.attached]))
+        .all(),
     )
     db.add(new)
     db.commit()
@@ -128,8 +164,11 @@ def update_post(db: Session, post: models.PostCreate, modifier: models.Member, n
 
 
 def delete_post(db: Session, type: models.PostType, no: int):
-    deleted = db.query(schemas.Post).filter(
-        schemas.Post.no == no and schemas.Post.type == type).delete()
+    deleted = (
+        db.query(schemas.Post)
+        .filter(schemas.Post.no == no and schemas.Post.type == type)
+        .delete()
+    )
     db.commit()
     return deleted
 
@@ -141,14 +180,22 @@ def get_club_information(db: Session):
 def update_club_information(db: Session, info: models.ClubInformationCreate):
     token_excluded = models.ClubInformation(**info.dict()).dict()
     db.query(schemas.ClubInformation).delete()
-    db.add_all([schemas.ClubInformation(key=key, value=value)
-               for key, value in token_excluded.items()])
+    db.add_all(
+        [
+            schemas.ClubInformation(key=key, value=value)
+            for key, value in token_excluded.items()
+        ]
+    )
     db.commit()
     return get_club_information(db)
 
 
 def get_uploaded_file(db: Session, uuid: uuid.UUID) -> schemas.UploadedFile:
-    return db.query(schemas.UploadedFile).filter(schemas.UploadedFile.uuid == str(uuid)).first()
+    return (
+        db.query(schemas.UploadedFile)
+        .filter(schemas.UploadedFile.uuid == str(uuid))
+        .first()
+    )
 
 
 async def create_uploaded_file(db: Session, file: UploadFile):
@@ -158,9 +205,7 @@ async def create_uploaded_file(db: Session, file: UploadFile):
     with open(f"uploaded/{internal_uuid}", "wb") as f:
         f.write(await file.read())
     row = schemas.UploadedFile(
-        uuid=str(internal_uuid),
-        name=name,
-        content_type=content_type
+        uuid=str(internal_uuid), name=name, content_type=content_type
     )
     db.add(row)
     db.commit()
@@ -168,20 +213,33 @@ async def create_uploaded_file(db: Session, file: UploadFile):
 
 
 async def delete_uploaded_file(db: Session, uuid: uuid.UUID):
-    deleted = db.query(schemas.UploadedFile).filter(
-        schemas.UploadedFile.uuid == str(uuid)).delete()
+    deleted = (
+        db.query(schemas.UploadedFile)
+        .filter(schemas.UploadedFile.uuid == str(uuid))
+        .delete()
+    )
     if deleted:
         db.commit()
-        Path.unlink(Path("uploaded/"+str(uuid)))
+        Path.unlink(Path("uploaded/" + str(uuid)))
     return deleted
 
 
 def get_magazine(db: Session, published: date):
-    return db.query(schemas.Magazine).filter(schemas.Magazine.published == published).first()
+    return (
+        db.query(schemas.Magazine)
+        .filter(schemas.Magazine.published == published)
+        .first()
+    )
 
 
 def get_magazines(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(schemas.Magazine).order_by(schemas.Magazine.published.desc()).offset(skip).limit(limit).all()
+    return (
+        db.query(schemas.Magazine)
+        .order_by(schemas.Magazine.published.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 def create_magazine(db: Session, magazine: models.MagazineCreate):
@@ -191,55 +249,72 @@ def create_magazine(db: Session, magazine: models.MagazineCreate):
         published=magazine.published,
     )
     db.add(db_magazine)
-    db.add_all([
-        schemas.MagazineContent(
-            published=magazine.published,
-            type=c.type,
-            title=c.title,
-            author=c.author,
-            language=c.language
-        )
-        for c in magazine.contents])
+    db.add_all(
+        [
+            schemas.MagazineContent(
+                published=magazine.published,
+                type=c.type,
+                title=c.title,
+                author=c.author,
+                language=c.language,
+            )
+            for c in magazine.contents
+        ]
+    )
     db.commit()
     return db_magazine
 
 
 def update_magazine(db: Session, published: date, magazine: models.MagazineCreate):
     db.query(schemas.MagazineContent).filter(
-        schemas.MagazineContent.published == published).delete()
-    updated = db.query(schemas.Magazine).filter(
-        schemas.Magazine.published == published)
+        schemas.MagazineContent.published == published
+    ).delete()
+    updated = db.query(schemas.Magazine).filter(schemas.Magazine.published == published)
     if not updated.first():
         return False
-    updated.update({
-        "year": magazine.year,
-        "cover": str(magazine.cover),
-        "published": magazine.published
-    })
-    db.add_all([
-        schemas.MagazineContent(
-            published=magazine.published,
-            type=c.type,
-            title=c.title,
-            author=c.author,
-            language=c.language
-        )
-        for c in magazine.contents])
+    updated.update(
+        {
+            "year": magazine.year,
+            "cover": str(magazine.cover),
+            "published": magazine.published,
+        }
+    )
+    db.add_all(
+        [
+            schemas.MagazineContent(
+                published=magazine.published,
+                type=c.type,
+                title=c.title,
+                author=c.author,
+                language=c.language,
+            )
+            for c in magazine.contents
+        ]
+    )
     db.commit()
     return magazine
 
 
 def delete_magazine(db: Session, published: date):
     db.query(schemas.MagazineContent).filter(
-        schemas.MagazineContent.published == published).delete()
-    if db.query(schemas.Magazine).filter(schemas.Magazine.published == published).delete():
+        schemas.MagazineContent.published == published
+    ).delete()
+    if (
+        db.query(schemas.Magazine)
+        .filter(schemas.Magazine.published == published)
+        .delete()
+    ):
         db.commit()
         return True
     return False
 
 
 def get_magazine_content(db: Session, published: date):
-    return db.query(schemas.MagazineContent).filter(schemas.MagazineContent.published == published).all()
+    return (
+        db.query(schemas.MagazineContent)
+        .filter(schemas.MagazineContent.published == published)
+        .all()
+    )
 
 
 def get_class(db: Session, name: models.ClassName):
@@ -251,13 +326,16 @@ def get_classes(db: Session):
 
 
 def create_classes_with_default_values(db: Session):
-    created = [schemas.Class(
-        name=name,
-        korean=models.ClassKoreanName[name],
-        moderator="홍길동",
-        schedule="매주 월요일 오후 5시",
-        description="이러쿵저러쿵"
-    ) for name in models.ClassName]
+    created = [
+        schemas.Class(
+            name=name,
+            korean=models.ClassKoreanName[name],
+            moderator="홍길동",
+            schedule="매주 월요일 오후 5시",
+            description="이러쿵저러쿵",
+        )
+        for name in models.ClassName
+    ]
     db.add_all(created)
     db.commit()
     return created
@@ -271,7 +349,12 @@ def update_class(db: Session, name: models.ClassName, class_data: models.ClassCr
         return existing
 
 
-def create_class_record(db: Session, class_name: models.ClassName, moderator: models.Member, record: models.ClassRecordCreate):
+def create_class_record(
+    db: Session,
+    class_name: models.ClassName,
+    moderator: models.Member,
+    record: models.ClassRecordCreate,
+):
     new_record = schemas.ClassRecord(
         class_name=class_name,
         conducted=record.conducted,
@@ -284,9 +367,16 @@ def create_class_record(db: Session, class_name: models.ClassName, moderator: mo
     return new_record
 
 
-def update_class_record(db: Session, class_name: models.ClassName, conducted: date, record: models.ClassRecordCreate):
+def update_class_record(
+    db: Session,
+    class_name: models.ClassName,
+    conducted: date,
+    record: models.ClassRecordCreate,
+):
     deleted = db.query(schemas.ClassRecord).filter(
-        schemas.ClassRecord.class_name == class_name, schemas.ClassRecord.conducted == conducted)
+        schemas.ClassRecord.class_name == class_name,
+        schemas.ClassRecord.conducted == conducted,
+    )
     original: schemas.ClassRecord = deleted.first()
     if not original:
         return False
@@ -297,7 +387,7 @@ def update_class_record(db: Session, class_name: models.ClassName, conducted: da
         conducted=record.conducted,
         moderator=moderator,
         topic=record.topic,
-        content=record.content
+        content=record.content,
     )
     db.add(updated)
     db.commit()
@@ -305,16 +395,40 @@ def update_class_record(db: Session, class_name: models.ClassName, conducted: da
     return updated
 
 
-def get_class_record(db: Session, class_name: models.ClassName, conducted: date) -> schemas.ClassRecord:
-    return db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name == class_name, schemas.ClassRecord.conducted == conducted).first()
+def get_class_record(
+    db: Session, class_name: models.ClassName, conducted: date
+) -> schemas.ClassRecord:
+    return (
+        db.query(schemas.ClassRecord)
+        .filter(
+            schemas.ClassRecord.class_name == class_name,
+            schemas.ClassRecord.conducted == conducted,
+        )
+        .first()
+    )
 
 
-def get_class_records(db: Session, class_name: models.ClassName, skip: int = 0, limit: int = 100):
-    return db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name == class_name).order_by(schemas.ClassRecord.conducted.desc()).offset(skip).limit(limit).all()
+def get_class_records(
+    db: Session, class_name: models.ClassName, skip: int = 0, limit: int = 100
+):
+    return (
+        db.query(schemas.ClassRecord)
+        .filter(schemas.ClassRecord.class_name == class_name)
+        .order_by(schemas.ClassRecord.conducted.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 def delete_class_record(db: Session, class_name: models.ClassName, conducted: date):
-    deleted = db.query(schemas.ClassRecord).filter(schemas.ClassRecord.class_name ==
-                                                   class_name, schemas.ClassRecord.conducted == conducted).delete()
+    deleted = (
+        db.query(schemas.ClassRecord)
+        .filter(
+            schemas.ClassRecord.class_name == class_name,
+            schemas.ClassRecord.conducted == conducted,
+        )
+        .delete()
+    )
     db.commit()
     return deleted

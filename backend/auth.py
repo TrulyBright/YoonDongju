@@ -55,11 +55,13 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM), expire.timestamp()
 
 
-async def get_current_member(db: Session = Depends(database.get_db), token: str = Depends(oauth2_scheme)):
+async def get_current_member(
+    db: Session = Depends(database.get_db), token: str = Depends(oauth2_scheme)
+):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"}
+        headers={"WWW-Authenticate": "Bearer"},
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -75,11 +77,10 @@ async def get_current_member(db: Session = Depends(database.get_db), token: str 
     return member
 
 
-async def get_current_member_board_only(member: models.Member = Depends(get_current_member)):
-    if member.role in {
-        models.Role.board,
-        models.Role.president
-    }:
+async def get_current_member_board_only(
+    member: models.Member = Depends(get_current_member),
+):
+    if member.role in {models.Role.board, models.Role.president}:
         return member
     raise HTTPException(403, "권한이 없습니다.")
 
@@ -92,10 +93,11 @@ def is_yonsei_member(id: int, pw: str):
         "retUrl": "/relation/otherSiteSSO",
         "type": "pmg",
         "id": id,
-        "password": pw
+        "password": pw,
     }
-    return data["retUrl"] in requests.post(
-        "https://library.yonsei.ac.kr/login",
-        data=data,
-        allow_redirects=True
-    ).url
+    return (
+        data["retUrl"]
+        in requests.post(
+            "https://library.yonsei.ac.kr/login", data=data, allow_redirects=True
+        ).url
+    )
