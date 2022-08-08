@@ -14,6 +14,6 @@
     - `jwt_secret="무작위로 생성된 32-digit hexadecimal. production 배포 중에는 바뀌면 안 됩니다.`
 1. 이후 `pytest`를 실행합니다.
 ## API Reference
-https://api.yonseimunhak.com/docs 를 참고하세요.
+https://api.yonseimunhak.com/docs
 ## Notes
 - 500 에러인데 클라이언트에서는 CORS 에러로 보일 때가 종종 있으니 조심하세요.
