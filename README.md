@@ -8,3 +8,5 @@
 - [FastAPI](https://fastapi.tiangolo.com/)
 - [Vue](https://vuejs.org/) & [Bootstrap 5](https://getbootstrap.com/)
 - [SQLite](https://sqlite.org/index.html)
+## Descriptions
+`/backend`, `/frontend` 디렉토리로 들어가면 제각기 `README.md`가 있으니, 그 문서를 참고하세요.
