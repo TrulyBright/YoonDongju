@@ -1,7 +1,9 @@
 # Backend
 ## Run
-1. `pip install -r requirements.txt`
-1. `gunicorn -k uvicorn.workers.UvicornWorker main:app -w (할당할 스레드 수)`
+1. `prod.env` 파일을 생성하고 다음 값을 넣습니다.
+    - `jwt_secret="무작위로 생성된 32-digit hexadecimal. production 배포 중에는 바뀌면 안 됩니다.`
+1. `pip install -r requirements.txt`를 실행합니다.
+1. `gunicorn -k uvicorn.workers.UvicornWorker main:app -w (할당할 스레드 수)`를 실행합니다.
 ## Test
 1. `test.env` 파일을 생성하고 다음 값을 넣습니다.
     - `test_portal_id=연세포탈 ID(즉 학번)`
