@@ -3,19 +3,16 @@ export default {
   props: {
     text: String,
   },
-  watch: {
-    $route: {
-      handler(newRoute) {
-        document.title =
+  async created() {
+    this.$watch('$route', function(newRoute) {
+      document.title =
           "연세문학회 :: " +
           (newRoute.meta.breadCrumb === "function"
             ? this.text
             : newRoute.meta.breadCrumb[newRoute.meta.breadCrumb.length - 1]
                 .text);
-      },
-      immediate: true,
-    },
-  },
+    })
+  }
 };
 </script>
 <template>
