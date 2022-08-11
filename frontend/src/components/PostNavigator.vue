@@ -4,13 +4,17 @@ export default {
     text: String,
   },
   watch: {
-    $route() {
-let breadCrumb =
-          typeof this.$route.meta.breadCrumb === "function"
-            ? this.$route.meta.breadCrumb(this.text)
-            : this.$route.meta.breadCrumb;
-        document.title = '연세문학회 :: '+ breadCrumb[breadCrumb.length - 1].text;
-    }
+    $route: {
+      handler(newRoute) {
+        document.title =
+          "연세문학회 :: " +
+          (newRoute.meta.breadCrumb === "function"
+            ? this.text
+            : newRoute.meta.breadCrumb[newRoute.meta.breadCrumb.length - 1]
+                .text);
+      },
+      immediate: true,
+    },
   },
 };
 </script>
