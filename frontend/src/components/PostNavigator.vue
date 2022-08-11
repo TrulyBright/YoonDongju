@@ -3,6 +3,15 @@ export default {
   props: {
     text: String,
   },
+  watch: {
+    $route() {
+let breadCrumb =
+          typeof this.$route.meta.breadCrumb === "function"
+            ? this.$route.meta.breadCrumb(this.text)
+            : this.$route.meta.breadCrumb;
+        document.title = '연세문학회 :: '+ breadCrumb[breadCrumb.length - 1].text;
+    }
+  },
 };
 </script>
 <template>
