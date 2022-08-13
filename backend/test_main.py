@@ -64,7 +64,6 @@ club_info = {
     "email": "someone@some.where",
     "president_name": "john doe",
     "president_tel": "010-0000-0000",
-    "join_form_url": "https://example.com",
     "HR_chief_tel": settings.test_HR_chief_tel,
 }
 about_data = {

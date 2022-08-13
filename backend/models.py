@@ -59,7 +59,6 @@ class ClubInformationBase(BaseModel):
     email: str
     president_name: str
     president_tel: str
-    join_form_url: str
     HR_chief_tel: str
 
 
