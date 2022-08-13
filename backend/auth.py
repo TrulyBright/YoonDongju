@@ -87,7 +87,10 @@ async def get_current_member_board_only(
 
 
 def is_yonsei_member(id: str, pw: str) -> bool:
-    return get_student_information(id, pw).usertypename == "학부학생"
+    try:
+        return get_student_information(id, pw).usertypename == "학부학생"
+    except:
+        return False
 
 
 def get_student_information(id: str, pw: str):
@@ -114,4 +117,7 @@ def get_student_information(id: str, pw: str):
             "moodlewsrestformat": "json",
         },
     )
-    return models.ClubMember(**json.loads(response.content.decode())["data"])
+    try:
+        return models.ClubMember(**json.loads(response.content.decode())["data"])
+    except:
+        return False
