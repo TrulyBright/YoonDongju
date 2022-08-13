@@ -109,6 +109,18 @@ export default {
                 >잡담방에 초대를 받습니다.</label
               >
             </div>
+            <div class="form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="club-register-agreement"
+                required
+              />
+              <label for="club-register-agreement" class="form-check-label"
+                >입력한 정보로 학사정보(실명/학번/전공/재적구분)를 받아오는 데
+                동의합니다.</label
+              >
+            </div>
             <div>
               <button type="submit" class="btn btn-pink">
                 가입<span
