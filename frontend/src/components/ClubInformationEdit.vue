@@ -1,4 +1,5 @@
 <script setup>
+import { Tooltip } from "bootstrap";
 import axios from "axios";
 import { useMemberStore } from "../stores/member";
 </script>
@@ -12,7 +13,7 @@ export default {
         email: null,
         president_name: null,
         president_tel: null,
-        join_form_url: null,
+        HR_chief_tel: null,
       },
     };
   },
@@ -21,6 +22,12 @@ export default {
     Object.entries(response.data).forEach(([key, value]) => {
       this.form[key] = value;
     });
+    const tooltipTriggerList = document.querySelectorAll(
+      '[data-bs-toggle="tooltip"]'
+    );
+    [...tooltipTriggerList].map(
+      (tooltipTriggerEl) => new Tooltip(tooltipTriggerEl)
+    );
   },
   methods: {
     async submit() {
@@ -81,15 +88,17 @@ export default {
         </div>
         <div class="form-floating">
           <input
-            type="url"
+            type="tel"
             class="form-control"
-            id="join-form-url"
-            v-model="form.join_form_url"
-            placeholder="http://example.com"
+            id="Hr-chief-tel"
+            v-model="form.HR_chief_tel"
+            placeholder="010-0000-0000"
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            title="이 번호로 신규 회원 가입 알림이 전송됩니다. 대시('-') 없이 숫자만 넣으세요."
           />
-          <label for="join-form-url">동아리 회원가입 주소</label>
+          <label for="HR-chief-tel">인사행정팀장 전화번호</label>
         </div>
-
         <button type="submit" class="btn btn-primary">게시</button>
       </form>
     </div>
