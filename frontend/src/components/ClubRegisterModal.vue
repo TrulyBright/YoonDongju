@@ -101,7 +101,6 @@ export default {
                 id="club-register-invite-informal-chat"
                 v-model="registerForm.invite_informal_chat"
                 placeholder="잡담방 초대 여부"
-                required
                 checked
               />
               <label
