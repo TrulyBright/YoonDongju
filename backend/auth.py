@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import json
 import requests
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -85,19 +86,32 @@ async def get_current_member_board_only(
     raise HTTPException(403, "권한이 없습니다.")
 
 
-def is_yonsei_member(id: int, pw: str):
+def is_yonsei_member(id: str, pw: str) -> bool:
+    return get_student_information(id, pw).usertypename == "학부학생"
+
+
+def get_student_information(id: str, pw: str):
     if len(pw) > 1024:
         raise
-    data = {
-        "loginType": "SSO",
-        "retUrl": "/relation/otherSiteSSO",
-        "type": "pmg",
-        "id": id,
-        "password": pw,
-    }
-    return (
-        data["retUrl"]
-        in requests.post(
-            "https://library.yonsei.ac.kr/login", data=data, allow_redirects=True
-        ).url
+    if len(id) > 1024:
+        raise
+    if id[4] == "2":
+        raise HTTPException(status_code=403, detail="신촌캠이 아닙니다.")
+    settings = get_settings()
+    response = requests.post(
+        url=settings.yonsei_fetch_api_endpoint,
+        data={"id": settings.yonsei_fetch_api_yonsei_id},
     )
+    token: str = json.loads(response.content.decode())["data"][0]["wstoken"]
+    response = requests.post(
+        url=settings.yonsei_login_api_endpoint,
+        data={
+            "userid": id,
+            "password": pw,
+            "wstoken": token,
+            "wsfunction": settings.yonsei_login_api_function,
+            "lang": "ko",
+            "moodlewsrestformat": "json",
+        },
+    )
+    return models.ClubMember(**json.loads(response.content.decode())["data"])
