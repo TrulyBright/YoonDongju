@@ -87,10 +87,11 @@ async def get_current_member_board_only(
 
 
 def is_yonsei_member(id: str, pw: str) -> bool:
-    try:
-        return get_student_information(id, pw).usertypename == "학부학생"
-    except:
-        return False
+    return get_student_information()
+
+
+def get_student_type(id: str, pw: str):
+    return get_student_information(id, pw).usertypename
 
 
 def get_student_information(id: str, pw: str):

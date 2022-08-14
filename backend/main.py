@@ -477,12 +477,18 @@ async def handle_club_member_registration(
         raise HTTPException(
             status_code=403, detail="해당 ID와 비밀번호로 LearnUs에 로그인할 수 없습니다."
         )
+    type = auth.get_student_type(model.portal_id, model.portal_pw)
+    if type != "학부학생":
+        raise HTTPException(
+            status_code=403, detail=f"학부생만 가입할 수 있습니다. {type}은 관리자에게 문의하세요."
+        )
     if not push_message.send_new_club_member_message(
         club_member=auth.get_student_information(
             id=model.portal_id, pw=model.portal_pw
         ),
         db=db,
-        tel=model.tel, invite_informal_chat=model.invite_informal_chat
+        tel=model.tel,
+        invite_informal_chat=model.invite_informal_chat,
     ):
         raise HTTPException(
             status_code=500,
