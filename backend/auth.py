@@ -87,7 +87,7 @@ async def get_current_member_board_only(
 
 
 def is_yonsei_member(id: str, pw: str) -> bool:
-    return get_student_information()
+    return get_student_information(id, pw)
 
 
 def get_student_type(id: str, pw: str):
