@@ -3,10 +3,6 @@
 `prod.env` 파일을 생성하고 다음 값을 넣습니다.
 ```
 jwt_secret=무작위로 생성된 32-digit hexadecimal. production 배포 중에는 바뀌면 안 됩니다.`
-yonsei_fetch_api_endpoint=학교 정보를 받아오는 API Endpoint.
-yonsei_fetch_api_yonsei_id=학교 ID.
-yonsei_login_api_endpoint=학생 로그인 API Endpoint.
-yonsei_login_api_function=학생 로그인 요청 함수.
 ncloud_access_key=Naver Cloud Platform access key.
 ncloud_secret_key=Naver Cloud Platform secret key.
 ncloud_sms_service_id=Naver Cloud Platform SENS SMS Service ID.

@@ -58,14 +58,19 @@ export default {
                 class="form-control"
                 id="club-register-portal-id"
                 v-model="registerForm.portal_id"
-                placeholder="연세포탈 ID"
+                placeholder="신촌캠 학부 학번"
                 data-bs-toggle="tooltip"
                 data-bs-placement="bottom"
-                title="학번이 10자리가 아니라면, 관리자(trulybright@yonsei.ac.kr)에게 문의하세요."
+                pattern="^[0-9]{4}1[0-9]{5}$"
+                title="학부 시절의 학번을 입력하셔야 합니다."
                 required
               />
-              <label for="club-register-portal-id">연세포탈 ID</label>
+              <label for="club-register-portal-id">신촌캠 학부 학번</label>
             </div>
+            <small
+              >학번이 숫자 10자리가 아닌가요? 관리자에게
+              <a href="mailto:trulybright@yonsei.ac.kr">문의</a>하세요.</small
+            >
             <div class="form-floating">
               <input
                 type="password"

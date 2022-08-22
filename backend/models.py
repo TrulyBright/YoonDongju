@@ -73,7 +73,6 @@ class ClubInformation(ClubInformationBase):
 
 class MemberBase(BaseModel):
     username: str
-    real_name: str
 
 
 class MemberCreate(MemberBase):
@@ -90,6 +89,7 @@ class Member(MemberBase):
 
     student_id: str
     role: Role = Role.member
+    real_name: str
 
     class Config:
         orm_mode = True
@@ -103,11 +103,10 @@ class ClubMemberBase(BaseModel):
 class ClubMember(BaseModel):
     """동아리 회원."""
 
-    usertypename: str
-    idnumber: str
-    firstname: str
-    institution: str
-    department: str
+    status: str
+    student_id: str
+    name: str
+    dept_and_major: str
 
 
 class ClubMemberCreate(ClubMemberBase):

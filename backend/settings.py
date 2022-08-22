@@ -4,10 +4,6 @@ from pydantic import BaseSettings
 
 class Settings(BaseSettings):
     jwt_secret: str
-    yonsei_fetch_api_endpoint: str
-    yonsei_fetch_api_yonsei_id: int
-    yonsei_login_api_endpoint: str
-    yonsei_login_api_function: str
     ncloud_access_key: str
     ncloud_secret_key: str
     ncloud_sms_service_id: str

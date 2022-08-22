@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import json
+import re
 import requests
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -7,6 +8,11 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from selenium.webdriver import Firefox
+from selenium.webdriver import FirefoxOptions
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 import crud
 import database
@@ -19,6 +25,8 @@ ALGORITHM = "HS256"
 id_pattern = "^.{1,65}$"  # 1자 이상 64자 이하에 어떤 문자든 허용됨
 # 10자 이상에 숫자와 영문이 하나씩은 있어야 함.
 password_pattern = "^(?=.*[0-9])(?=.*[a-zA-Z]).{10,}$"
+
+sinchon_student_id_pattern = "^[0-9]{4}1[0-9]{5}$"
 
 
 class Token(BaseModel):
@@ -90,8 +98,12 @@ def is_yonsei_member(id: str, pw: str) -> bool:
     return get_student_information(id, pw)
 
 
-def get_student_type(id: str, pw: str):
-    return get_student_information(id, pw).usertypename
+def is_sinchon_member(student_id: str) -> bool:
+    return re.match(sinchon_student_id_pattern, student_id)
+
+
+def get_student_status(id: str, pw: str):
+    return get_student_information(id, pw).status
 
 
 def get_student_information(id: str, pw: str):
@@ -101,24 +113,38 @@ def get_student_information(id: str, pw: str):
         raise
     if id[4] == "2":
         raise HTTPException(status_code=403, detail="신촌캠이 아닙니다.")
-    settings = get_settings()
-    response = requests.post(
-        url=settings.yonsei_fetch_api_endpoint,
-        data={"id": settings.yonsei_fetch_api_yonsei_id},
-    )
-    token: str = json.loads(response.content.decode())["data"][0]["wstoken"]
-    response = requests.post(
-        url=settings.yonsei_login_api_endpoint,
-        data={
-            "userid": id,
-            "password": pw,
-            "wstoken": token,
-            "wsfunction": settings.yonsei_login_api_function,
-            "lang": "ko",
-            "moodlewsrestformat": "json",
-        },
-    )
+    options = FirefoxOptions()
+    options.add_argument("--headless")
+    driver = Firefox(options=options)
     try:
-        return models.ClubMember(**json.loads(response.content.decode())["data"])
+        driver.get("https://portal.yonsei.ac.kr")
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "jooyohaksalink1"))
+        ).click()
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "loginId"))
+        ).send_keys(id)
+        driver.find_element(By.ID, "loginPasswd").send_keys(pw)
+        driver.find_element(By.ID, "loginBtn").click()
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "btn_open_icon"))
+        ).click()
+        name = (
+            WebDriverWait(driver, 10)
+            .until(EC.presence_of_element_located((By.ID, "wq_uuid_63")))
+            .get_attribute("textContent")
+        )
+        dept_and_major = driver.find_element(By.ID, "wq_uuid_77").get_attribute(
+            "textContent"
+        )
+        status = driver.find_element(By.ID, "wq_uuid_90").get_attribute("textContent")
+    except:
+        raise HTTPException(500, detail="연세포탈에서 정보를 받아오는 중 오류가 발생했습니다. 관리자에게 문의하세요.")
+    finally:
+        driver.quit()
+    try:
+        return models.ClubMember(
+            status=status, student_id=id, name=name, dept_and_major=dept_and_major
+        )
     except:
         return False
