@@ -24,7 +24,6 @@ def make_signature(access_key: str, secret_key: str, timestamp: str, uri: str):
 def send_new_club_member_message(
     club_member: models.ClubMember, db: Session, tel: str, invite_informal_chat: bool
 ):
-    print("asdasdf")
     settings = get_settings()
     url = "https://sens.apigw.ntruss.com"
     uri = f"/sms/v2/services/{urllib.parse.quote(settings.ncloud_sms_service_id)}/messages"
@@ -33,7 +32,7 @@ def send_new_club_member_message(
         {
             "type": "SMS",
             "from": settings.ncloud_sms_service_phone_number,
-            "content": f"""{club_member.name}/{club_member.student_id}/{club_member.dept_and_major}/{tel}/잡담방 초대 {'O' if invite_informal_chat else 'X'}""",
+            "content": f"""{club_member.name}/{club_member.student_id}/{club_member.dept_and_major}/{club_member.status}/{tel}/잡담방 초대 {'O' if invite_informal_chat else 'X'}""",
             "messages": [{"to": crud.get_club_information(db=db)["HR_chief_tel"]}],
         }
     )
