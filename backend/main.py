@@ -1,3 +1,4 @@
+import json
 import re
 from functools import lru_cache
 from datetime import date, datetime, timedelta
@@ -10,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from pydantic import UUID5, BaseModel, BaseSettings
+from settings import get_settings
 import models
 import crud
 import auth
@@ -23,11 +25,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://192.168.0.4",
-        "https://yonseimunhak.com",
-        "http://localhost:3000",
-    ],
+    allow_origins=json.loads(get_settings().allow_origins),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

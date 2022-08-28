@@ -11,7 +11,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
-import time
 
 import crud
 import database
@@ -115,7 +114,7 @@ def get_student_information(id: str, pw: str):
     options = FirefoxOptions()
     options.add_argument("--headless")
     options.add_argument("--window-size=1280,720")
-    driver = Firefox(options=options)
+    driver = Firefox(options=options, executable_path=get_settings().driver_path)
     # NOTE: Ubuntu on OCI for some reason doesn't work with geckodriver.
     # Use Fedora or something as an alternative.
     driver.get("https://portal.yonsei.ac.kr")
