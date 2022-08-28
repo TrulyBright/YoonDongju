@@ -48,6 +48,7 @@ class Settings(BaseSettings):
     test_username: str
     test_password: str
     test_new_pw: str
+    test_HR_chief_tel: str
 
     class Config:
         env_file = "test.env"
@@ -63,7 +64,7 @@ club_info = {
     "email": "someone@some.where",
     "president_name": "john doe",
     "president_tel": "010-0000-0000",
-    "join_form_url": "https://example.com",
+    "HR_chief_tel": settings.test_HR_chief_tel,
 }
 about_data = {
     "title": "about",
@@ -472,9 +473,9 @@ def test_get_magazines():
     ]
     dummies = [
         {
-            "year": i,
+            "year": 2000 + i,
             "cover": dummy_upload[i - 1]["uuid"],
-            "published": date(year=i, month=1, day=1).strftime("%Y-%m-%d"),
+            "published": date(year=2000 + i, month=1, day=1).strftime("%Y-%m-%d"),
             "contents": [
                 models.MagazineContentCreate(
                     type="시", title="서시", author="윤동주", language="한국어"

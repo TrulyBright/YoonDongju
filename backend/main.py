@@ -15,6 +15,7 @@ import crud
 import auth
 import schemas
 from database import SessionLocal, engine, get_db
+import push_message
 
 schemas.Base.metadata.create_all(bind=engine)
 
@@ -22,7 +23,11 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://192.168.0.4", "https://yonseimunhak.com"],
+    allow_origins=[
+        "http://192.168.0.4",
+        "https://yonseimunhak.com",
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,7 +38,6 @@ Path("uploaded").mkdir(exist_ok=True)
 class RegisterForm(BaseModel):
     portal_id: str
     portal_pw: str
-    real_name: str
     username: str
     password: str
 
@@ -400,8 +404,8 @@ async def delete_class_record(
 
 @app.post("/register", response_model=models.Member)
 async def register(form: RegisterForm, db: Session = Depends(get_db)):
-    if str(form.portal_id)[4] == "2":
-        raise HTTPException(status_code=403, detail="신촌캠만 가입할 수 있습니다.")
+    if not auth.is_sinchon_member(form.portal_id):
+        raise HTTPException(status_code=403, detail="신촌캠 학부에 적이 있어야만 가입할 수 있습니다.")
     if not auth.is_yonsei_member(form.portal_id, form.portal_pw):
         raise HTTPException(status_code=403, detail="해당 ID와 비밀번호로 연세포탈에 로그인할 수 없습니다.")
     if crud.get_member(db=db, student_id=form.portal_id):
@@ -412,11 +416,12 @@ async def register(form: RegisterForm, db: Session = Depends(get_db)):
         raise HTTPException(status_code=422, detail="비밀번호가 안전하지 않습니다.")
     if not re.match(auth.id_pattern, form.username):
         raise HTTPException(status_code=422, detail="이런 ID는 쓸 수 없습니다.")
+    real_name = auth.get_student_information(id=form.portal_id, pw=form.portal_pw).name
     return crud.create_member(
         db=db,
         student_id=form.portal_id,
         member=models.MemberCreate(
-            real_name=form.real_name, username=form.username, password=form.password
+            real_name=real_name, username=form.username, password=form.password
         ),
     )
 
@@ -468,3 +473,25 @@ async def find_PW(form: FindPWForm, db: Session = Depends(get_db)):
             raise HTTPException(404)
     except ValueError:
         raise HTTPException(400)
+
+
+@app.post("/club-members")
+async def handle_club_member_registration(
+    model: models.ClubMemberCreate, db=Depends(get_db)
+):
+    if not auth.is_sinchon_member(model.portal_id):
+        raise HTTPException(status_code=403, detail="신촌캠 학부에 적이 있어야만 가입할 수 있습니다.")
+    if not auth.is_yonsei_member(model.portal_id, model.portal_pw):
+        raise HTTPException(status_code=403, detail="해당 ID와 비밀번호로 연세포탈에 로그인할 수 없습니다.")
+    if not push_message.send_new_club_member_message(
+        club_member=auth.get_student_information(
+            id=model.portal_id, pw=model.portal_pw
+        ),
+        db=db,
+        tel=model.tel,
+        invite_informal_chat=model.invite_informal_chat,
+    ):
+        raise HTTPException(
+            status_code=500,
+            detail="가입 신청에 실패했습니다. 사이트 관리자(trulybright@yonsei.ac.kr)에게 문의하세요.",
+        )

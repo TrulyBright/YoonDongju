@@ -59,7 +59,7 @@ class ClubInformationBase(BaseModel):
     email: str
     president_name: str
     president_tel: str
-    join_form_url: str
+    HR_chief_tel: str
 
 
 class ClubInformationCreate(ClubInformationBase):
@@ -73,7 +73,6 @@ class ClubInformation(ClubInformationBase):
 
 class MemberBase(BaseModel):
     username: str
-    real_name: str
 
 
 class MemberCreate(MemberBase):
@@ -86,11 +85,33 @@ class MemberModify(BaseModel):
 
 
 class Member(MemberBase):
+    """사이트 회원."""
+
     student_id: str
     role: Role = Role.member
+    real_name: str
 
     class Config:
         orm_mode = True
+
+
+class ClubMemberBase(BaseModel):
+    tel: str
+    invite_informal_chat: bool
+
+
+class ClubMember(BaseModel):
+    """동아리 회원."""
+
+    status: str
+    student_id: str
+    name: str
+    dept_and_major: str
+
+
+class ClubMemberCreate(ClubMemberBase):
+    portal_id: str
+    portal_pw: str
 
 
 class PostBase(BaseModel):

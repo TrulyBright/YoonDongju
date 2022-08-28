@@ -3,6 +3,7 @@ import { useMemberStore } from "../stores/member";
 import axios from "axios";
 import LoginModal from "./LoginModal.vue";
 import RegisterModal from "./RegisterModal.vue";
+import ClubRegisterModal from "./ClubRegisterModal.vue";
 </script>
 <script>
 export default {
@@ -34,6 +35,32 @@ export default {
 <template>
   <LoginModal id="login-modal"></LoginModal>
   <RegisterModal id="register-modal"></RegisterModal>
+  <ClubRegisterModal id="club-register-modal"></ClubRegisterModal>
+  <Teleport to="#app"
+    ><div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div
+        id="club-register-success"
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header">
+          <strong class="me-auto">연세문학회</strong>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="toast-body">
+          동아리 가입이 신청되었습니다! 곧 인사행정팀장이 단톡방에
+          초대해드립니다.
+        </div>
+      </div>
+    </div></Teleport
+  >
   <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container-fluid" id="navbar-header">
       <RouterLink class="navbar-brand" to="/">연세문학회</RouterLink>
@@ -149,7 +176,13 @@ export default {
                 class="dropdown-menu dropdown-menu-end"
                 aria-labelledby="offcanvasNavbarDropdown"
               >
-                <a :href="joinFormUrl" class="dropdown-item">동아리 가입</a>
+                <a
+                  data-bs-toggle="modal"
+                  href="#club-register-modal"
+                  role="button"
+                  class="dropdown-item"
+                  >동아리 가입</a
+                >
                 <a
                   data-bs-toggle="modal"
                   href="#register-modal"

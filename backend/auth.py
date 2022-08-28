@@ -1,11 +1,17 @@
 from datetime import datetime, timedelta
-import requests
+import re
 from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from selenium.webdriver import Firefox, FirefoxOptions
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
+import time
 
 import crud
 import database
@@ -18,6 +24,8 @@ ALGORITHM = "HS256"
 id_pattern = "^.{1,65}$"  # 1자 이상 64자 이하에 어떤 문자든 허용됨
 # 10자 이상에 숫자와 영문이 하나씩은 있어야 함.
 password_pattern = "^(?=.*[0-9])(?=.*[a-zA-Z]).{10,}$"
+
+sinchon_student_id_pattern = "^[0-9]{4}1[0-9]{5}$"
 
 
 class Token(BaseModel):
@@ -85,19 +93,57 @@ async def get_current_member_board_only(
     raise HTTPException(403, "권한이 없습니다.")
 
 
-def is_yonsei_member(id: int, pw: str):
+def is_yonsei_member(id: str, pw: str) -> bool:
+    return get_student_information(id, pw)
+
+
+def is_sinchon_member(student_id: str) -> bool:
+    return re.match(sinchon_student_id_pattern, student_id)
+
+
+def get_student_status(id: str, pw: str):
+    return get_student_information(id, pw).status
+
+
+def get_student_information(id: str, pw: str):
     if len(pw) > 1024:
         raise
-    data = {
-        "loginType": "SSO",
-        "retUrl": "/relation/otherSiteSSO",
-        "type": "pmg",
-        "id": id,
-        "password": pw,
-    }
-    return (
-        data["retUrl"]
-        in requests.post(
-            "https://library.yonsei.ac.kr/login", data=data, allow_redirects=True
-        ).url
+    if len(id) > 1024:
+        raise
+    if id[4] != "1":
+        raise HTTPException(status_code=403, detail="신촌캠 학부 학번이 필요합니다.")
+    options = FirefoxOptions()
+    options.add_argument("--headless")
+    options.add_argument("--window-size=1280,720")
+    driver = Firefox(options=options)
+    # NOTE: Ubuntu on OCI for some reason doesn't work with geckodriver.
+    # Use Fedora or something as an alternative.
+    driver.get("https://portal.yonsei.ac.kr")
+    WebDriverWait(driver, 15).until(
+        EC.element_to_be_clickable((By.ID, "jooyohaksalink1"))
+    ).click()
+    WebDriverWait(driver, 15).until(
+        EC.element_to_be_clickable((By.ID, "loginId"))
+    ).send_keys(id)
+    driver.find_element(By.ID, "loginPasswd").send_keys(pw)
+    driver.find_element(By.ID, "loginBtn").click()
+    unauthorized = False
+    try:
+        WebDriverWait(driver, 15).until(
+            EC.element_to_be_clickable((By.ID, "btn_open_icon"))
+        ).click()
+    except TimeoutException:
+        unauthorized = True
+    else:
+        name = driver.find_element(By.ID, "wq_uuid_63").get_attribute("textContent")
+        dept_and_major = driver.find_element(By.ID, "wq_uuid_77").get_attribute(
+            "textContent"
+        )
+        status = driver.find_element(By.ID, "wq_uuid_90").get_attribute("textContent")
+    finally:
+        driver.quit()
+    if unauthorized:
+        raise HTTPException(401, "연세포탈에 로그인하는 데 실패했습니다.")
+    return models.ClubMember(
+        status=status, student_id=id, name=name, dept_and_major=dept_and_major
     )
