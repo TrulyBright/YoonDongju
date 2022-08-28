@@ -1,1 +1,8 @@
+*.env
+uploaded
+*.db
+__pycache__
 .venv
+wallet
+drivers
+*.log
