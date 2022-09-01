@@ -4,7 +4,6 @@ from pydantic import BaseSettings
 
 class Settings(BaseSettings):
     jwt_secret: str
-    allow_origins: str
     ncloud_access_key: str
     ncloud_secret_key: str
     ncloud_sms_service_id: str
