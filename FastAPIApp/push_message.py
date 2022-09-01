@@ -6,9 +6,9 @@ import hmac
 import base64
 import requests
 import time
-import models
-import crud
-from settings import get_settings
+import FastAPIApp.models as models
+import FastAPIApp.crud as crud
+from FastAPIApp.settings import get_settings
 from sqlalchemy.orm import Session
 
 

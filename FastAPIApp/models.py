@@ -1,11 +1,9 @@
 from __future__ import annotations
+from typing import Union
 from datetime import date
 from enum import Enum
-import json
-import re
 from uuid import UUID
-from pydantic import BaseModel, validator
-from fastapi import UploadFile
+from pydantic import BaseModel
 
 
 class Role(str, Enum):
@@ -35,11 +33,12 @@ class ClassKoreanName(str, Enum):
 
 
 class TokenData(BaseModel):
-    student_id: int | None = None
+    student_id: Union[str, None] = None
 
 
 class UploadedFileBase(BaseModel):
     name: str
+    content_type: str
 
 
 class UploadedFileCreate(UploadedFileBase):
@@ -47,8 +46,7 @@ class UploadedFileCreate(UploadedFileBase):
 
 
 class UploadedFile(UploadedFileBase):
-    uuid: UUID
-    content_type: str
+    id: int
 
     class Config:
         orm_mode = True
@@ -76,12 +74,13 @@ class MemberBase(BaseModel):
 
 
 class MemberCreate(MemberBase):
+    real_name: str
     password: str
 
 
 class MemberModify(BaseModel):
-    role: Role | None = None
-    password: str | None = None
+    role: Union[Role, None] = None
+    password: Union[str, None] = None
 
 
 class Member(MemberBase):
@@ -128,8 +127,8 @@ class Post(PostBase):
     no: int
     author: str
     published: date
-    modified: date | None = None
-    modifier: str | None = None
+    modified: Union[date, None] = None
+    modifier: Union[str, None] = None
     attached: list[UploadedFile]
 
     class Config:
@@ -209,7 +208,6 @@ class MagazineContent(MagazineContentBase):
 
 
 class MagazineBase(BaseModel):
-    year: int
     cover: UUID
     published: date
 

@@ -1,19 +1,14 @@
 from sqlalchemy import (
-    Boolean,
     Column,
     Integer,
     String,
     Date,
     ForeignKey,
-    UniqueConstraint,
-    ForeignKeyConstraint,
-    PrimaryKeyConstraint,
-    Table,
+    LargeBinary
 )
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.hybrid import hybrid_property
 
-from database import Base
+from FastAPIApp.database import Base
 
 
 class ClubInformation(Base):
@@ -50,10 +45,12 @@ class Post(Base):
 
 class UploadedFile(Base):
     __tablename__ = "uploadedFiles"
-    uuid = Column(String, primary_key=True)
+    uuid = Column(String, primary_key=True, index=True)
     name = Column(String)
-    post_no = Column(Integer, ForeignKey("posts.no", ondelete="CASCADE"), nullable=True)
     content_type = Column(String)
+    blob = Column(LargeBinary)
+    post_no = Column(Integer, ForeignKey(
+        "posts.no", ondelete="CASCADE"), nullable=True)
 
 
 class Class(Base):
@@ -79,18 +76,15 @@ class ClassRecord(Base):
 
 class Magazine(Base):
     __tablename__ = "magazines"
-    year = Column(Integer)
-    season = Column(Integer)
     cover = Column(String, ForeignKey("uploadedFiles.uuid"))  # 표지 파일 UUID
     published = Column(Date, primary_key=True)
     contents = relationship("MagazineContent")
-    __table_args__ = (UniqueConstraint("year", "season"),)
 
 
 class MagazineContent(Base):
     __tablename__ = "magazineContents"
     no = Column(Integer, primary_key=True)
-    published = Column(Integer, ForeignKey("magazines.published"), index=True)
+    published = Column(Date, ForeignKey("magazines.published"), index=True)
     type = Column(String)
     title = Column(String)
     author = Column(String)

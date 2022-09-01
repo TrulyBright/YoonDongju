@@ -1,21 +1,17 @@
 from datetime import datetime, timedelta
 import re
-from fastapi import Depends, FastAPI, HTTPException, status
+from typing import Union
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from selenium.webdriver import Firefox, FirefoxOptions
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
-
-import crud
-import database
-import models
-from settings import get_settings
+import FastAPIApp.crud as crud
+import FastAPIApp.database as database
+import FastAPIApp.models as models
+from FastAPIApp.settings import get_settings
+import requests
 
 SECRET_KEY = get_settings().jwt_secret
 ALGORITHM = "HS256"
@@ -33,14 +29,12 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: str | None = None
+    username: Union[str, None] = None
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-app = FastAPI()
 
 
 def authenticate(db: Session, username: str, password: str):
@@ -52,7 +46,7 @@ def authenticate(db: Session, username: str, password: str):
     return member
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -109,40 +103,12 @@ def get_student_information(id: str, pw: str):
         raise
     if len(id) > 1024:
         raise
-    if id[4] != "1":
-        raise HTTPException(status_code=403, detail="신촌캠 학부 학번이 필요합니다.")
-    options = FirefoxOptions()
-    options.add_argument("--headless")
-    options.add_argument("--window-size=1280,720")
-    driver = Firefox(options=options, executable_path=get_settings().driver_path)
-    # NOTE: Ubuntu on OCI for some reason doesn't work with geckodriver.
-    # Use Fedora or something as an alternative.
-    driver.get("https://portal.yonsei.ac.kr")
-    WebDriverWait(driver, 15).until(
-        EC.element_to_be_clickable((By.ID, "jooyohaksalink1"))
-    ).click()
-    WebDriverWait(driver, 15).until(
-        EC.element_to_be_clickable((By.ID, "loginId"))
-    ).send_keys(id)
-    driver.find_element(By.ID, "loginPasswd").send_keys(pw)
-    driver.find_element(By.ID, "loginBtn").click()
-    unauthorized = False
-    try:
-        WebDriverWait(driver, 15).until(
-            EC.element_to_be_clickable((By.ID, "btn_open_icon"))
-        ).click()
-    except TimeoutException:
-        unauthorized = True
-    else:
-        name = driver.find_element(By.ID, "wq_uuid_63").get_attribute("textContent")
-        dept_and_major = driver.find_element(By.ID, "wq_uuid_77").get_attribute(
-            "textContent"
-        )
-        status = driver.find_element(By.ID, "wq_uuid_90").get_attribute("textContent")
-    finally:
-        driver.quit()
-    if unauthorized:
-        raise HTTPException(401, "연세포탈에 로그인하는 데 실패했습니다.")
-    return models.ClubMember(
-        status=status, student_id=id, name=name, dept_and_major=dept_and_major
-    )
+    if not is_sinchon_member(id):
+        raise HTTPException(401, "신촌캠 학부 학번이 필요합니다.")
+    settings = get_settings()
+    response = requests.get(settings.yonsei_auth_function_endpoint, params={
+        "id": id, "pw": pw, "code": settings.yonsei_auth_function_code})
+    if response.status_code != 200:
+        raise HTTPException(500, "연세포탈에서 정보를 받아오는 데 실패했습니다.")
+    json = response.json()
+    return models.ClubMember(status=json["status"], student_id=id, name=json["name"], dept_and_major=json["deptMajor"])

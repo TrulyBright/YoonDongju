@@ -1,6 +1,6 @@
 {
-    "recommendations": [
-        "ms-python.python",
-        "antfu.vite"
-    ]
+  "recommendations": [
+    "ms-azuretools.vscode-azurefunctions",
+    "ms-python.python"
+  ]
 }

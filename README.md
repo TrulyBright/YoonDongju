@@ -1,37 +1,142 @@
-# Backend
-## Production Settings
-`prod.env` 파일을 생성하고 다음 값을 넣습니다.
-```
-jwt_secret=무작위로 생성된 32-digit hexadecimal. production 배포 중에는 바뀌면 안 됩니다.`
-allow_origins=CORS용 allow-origins. JSON Array 꼴이어야 합니다.
-driver_path=Selenium용 driver의 Absolute Path.
-ncloud_access_key=Naver Cloud Platform access key.
-ncloud_secret_key=Naver Cloud Platform secret key.
-ncloud_sms_service_id=Naver Cloud Platform SENS SMS Service ID.
-ncloud_sms_service_phone_number=Naver Cloud Platform SENS SMS 서비스에 등록된 발신번호.
-```
-## Run
-1. 위에 있는 `Production Settings`를 완료합니다.
-1. `pip install -r requirements.txt`를 실행합니다.
-1. `gunicorn -k uvicorn.workers.UvicornWorker main:app -w (할당할 스레드 수)`를 실행합니다.
-## Test
-1. 위에 있는 `Production Settings`를 완료합니다.
-2. `test.env` 파일을 생성하고 다음 값을 넣습니다.
-```
-test_portal_id=연세포탈 ID(즉 학번)
-test_portal_pw=연세포탈 비번
-test_real_name=견본 실명
-test_username=견본 ID
-test_password=견본 비번. main.py에서 정한 정규표현식 패턴과 맞아야 합니다.
-test_new_pw=변경용 견본 비번. '비밀번호 찾기'가 이 비밀번호를 이용하여 시험됩니다.
-test_HR_chief_tel=견본 전화번호. 실용 환경에서는 인사행정팀장의 전화번호가 됩니다.
-```
-3. 이후 `pytest`를 실행합니다.
-## API Reference
-https://api.yonseimunhak.com/docs
+---
+page_type: sample
+languages: 
+- python
+products: 
+- azure
+- azure-functions
+description: "This is a sample Azure Function app created with the FastAPI framework."
+title: Using FastAPI Framework with Azure Functions
+author: shreyabatra4, vrdmr
+urlFragment: azure-functions-python-create-fastapi-app
+---
 
-https://api.yonseimunhak.com/redoc
-## Notes
-- 500 에러인데 클라이언트에서는 CORS 에러로 보일 때가 종종 있으니 조심하세요.
-## Code Convention
-[Black](https://github.com/psf/black)
+# Using FastAPI Framework with Azure Functions
+
+Azure Functions supports WSGI and ASGI-compatible frameworks with HTTP-triggered Python functions. This can be helpful if you are familiar with a particular framework, or if you have existing code you would like to reuse to create the Function app. The following is an example of creating an Azure Function app using Fast API.
+  
+## Prerequisites
+
+Here are some of the prerequisites to get [this sample](https://github.com/Azure-Samples/fastapi-on-azure-functions) to work for you.
+
+**Install Python**
+
+A [Python version](https://docs.microsoft.com/azure/azure-functions/supported-languages#languages-by-runtime-version) that is supported by Azure Functions is required. Run `python --version` (Linux/MacOS) or `py --version` (Windows) to check your Python version reports to a supported version. For more information on installing Python, see [How to install Python](https://wiki.python.org/moin/BeginnersGuide/Download).
+
+**Install Azure Functions Core Tools**
+
+Azure Functions Core Tools provides commands to create functions, connect to Azure, and deploy function projects. For more information, see [Install Azure Functions Core Tools](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=v4%2Cwindows%2Ccsharp%2Cportal%2Cbash#install-the-azure-functions-core-tools).
+
+**Create a new Azure Function App in VS Code**
+
+To create an Azure Function app in VSCode, please go through the [Microsoft Docs tutorial on creating your first Azure Function using Visual Studio Code](https://docs.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-python). In the code snippet along with the sample, we name the two python module 'FastAPIApp' and 'WrapperFunction' with the HTTP trigger.
+
+## Setup
+
+Clone or download [this sample](https://github.com/Azure-Samples/fastapi-app-on-azure-functions/) repository, and open the sample folder in Visual Studio Code or your IDE of choice.
+
+## FastAPI Framework in an Azure Function App
+
+The file requirements.txt is updated to include the following depdendencies.
+```python
+azure-functions
+fastapi
+```
+Note that `azure-functions-worker` should not be included in this file as the Python worker is manager by Azure Functions platform and manually managing it may cause unexpected issues.
+
+The following code shows the use of `AsgiMiddleware`, which redirects the invocations to FastAPI handler.
+```python
+
+import azure.functions as func
+from FastAPIApp import app
+import nest_asyncio
+
+nest_asyncio.apply()
+
+async def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
+  """Each request is redirected to the ASGI handler.
+    """
+    return func.AsgiMiddleware(app).handle(req, context)
+```
+
+The file function.json is modified to include `route` in the HTTP trigger.
+```json
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "authLevel": "anonymous",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": [
+        "get",
+        "post"
+      ],
+      "route": "/{*route}"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "$return"
+    }
+  ]
+}
+```
+
+The file host.json is updated to include the HTTP `routePrefix`.
+```json
+{
+  "version": "2.0",
+  "extensions": {
+    "http": {
+        "routePrefix": ""
+    }
+  }
+}
+```
+
+## Running the sample
+
+### Testing locally
+
+To run Function Apps using Core Tools, see [Run functions locally with Core Tools](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=v4%2Cwindows%2Cpython%2Cportal%2Cbash#start).
+
+To test locally, run the below to install FastAPI.
+
+```log
+pip install -r requirements.txt
+```
+
+Then, start debug mode and test the function using the HTTP endpoint exposed after the host and the worker load up the function.
+
+```log
+Http Functions:
+HandleApproach: [GET,POST] http://localhost:7071/<route>
+```
+
+### Testing in Azure
+
+You can publish the function app directly from VSCode using the “Publish to Azure option” in the Azure extension. For more information, please refer the guide to [publish the project to Azure using Visual Studio Code](https://docs.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-python#publish-the-project-to-azure).
+
+You can use a tool like Postman to see the API in action locally, and on Azure. Running locally will help you to verify the credentials, configuration and business logic.
+
+### Calling the URL with Path Parameters
+
+When running this sample, you can try a different URL route as well as parameterize it. For instance, `http://<HOST>:7071/hello/Foo` to call the FastAPI app with path param `Foo`.
+
+When done locally, please try the following URL in your browser -
+```
+http://localhost:7071/hello/Foo
+```
+
+When done in Azure, please try the following URL in your browser -
+```
+http://<FunctionAppName>.azurewebsites.net/hello/Foo
+```
+
+## Conclusion and Next Steps
+
+[This sample](https://github.com/Azure-Samples/fastapi-on-azure-functions) helps you setup an app with the FastAPI framework and can help you get started using web frameworks in Azure Functions.
+
+To learn more about altering Python functions to leverage WSGI and ASGI-compatible frameworks, see [Web frameworks](https://docs.microsoft.com/azure/azure-functions/functions-reference-python?tabs=asgi%2Cazurecli-linux%2Capplication-level#web-frameworks).

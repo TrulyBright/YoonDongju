@@ -1,36 +1,19 @@
-import json
 import re
-from functools import lru_cache
-from datetime import date, datetime, timedelta
 from typing import Union
 from uuid import UUID
-from pathlib import Path
-from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordRequestForm
+from datetime import date, timedelta
+import azure.functions as func
+from FastAPIApp import app, models, crud, auth
+from FastAPIApp.database import get_db
 from sqlalchemy.orm import Session
-from pydantic import UUID5, BaseModel, BaseSettings
-from settings import get_settings
-import models
-import crud
-import auth
-import schemas
-from database import SessionLocal, engine, get_db
-import push_message
+from fastapi import Depends, HTTPException, UploadFile
+from fastapi.responses import FileResponse
+from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel
+from FastAPIApp import schemas, push_message
+import nest_asyncio
 
-schemas.Base.metadata.create_all(bind=engine)
-
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=json.loads(get_settings().allow_origins),
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-Path("uploaded").mkdir(exist_ok=True)
+nest_asyncio.apply()
 
 
 class RegisterForm(BaseModel):
@@ -49,6 +32,10 @@ class FindPWForm(BaseModel):
     portal_id: str
     portal_pw: str
     new_pw: str
+
+
+async def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
+    return func.AsgiMiddleware(app).handle(req, context)
 
 
 @app.get("/club-information", response_model=models.ClubInformation)
@@ -121,7 +108,7 @@ async def update_rules(
 
 @app.get("/notices", response_model=list[models.PostOutline])
 async def get_notices(
-    skip: int = 0, limit: int | None = None, db: Session = Depends(get_db)
+    skip: int = 0, limit: Union[int, None] = None, db: Session = Depends(get_db)
 ):
     return crud.get_posts(db=db, type=models.PostType.notice, skip=skip, limit=limit)
 
@@ -402,10 +389,8 @@ async def delete_class_record(
 
 @app.post("/register", response_model=models.Member)
 async def register(form: RegisterForm, db: Session = Depends(get_db)):
-    if not auth.is_sinchon_member(form.portal_id):
-        raise HTTPException(status_code=403, detail="신촌캠 학부에 적이 있어야만 가입할 수 있습니다.")
-    if not auth.is_yonsei_member(form.portal_id, form.portal_pw):
-        raise HTTPException(status_code=403, detail="해당 ID와 비밀번호로 연세포탈에 로그인할 수 없습니다.")
+    real_name = auth.get_student_information(
+        id=form.portal_id, pw=form.portal_pw).name
     if crud.get_member(db=db, student_id=form.portal_id):
         raise HTTPException(status_code=409, detail="이미 이 학번으로 가입된 계정이 있습니다.")
     if crud.get_member_by_username(db=db, username=form.username):
@@ -414,7 +399,6 @@ async def register(form: RegisterForm, db: Session = Depends(get_db)):
         raise HTTPException(status_code=422, detail="비밀번호가 안전하지 않습니다.")
     if not re.match(auth.id_pattern, form.username):
         raise HTTPException(status_code=422, detail="이런 ID는 쓸 수 없습니다.")
-    real_name = auth.get_student_information(id=form.portal_id, pw=form.portal_pw).name
     return crud.create_member(
         db=db,
         student_id=form.portal_id,
@@ -428,7 +412,8 @@ async def register(form: RegisterForm, db: Session = Depends(get_db)):
 async def login(
     form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
-    member = auth.authenticate(db=db, username=form.username, password=form.password)
+    member = auth.authenticate(
+        db=db, username=form.username, password=form.password)
     if not member:
         raise HTTPException(
             status_code=401,
@@ -477,19 +462,9 @@ async def find_PW(form: FindPWForm, db: Session = Depends(get_db)):
 async def handle_club_member_registration(
     model: models.ClubMemberCreate, db=Depends(get_db)
 ):
-    if not auth.is_sinchon_member(model.portal_id):
-        raise HTTPException(status_code=403, detail="신촌캠 학부에 적이 있어야만 가입할 수 있습니다.")
-    if not auth.is_yonsei_member(model.portal_id, model.portal_pw):
-        raise HTTPException(status_code=403, detail="해당 ID와 비밀번호로 연세포탈에 로그인할 수 없습니다.")
-    if not push_message.send_new_club_member_message(
-        club_member=auth.get_student_information(
-            id=model.portal_id, pw=model.portal_pw
-        ),
-        db=db,
-        tel=model.tel,
-        invite_informal_chat=model.invite_informal_chat,
-    ):
+    if student_information := auth.is_yonsei_member(model.portal_id, model.portal_pw):
+        push_message.send_new_club_member_message(
+            student_information, db=db, tel=model.tel, invite_informal_chat=model.invite_informal_chat)
+    else:
         raise HTTPException(
-            status_code=500,
-            detail="가입 신청에 실패했습니다. 사이트 관리자(trulybright@yonsei.ac.kr)에게 문의하세요.",
-        )
+            status_code=403, detail="해당 ID와 비밀번호로 연세포탈에 로그인할 수 없습니다.")

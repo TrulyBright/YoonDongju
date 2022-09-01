@@ -1,4 +1,10 @@
 {
-    "python.formatting.provider": "black",
-    "editor.formatOnSave": true
+    "python.formatting.provider": "autopep8",
+    "editor.formatOnSave": true,
+    "azureFunctions.deploySubpath": ".",
+    "azureFunctions.scmDoBuildDuringDeployment": true,
+    "azureFunctions.pythonVenv": ".venv",
+    "azureFunctions.projectLanguage": "Python",
+    "azureFunctions.projectRuntime": "~4",
+    "debug.internalConsoleOptions": "neverOpen"
 }

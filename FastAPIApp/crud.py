@@ -1,21 +1,21 @@
 import re
-import bcrypt
+from typing import Union
 from datetime import datetime, date
 from pathlib import Path
 from sqlalchemy.sql import case
 from sqlalchemy.orm import Session, joinedload
 from fastapi import UploadFile
-import auth
-import asyncio
+import FastAPIApp.auth as auth
 import uuid
-from database import SessionLocal, get_db
-import models
-import schemas
+from FastAPIApp.database import SessionLocal, get_db
+import FastAPIApp.models as models
+import FastAPIApp.schemas as schemas
 
 
 def get_member(db: Session, student_id: str) -> schemas.Member:
     return (
-        db.query(schemas.Member).filter(schemas.Member.student_id == student_id).first()
+        db.query(schemas.Member).filter(
+            schemas.Member.student_id == student_id).first()
     )
 
 
@@ -51,11 +51,13 @@ def update_member(db: Session, student_id: str, member: models.MemberModify):
         if not re.match(auth.password_pattern, member.password):
             raise ValueError("Password do not match the required pattern")
         member.password = auth.pwd_context.hash(member.password)
-    updated = db.query(schemas.Member).filter(schemas.Member.student_id == student_id)
+    updated = db.query(schemas.Member).filter(
+        schemas.Member.student_id == student_id)
     actual_object: schemas.Member = updated.first()
     if actual_object is None:
         return actual_object
-    to = {key: value for key, value in member.dict().items() if value is not None}
+    to = {key: value for key, value in member.dict().items()
+          if value is not None}
     updated.update(to)
     db.commit()
     db.refresh(actual_object)
@@ -74,7 +76,7 @@ def delete_member(db: Session, student_id: str):
 
 
 def get_posts(
-    db: Session, type: models.PostType, skip: int = 0, limit: int | None = None
+    db: Session, type: models.PostType, skip: int = 0, limit: Union[int, None] = None
 ):
     return (
         db.query(
@@ -269,7 +271,8 @@ def update_magazine(db: Session, published: date, magazine: models.MagazineCreat
     db.query(schemas.MagazineContent).filter(
         schemas.MagazineContent.published == published
     ).delete()
-    updated = db.query(schemas.Magazine).filter(schemas.Magazine.published == published)
+    updated = db.query(schemas.Magazine).filter(
+        schemas.Magazine.published == published)
     if not updated.first():
         return False
     updated.update(
