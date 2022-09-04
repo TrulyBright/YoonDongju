@@ -35,32 +35,32 @@ jobs:
         run: pip install -r requirements.txt
 
       # Optional: Add step to run tests here
-      - name: Test
-        env:
-          AzureWebJobsStorage: ${{secrets.AzureWebJobsStorage}}
-          db_database: ${{secrets.DB_DATABASE}}
-          db_dialect: ${{secrets.DB_DIALECT}}
-          db_host: ${{secrets.DB_HOST}}
-          db_password: ${{secrets.DB_PASSWORD}}
-          db_port: ${{secrets.DB_PORT}}
-          db_username: ${{secrets.DB_USERNAME}}
-          FUNCTIONS_WORKER_RUNTIME: "python"
-          jwt_secret: ${{secrets.JWT_SECRET}}
-          ncloud_access_key: ${{secrets.NCLOUD_ACCESS_KEY}}
-          ncloud_secret_key: ${{secrets.NCLOUD_SECRET_KEY}}
-          ncloud_sms_service_id: ${{secrets.NCLOUD_SMS_SERVICE_ID}}
-          ncloud_sms_service_phone_number: ${{secrets.NCLOUD_SMS_SERVICE_PHONE_NUMBER}}
-          yonsei_auth_function_endpoint: ${{secrets.YONSEI_AUTH_FUNCTION_ENDPOINT}}
-          yonsei_auth_function_code: ${{secrets.YONSEI_AUTH_FUNCTION_CODE}}
-          portal_id: ${{secrets.PORTAL_ID}}
-          portal_pw: ${{secrets.PORTAL_PW}}
-          real_name: ${{secrets.REAL_NAME}}
-          username: ${{secrets.USERNAME}}
-          password: ${{secrets.PASSWORD}}
-          new_pw: ${{secrets.NEW_PW}}
-          HR_manager_tel: ${{secrets.HR_MANAGER_TEL}}
-        run: |
-          pytest -n 1
+      # - name: Test
+      #   env:
+      #     AzureWebJobsStorage: ${{secrets.AzureWebJobsStorage}}
+      #     db_database: ${{secrets.DB_DATABASE}}
+      #     db_dialect: ${{secrets.DB_DIALECT}}
+      #     db_host: ${{secrets.DB_HOST}}
+      #     db_password: ${{secrets.DB_PASSWORD}}
+      #     db_port: ${{secrets.DB_PORT}}
+      #     db_username: ${{secrets.DB_USERNAME}}
+      #     FUNCTIONS_WORKER_RUNTIME: "python"
+      #     jwt_secret: ${{secrets.JWT_SECRET}}
+      #     ncloud_access_key: ${{secrets.NCLOUD_ACCESS_KEY}}
+      #     ncloud_secret_key: ${{secrets.NCLOUD_SECRET_KEY}}
+      #     ncloud_sms_service_id: ${{secrets.NCLOUD_SMS_SERVICE_ID}}
+      #     ncloud_sms_service_phone_number: ${{secrets.NCLOUD_SMS_SERVICE_PHONE_NUMBER}}
+      #     yonsei_auth_function_endpoint: ${{secrets.YONSEI_AUTH_FUNCTION_ENDPOINT}}
+      #     yonsei_auth_function_code: ${{secrets.YONSEI_AUTH_FUNCTION_CODE}}
+      #     portal_id: ${{secrets.PORTAL_ID}}
+      #     portal_pw: ${{secrets.PORTAL_PW}}
+      #     real_name: ${{secrets.REAL_NAME}}
+      #     username: ${{secrets.USERNAME}}
+      #     password: ${{secrets.PASSWORD}}
+      #     new_pw: ${{secrets.NEW_PW}}
+      #     HR_manager_tel: ${{secrets.HR_MANAGER_TEL}}
+      #   run: |
+      #     pytest -n 1
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
