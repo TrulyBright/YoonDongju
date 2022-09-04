@@ -1,7 +1,5 @@
 from __future__ import annotations
 import itertools
-import os
-import json
 import re
 import uuid
 import pytest
@@ -32,7 +30,7 @@ class Settings(BaseSettings):
 settings = Settings()
 
 
-SQLALCHEMY_DATABASE_URL = "sqlite://"
+SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False},
