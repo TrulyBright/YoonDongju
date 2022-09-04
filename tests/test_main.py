@@ -12,9 +12,6 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 import sqlalchemy.event as sqlevent
 from fastapi.testclient import TestClient
-with open("local.settings.json", encoding="utf-8") as f:
-    for key, value in json.load(f)["Values"].items():
-        os.environ[key] = value
 from FastAPIApp import auth, app, schemas
 import FastAPIApp.database as database
 import FastAPIApp.models as models
