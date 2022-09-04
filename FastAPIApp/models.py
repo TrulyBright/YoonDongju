@@ -1,17 +1,17 @@
 from __future__ import annotations
 from typing import Union
 from datetime import date
-from enum import Enum, IntEnum
+from enum import Enum
 from pydantic import BaseModel
 
 
-class Role(IntEnum):
-    member = 0
-    board = 1
-    president = 2
+class Role(str, Enum):
+    member = "member"
+    board = "board"
+    president = "president"
 
 
-class PostType(Enum):
+class PostType(str, Enum):
     notice = "notice"
     about = "about"
     rules = "rules"

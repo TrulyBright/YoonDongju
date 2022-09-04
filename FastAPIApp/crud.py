@@ -29,7 +29,7 @@ def create_member(db: Session, student_id: str, member: models.MemberCreate):
         real_name=member.real_name,
         username=member.username,
         password=auth.pwd_context.hash(member.password),
-        role=models.Role.member.value,
+        role=models.Role.member,
     )
     db.add(db_member)
     db.commit()
