@@ -72,7 +72,8 @@ async def get_current_member(
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    member = crud.get_member_by_username(db, username=token_data.username)
+    member = models.Member.from_orm(
+        crud.get_member_by_username(db, username=token_data.username))
     if member is None:
         raise credentials_exception
     return member
@@ -81,7 +82,7 @@ async def get_current_member(
 async def get_current_member_board_only(
     member: models.Member = Depends(get_current_member),
 ):
-    if member.role in {models.Role.board, models.Role.president}:
+    if member.role >= models.Role.board:
         return member
     raise HTTPException(403, "권한이 없습니다.")
 

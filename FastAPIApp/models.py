@@ -1,35 +1,20 @@
 from __future__ import annotations
 from typing import Union
 from datetime import date
-from enum import Enum
-from uuid import UUID
+from enum import Enum, auto, IntEnum
 from pydantic import BaseModel
 
 
-class Role(str, Enum):
-    president = "president"
-    board = "board"
-    member = "member"
+class Role(IntEnum):
+    member = 0
+    board = 1
+    president = 2
 
 
-class PostType(str, Enum):
+class PostType(Enum):
     notice = "notice"
     about = "about"
     rules = "rules"
-
-
-class ClassName(str, Enum):
-    poetry = "poetry"
-    novel = "novel"
-    critique = "critique"
-    reading = "reading"
-
-
-class ClassKoreanName(str, Enum):
-    poetry = "시반"
-    novel = "소설반"
-    critique = "합평반"
-    reading = "독서반"
 
 
 class TokenData(BaseModel):
@@ -53,11 +38,11 @@ class UploadedFile(UploadedFileBase):
 
 
 class ClubInformationBase(BaseModel):
-    address: str
-    email: str
-    president_name: str
-    president_tel: str
-    HR_chief_tel: str
+    address: Union[str, None]
+    email: Union[str, None]
+    president_name: Union[str, None]
+    president_tel: Union[str, None]
+    HR_manager_tel: Union[str, None]
 
 
 class ClubInformationCreate(ClubInformationBase):
@@ -119,7 +104,7 @@ class PostBase(BaseModel):
 
 
 class PostCreate(PostBase):
-    attached: list[UUID]
+    attached: list[int]
 
 
 class Post(PostBase):
@@ -145,50 +130,50 @@ class PostOutline(BaseModel):
         orm_mode = True
 
 
-class ClassBase(BaseModel):
-    moderator: str
-    schedule: str
-    description: str
-    korean: str
+# class ClassBase(BaseModel):
+#     moderator: str
+#     schedule: str
+#     description: str
+#     korean: str
 
 
-class ClassCreate(ClassBase):
-    pass
+# class ClassCreate(ClassBase):
+#     pass
 
 
-class Class(ClassBase):
-    name: ClassName
+# class Class(ClassBase):
+#     name: ClassName
 
-    class Config:
-        orm_mode = True
-
-
-class ClassRecordBase(BaseModel):
-    conducted: date
-    topic: str
-    content: str
+#     class Config:
+#         orm_mode = True
 
 
-class ClassRecordCreate(ClassRecordBase):
-    pass
+# class ClassRecordBase(BaseModel):
+#     conducted: date
+#     topic: str
+#     content: str
 
 
-class ClassRecord(ClassRecordBase):
-    class_name: ClassName
-    moderator: str
-
-    class Config:
-        orm_mode = True
+# class ClassRecordCreate(ClassRecordBase):
+#     pass
 
 
-class ClassRecordOutline(BaseModel):
-    class_name: ClassName
-    moderator: str
-    conducted: date
-    topic: str
+# class ClassRecord(ClassRecordBase):
+#     class_name: ClassName
+#     moderator: str
 
-    class Config:
-        orm_mode = True
+#     class Config:
+#         orm_mode = True
+
+
+# class ClassRecordOutline(BaseModel):
+#     class_name: ClassName
+#     moderator: str
+#     conducted: date
+#     topic: str
+
+#     class Config:
+#         orm_mode = True
 
 
 class MagazineContentBase(BaseModel):
@@ -208,7 +193,8 @@ class MagazineContent(MagazineContentBase):
 
 
 class MagazineBase(BaseModel):
-    cover: UUID
+    year: int
+    cover: int
     published: date
 
 
@@ -225,7 +211,7 @@ class Magazine(MagazineBase):
 
 class MagazineOutline(BaseModel):
     published: date
-    cover: UUID
+    cover: int
 
     class Config:
         orm_mode = True

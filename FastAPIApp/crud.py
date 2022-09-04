@@ -4,9 +4,8 @@ from datetime import datetime, date
 from pathlib import Path
 from sqlalchemy.sql import case
 from sqlalchemy.orm import Session, joinedload
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
 import FastAPIApp.auth as auth
-import uuid
 from FastAPIApp.database import SessionLocal, get_db
 import FastAPIApp.models as models
 import FastAPIApp.schemas as schemas
@@ -42,14 +41,10 @@ def create_member(db: Session, student_id: str, member: models.MemberCreate):
 
 
 def update_member(db: Session, student_id: str, member: models.MemberModify):
-    """`password`는 평문으로 주세요. 이 함수에서 `hash`해줍니다.
-
-    Raises:
-        `ValueError`: 비밀번호가 `pattern`에 맞지 않아 보안이 취약한 경우.
-    """
+    """`password`는 평문으로 주세요. 이 함수에서 `hash`해줍니다."""
     if member.password:
         if not re.match(auth.password_pattern, member.password):
-            raise ValueError("Password do not match the required pattern")
+            raise HTTPException(400, "비밀번호가 규칙에 맞지 않습니다.")
         member.password = auth.pwd_context.hash(member.password)
     updated = db.query(schemas.Member).filter(
         schemas.Member.student_id == student_id)
@@ -85,7 +80,7 @@ def get_posts(
             schemas.Post.title,
             schemas.Post.published,
         )
-        .filter(schemas.Post.type == type.value)
+        .filter(schemas.Post.type == type.name)
         .order_by(schemas.Post.no.desc())
         .offset(skip)
         .limit(limit)
@@ -94,14 +89,14 @@ def get_posts(
 
 
 def get_post_count(db: Session, type: models.PostType):
-    return db.query(schemas.Post).filter(schemas.Post.type == type.value).count()
+    return db.query(schemas.Post).filter(schemas.Post.type == type.name).count()
 
 
 def get_post(db: Session, type: models.PostType, no: int = None):
     return (
         db.query(schemas.Post)
         .options(joinedload(schemas.Post.attached))
-        .filter(schemas.Post.no == no if no else schemas.Post.type == type.value)
+        .filter(schemas.Post.no == no if no else schemas.Post.type == type.name)
         .first()
     )
 
@@ -116,7 +111,7 @@ def create_post(
         content=post.content,
         published=datetime.today().date(),
         attached=db.query(schemas.UploadedFile)
-        .filter(schemas.UploadedFile.uuid.in_([str(id) for id in post.attached]))
+        .filter(schemas.UploadedFile.id.in_(post.attached))
         .all(),
     )
     db.add(db_post)
@@ -144,7 +139,7 @@ def update_post(
         )
         updated.first().attached = (
             db.query(schemas.UploadedFile)
-            .filter(schemas.UploadedFile.uuid.in_([str(id) for id in post.attached]))
+            .filter(schemas.UploadedFile.id.in_(post.attached))
             .all()
         )
         db.commit()
@@ -157,7 +152,7 @@ def update_post(
         content=post.content,
         published=datetime.today().date(),
         attached=db.query(schemas.UploadedFile)
-        .filter(schemas.UploadedFile.uuid.in_([str(id) for id in post.attached]))
+        .filter(schemas.UploadedFile.id.in_(post.attached))
         .all(),
     )
     db.add(new)
@@ -176,7 +171,7 @@ def delete_post(db: Session, type: models.PostType, no: int):
 
 
 def get_club_information(db: Session):
-    return {row.key: row.value for row in db.query(schemas.ClubInformation).all()}
+    return models.ClubInformation(**{row.key: row.value for row in db.query(schemas.ClubInformation).all()})
 
 
 def update_club_information(db: Session, info: models.ClubInformationCreate):
@@ -192,10 +187,10 @@ def update_club_information(db: Session, info: models.ClubInformationCreate):
     return get_club_information(db)
 
 
-def get_uploaded_file(db: Session, uuid: uuid.UUID) -> schemas.UploadedFile:
+def get_uploaded_file(db: Session, id: int) -> schemas.UploadedFile:
     return (
         db.query(schemas.UploadedFile)
-        .filter(schemas.UploadedFile.uuid == str(uuid))
+        .filter(schemas.UploadedFile.id == id)
         .first()
     )
 
@@ -203,27 +198,19 @@ def get_uploaded_file(db: Session, uuid: uuid.UUID) -> schemas.UploadedFile:
 async def create_uploaded_file(db: Session, file: UploadFile):
     name = file.filename
     content_type = file.content_type
-    internal_uuid = uuid.uuid4()
-    with open(f"uploaded/{internal_uuid}", "wb") as f:
-        f.write(await file.read())
     row = schemas.UploadedFile(
-        uuid=str(internal_uuid), name=name, content_type=content_type
+        name=name, content_type=content_type, binary=file.file.read()
     )
     db.add(row)
     db.commit()
     return row
 
 
-async def delete_uploaded_file(db: Session, uuid: uuid.UUID):
-    deleted = (
-        db.query(schemas.UploadedFile)
-        .filter(schemas.UploadedFile.uuid == str(uuid))
-        .delete()
-    )
-    if deleted:
+async def delete_uploaded_file(db: Session, id: int):
+    try:
+        return db.query(schemas.UploadedFile).filter(schemas.UploadedFile.id == id).delete()
+    finally:
         db.commit()
-        Path.unlink(Path("uploaded/" + str(uuid)))
-    return deleted
 
 
 def get_magazine(db: Session, published: date):
@@ -247,7 +234,7 @@ def get_magazines(db: Session, skip: int = 0, limit: int = 100):
 def create_magazine(db: Session, magazine: models.MagazineCreate):
     db_magazine = schemas.Magazine(
         year=magazine.year,
-        cover=str(magazine.cover),
+        cover=magazine.cover,
         published=magazine.published,
     )
     db.add(db_magazine)
@@ -278,7 +265,7 @@ def update_magazine(db: Session, published: date, magazine: models.MagazineCreat
     updated.update(
         {
             "year": magazine.year,
-            "cover": str(magazine.cover),
+            "cover": magazine.cover,
             "published": magazine.published,
         }
     )
@@ -299,14 +286,7 @@ def update_magazine(db: Session, published: date, magazine: models.MagazineCreat
 
 
 def delete_magazine(db: Session, published: date):
-    db.query(schemas.MagazineContent).filter(
-        schemas.MagazineContent.published == published
-    ).delete()
-    if (
-        db.query(schemas.Magazine)
-        .filter(schemas.Magazine.published == published)
-        .delete()
-    ):
+    if db.query(schemas.Magazine).filter(schemas.Magazine.published == published).delete():
         db.commit()
         return True
     return False
@@ -320,118 +300,118 @@ def get_magazine_content(db: Session, published: date):
     )
 
 
-def get_class(db: Session, name: models.ClassName):
-    return db.query(schemas.Class).filter(schemas.Class.name == name).first()
+# def get_class(db: Session, name: models.ClassName):
+#     return db.query(schemas.Class).filter(schemas.Class.name == name).first()
 
 
-def get_classes(db: Session):
-    return db.query(schemas.Class).all()
+# def get_classes(db: Session):
+#     return db.query(schemas.Class).all()
 
 
-def create_classes_with_default_values(db: Session):
-    created = [
-        schemas.Class(
-            name=name,
-            korean=models.ClassKoreanName[name],
-            moderator="홍길동",
-            schedule="매주 월요일 오후 5시",
-            description="이러쿵저러쿵",
-        )
-        for name in models.ClassName
-    ]
-    db.add_all(created)
-    db.commit()
-    return created
+# def create_classes_with_default_values(db: Session):
+#     created = [
+#         schemas.Class(
+#             name=name,
+#             korean=models.ClassKoreanName[name],
+#             moderator="홍길동",
+#             schedule="매주 월요일 오후 5시",
+#             description="이러쿵저러쿵",
+#         )
+#         for name in models.ClassName
+#     ]
+#     db.add_all(created)
+#     db.commit()
+#     return created
 
 
-def update_class(db: Session, name: models.ClassName, class_data: models.ClassCreate):
-    queried = db.query(schemas.Class).filter(schemas.Class.name == name)
-    if existing := queried.first():
-        queried.update(class_data.dict())
-        db.commit()
-        return existing
+# def update_class(db: Session, name: models.ClassName, class_data: models.ClassCreate):
+#     queried = db.query(schemas.Class).filter(schemas.Class.name == name)
+#     if existing := queried.first():
+#         queried.update(class_data.dict())
+#         db.commit()
+#         return existing
 
 
-def create_class_record(
-    db: Session,
-    class_name: models.ClassName,
-    moderator: models.Member,
-    record: models.ClassRecordCreate,
-):
-    new_record = schemas.ClassRecord(
-        class_name=class_name,
-        conducted=record.conducted,
-        moderator=moderator.real_name,
-        topic=record.topic,
-        content=record.content,
-    )
-    db.add(new_record)
-    db.commit()
-    return new_record
+# def create_class_record(
+#     db: Session,
+#     class_name: models.ClassName,
+#     moderator: models.Member,
+#     record: models.ClassRecordCreate,
+# ):
+#     new_record = schemas.ClassRecord(
+#         class_name=class_name,
+#         conducted=record.conducted,
+#         moderator=moderator.real_name,
+#         topic=record.topic,
+#         content=record.content,
+#     )
+#     db.add(new_record)
+#     db.commit()
+#     return new_record
 
 
-def update_class_record(
-    db: Session,
-    class_name: models.ClassName,
-    conducted: date,
-    record: models.ClassRecordCreate,
-):
-    deleted = db.query(schemas.ClassRecord).filter(
-        schemas.ClassRecord.class_name == class_name,
-        schemas.ClassRecord.conducted == conducted,
-    )
-    original: schemas.ClassRecord = deleted.first()
-    if not original:
-        return False
-    deleted.delete()
-    moderator = original.moderator
-    updated = schemas.ClassRecord(
-        class_name=class_name,
-        conducted=record.conducted,
-        moderator=moderator,
-        topic=record.topic,
-        content=record.content,
-    )
-    db.add(updated)
-    db.commit()
-    db.refresh(updated)
-    return updated
+# def update_class_record(
+#     db: Session,
+#     class_name: models.ClassName,
+#     conducted: date,
+#     record: models.ClassRecordCreate,
+# ):
+#     deleted = db.query(schemas.ClassRecord).filter(
+#         schemas.ClassRecord.class_name == class_name,
+#         schemas.ClassRecord.conducted == conducted,
+#     )
+#     original: schemas.ClassRecord = deleted.first()
+#     if not original:
+#         return False
+#     deleted.delete()
+#     moderator = original.moderator
+#     updated = schemas.ClassRecord(
+#         class_name=class_name,
+#         conducted=record.conducted,
+#         moderator=moderator,
+#         topic=record.topic,
+#         content=record.content,
+#     )
+#     db.add(updated)
+#     db.commit()
+#     db.refresh(updated)
+#     return updated
 
 
-def get_class_record(
-    db: Session, class_name: models.ClassName, conducted: date
-) -> schemas.ClassRecord:
-    return (
-        db.query(schemas.ClassRecord)
-        .filter(
-            schemas.ClassRecord.class_name == class_name,
-            schemas.ClassRecord.conducted == conducted,
-        )
-        .first()
-    )
+# def get_class_record(
+#     db: Session, class_name: models.ClassName, conducted: date
+# ) -> schemas.ClassRecord:
+#     return (
+#         db.query(schemas.ClassRecord)
+#         .filter(
+#             schemas.ClassRecord.class_name == class_name,
+#             schemas.ClassRecord.conducted == conducted,
+#         )
+#         .first()
+#     )
 
 
-def get_class_records(
-    db: Session, class_name: models.ClassName, skip: int = 0, limit: int = 100
-):
-    return (
-        db.query(schemas.ClassRecord)
-        .filter(schemas.ClassRecord.class_name == class_name)
-        .order_by(schemas.ClassRecord.conducted.desc())
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+# def get_class_records(
+#     db: Session, class_name: models.ClassName, skip: int = 0, limit: int = 100
+# ):
+#     return (
+#         db.query(schemas.ClassRecord)
+#         .filter(schemas.ClassRecord.class_name == class_name)
+#         .order_by(schemas.ClassRecord.conducted.desc())
+#         .offset(skip)
+#         .limit(limit)
+#         .all()
+#     )
 
 
-def delete_class_record(db: Session, class_name: models.ClassName, conducted: date):
-    deleted = (
-        db.query(schemas.ClassRecord)
-        .filter(
-            schemas.ClassRecord.class_name == class_name,
-            schemas.ClassRecord.conducted == conducted,
-        )
-        .delete()
-    )
-    db.commit()
-    return deleted
+# def delete_class_record(db: Session, class_name: models.ClassName, conducted: date):
+#     deleted = (
+#         db.query(schemas.ClassRecord)
+#         .filter(
+#             schemas.ClassRecord.class_name == class_name,
+#             schemas.ClassRecord.conducted == conducted,
+#         )
+#         .delete()
+#     )
+#     db.commit()
+#     return deleted

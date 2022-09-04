@@ -1,13 +1,12 @@
 import re
 from typing import Union
-from uuid import UUID
 from datetime import date, timedelta
 import azure.functions as func
 from FastAPIApp import app, models, crud, auth
 from FastAPIApp.database import get_db
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import Response
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from FastAPIApp import schemas, push_message
@@ -34,7 +33,7 @@ class FindPWForm(BaseModel):
     new_pw: str
 
 
-async def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
+def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
     return func.AsgiMiddleware(app).handle(req, context)
 
 
@@ -50,16 +49,6 @@ async def update_club_information(
     modifier: schemas.Member = Depends(auth.get_current_member_board_only),
 ):
     return crud.update_club_information(db=db, info=info)
-
-
-@app.get("/recent-notices", response_model=list[models.PostOutline])
-async def get_recent_notices(limit: int = 4, db: Session = Depends(get_db)):
-    return crud.get_posts(db=db, type=models.PostType.notice, limit=limit)
-
-
-@app.get("/recent-magazines", response_model=list[models.MagazineOutline])
-async def get_recent_magazines(limit: int = 4, db: Session = Depends(get_db)):
-    return crud.get_magazines(db=db, skip=0, limit=limit)
 
 
 @app.get("/about", response_model=models.Post)
@@ -113,6 +102,11 @@ async def get_notices(
     return crud.get_posts(db=db, type=models.PostType.notice, skip=skip, limit=limit)
 
 
+@app.get("/notices/recent", response_model=list[models.PostOutline])
+async def get_recent_notices(limit: int = 4, db: Session = Depends(get_db)):
+    return crud.get_posts(db=db, type=models.PostType.notice, limit=limit)
+
+
 @app.get("/notice-count", response_model=int)
 async def get_notice_count(db: Session = Depends(get_db)):
     return crud.get_post_count(db=db, type=models.PostType.notice)
@@ -136,7 +130,7 @@ async def create_notice(
     )
 
 
-@app.patch("/notices/{no:int}", response_model=models.Post)
+@app.put("/notices/{no:int}", response_model=models.Post)
 async def update_notice(
     no: int,
     post: models.PostCreate,
@@ -186,22 +180,14 @@ async def get_myself(
     return me
 
 
-@app.patch("/members/{student_id:str}", response_model=models.Member)
+@app.put("/members/{student_id:str}", response_model=models.Member)
 async def update_member(
     student_id: str,
     member: models.MemberModify,
     db: Session = Depends(get_db),
-    author: schemas.Member = Depends(auth.get_current_member),
+    author: schemas.Member = Depends(auth.get_current_member_board_only),
 ):
-    if (
-        author.role not in {models.Role.board, models.Role.president}
-        and member.role is not None
-    ):
-        raise HTTPException(403)
-    try:
-        return crud.update_member(db=db, student_id=student_id, member=member)
-    except ValueError:
-        raise HTTPException(422, "비밀번호가 규칙에 맞지 않습니다.")
+    return crud.update_member(db=db, student_id=student_id, member=member)
 
 
 @app.delete("/members/{student_id:str}")
@@ -219,14 +205,10 @@ async def delete_member(
         raise HTTPException(404)
 
 
-@app.get("/uploaded/{uuid}")
-async def get_uploaded_file(uuid: UUID, db: Session = Depends(get_db)):
-    if uploaded := crud.get_uploaded_file(db=db, uuid=uuid):
-        return FileResponse(
-            "uploaded/" + str(uuid),
-            filename=uploaded.name,
-            media_type=uploaded.content_type,
-        )
+@app.get("/uploaded/{id}")
+async def get_uploaded_file(id: int, db: Session = Depends(get_db)):
+    if uploaded := crud.get_uploaded_file(db=db, id=id):
+        return Response(content=uploaded.binary, media_type=uploaded.content_type)
     raise HTTPException(404)
 
 
@@ -239,24 +221,29 @@ async def create_uploaded_file(
     return await crud.create_uploaded_file(db=db, file=uploaded)
 
 
-@app.delete("/uploaded/{uuid}")
+@app.delete("/uploaded/{id}")
 async def delete_uploaded_file(
-    uuid: UUID,
+    id: int,
     db: Session = Depends(get_db),
     deleter=Depends(auth.get_current_member_board_only),
 ):
-    if not await crud.delete_uploaded_file(db=db, uuid=uuid):
+    if not await crud.delete_uploaded_file(db=db, id=id):
         raise HTTPException(404)
 
 
-@app.get("/uploaded-info/{uuid}", response_model=models.UploadedFile)
-async def get_uploaded_file_info(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.get_uploaded_file(db=db, uuid=uuid)
+@app.get("/uploaded/{id}/info", response_model=models.UploadedFile)
+async def get_uploaded_file_info(id: int, db: Session = Depends(get_db)):
+    return crud.get_uploaded_file(db=db, id=id)
 
 
 @app.get("/magazines", response_model=list[models.MagazineOutline])
 async def get_magazines(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return crud.get_magazines(db=db, skip=skip, limit=limit)
+
+
+@app.get("/magazines/recent", response_model=list[models.MagazineOutline])
+async def get_recent_magazines(limit: int = 4, db: Session = Depends(get_db)):
+    return crud.get_magazines(db=db, skip=0, limit=limit)
 
 
 @app.get("/magazines/{published}", response_model=models.Magazine)
@@ -275,7 +262,7 @@ async def create_magazine(
     return crud.create_magazine(db=db, magazine=magazine)
 
 
-@app.patch("/magazines/{published}", response_model=models.Magazine)
+@app.put("/magazines/{published}", response_model=models.Magazine)
 async def update_magazine(
     published: date,
     magazine: models.MagazineCreate,
@@ -297,94 +284,94 @@ async def delete_magazine(
         raise HTTPException(404, f"{published}에 발행된 문집이 없습니다.")
 
 
-@app.get("/classes", response_model=list[models.Class])
-async def get_classes(db: Session = Depends(get_db)):
-    # Depends() not working at startup.
-    return crud.get_classes(db=db) or crud.create_classes_with_default_values(db=db)
+# @app.get("/classes", response_model=list[models.Class])
+# async def get_classes(db: Session = Depends(get_db)):
+#     # Depends() not working at startup.
+#     return crud.get_classes(db=db) or crud.create_classes_with_default_values(db=db)
 
 
-@app.get("/classes/{class_name}", response_model=models.Class)
-async def get_class(class_name: models.ClassName, db: Session = Depends(get_db)):
-    return crud.get_class(db=db, name=class_name)
+# @app.get("/classes/{class_name}", response_model=models.Class)
+# async def get_class(class_name: models.ClassName, db: Session = Depends(get_db)):
+#     return crud.get_class(db=db, name=class_name)
 
 
-@app.patch("/classes/{class_name}", response_model=models.Class)
-async def update_class(
-    class_name: models.ClassName,
-    class_data: models.ClassCreate,
-    db: Session = Depends(get_db),
-    modifier: schemas.Member = Depends(auth.get_current_member_board_only),
-):
-    return crud.update_class(db=db, name=class_name, class_data=class_data)
+# @app.put("/classes/{class_name}", response_model=models.Class)
+# async def update_class(
+#     class_name: models.ClassName,
+#     class_data: models.ClassCreate,
+#     db: Session = Depends(get_db),
+#     modifier: schemas.Member = Depends(auth.get_current_member_board_only),
+# ):
+#     return crud.update_class(db=db, name=class_name, class_data=class_data)
 
 
-@app.get(
-    "/classes/{class_name}/records", response_model=list[models.ClassRecordOutline]
-)
-async def get_class_records(
-    class_name: models.ClassName,
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db),
-):
-    return crud.get_class_records(db=db, class_name=class_name, skip=skip, limit=limit)
+# @app.get(
+#     "/classes/{class_name}/records", response_model=list[models.ClassRecordOutline]
+# )
+# async def get_class_records(
+#     class_name: models.ClassName,
+#     skip: int = 0,
+#     limit: int = 100,
+#     db: Session = Depends(get_db),
+# ):
+#     return crud.get_class_records(db=db, class_name=class_name, skip=skip, limit=limit)
 
 
-@app.get(
-    "/classes/{class_name}/records/{conducted}",
-    response_model=Union[models.ClassRecord, models.ClassRecord],
-)
-async def get_class_record(
-    class_name: models.ClassName,
-    conducted: date,
-    db: Session = Depends(get_db),
-    accessing: schemas.Member = Depends(auth.get_current_member),
-):
-    if record := crud.get_class_record(
-        db=db, class_name=class_name, conducted=conducted
-    ):
-        return record
-    raise HTTPException(404, f"{conducted}에 진행한 활동이 없습니다.")
+# @app.get(
+#     "/classes/{class_name}/records/{conducted}",
+#     response_model=Union[models.ClassRecord, models.ClassRecord],
+# )
+# async def get_class_record(
+#     class_name: models.ClassName,
+#     conducted: date,
+#     db: Session = Depends(get_db),
+#     accessing: schemas.Member = Depends(auth.get_current_member),
+# ):
+#     if record := crud.get_class_record(
+#         db=db, class_name=class_name, conducted=conducted
+#     ):
+#         return record
+#     raise HTTPException(404, f"{conducted}에 진행한 활동이 없습니다.")
 
 
-@app.post("/classes/{class_name}/records", response_model=models.ClassRecord)
-async def create_class_record(
-    class_name: models.ClassName,
-    record: models.ClassRecordCreate,
-    db: Session = Depends(get_db),
-    recorder: schemas.Member = Depends(auth.get_current_member_board_only),
-):
-    return crud.create_class_record(
-        db=db, class_name=class_name, moderator=recorder, record=record
-    )
+# @app.post("/classes/{class_name}/records", response_model=models.ClassRecord)
+# async def create_class_record(
+#     class_name: models.ClassName,
+#     record: models.ClassRecordCreate,
+#     db: Session = Depends(get_db),
+#     recorder: schemas.Member = Depends(auth.get_current_member_board_only),
+# ):
+#     return crud.create_class_record(
+#         db=db, class_name=class_name, moderator=recorder, record=record
+#     )
 
 
-@app.patch(
-    "/classes/{class_name}/records/{conducted}", response_model=models.ClassRecord
-)
-async def update_class_record(
-    class_name: models.ClassName,
-    conducted: date,
-    record: models.ClassRecordCreate,
-    db: Session = Depends(get_db),
-    recorder: schemas.Member = Depends(auth.get_current_member_board_only),
-):
-    if updated := crud.update_class_record(
-        db=db, class_name=class_name, conducted=conducted, record=record
-    ):
-        return updated
-    raise HTTPException(404, f"{conducted}에 진행한 활동이 없습니다.")
+# @app.put(
+#     "/classes/{class_name}/records/{conducted}", response_model=models.ClassRecord
+# )
+# async def update_class_record(
+#     class_name: models.ClassName,
+#     conducted: date,
+#     record: models.ClassRecordCreate,
+#     db: Session = Depends(get_db),
+#     recorder: schemas.Member = Depends(auth.get_current_member_board_only),
+# ):
+#     if updated := crud.update_class_record(
+#         db=db, class_name=class_name, conducted=conducted, record=record
+#     ):
+#         return updated
+#     raise HTTPException(404, f"{conducted}에 진행한 활동이 없습니다.")
 
 
-@app.delete("/classes/{class_name}/records/{conducted}")
-async def delete_class_record(
-    class_name: models.ClassName,
-    conducted: date,
-    recorder: schemas.Member = Depends(auth.get_current_member_board_only),
-    db: Session = Depends(get_db),
-):
-    if not crud.delete_class_record(db=db, class_name=class_name, conducted=conducted):
-        raise HTTPException(404, f"{conducted}에 진행된 활동이 없습니다.")
+# @app.delete("/classes/{class_name}/records/{conducted}")
+# async def delete_class_record(
+#     class_name: models.ClassName,
+#     conducted: date,
+#     recorder: schemas.Member = Depends(auth.get_current_member_board_only),
+#     db: Session = Depends(get_db),
+# ):
+#     if not crud.delete_class_record(db=db, class_name=class_name, conducted=conducted):
+#         raise HTTPException(404, f"{conducted}에 진행된 활동이 없습니다.")
 
 
 @app.post("/register", response_model=models.Member)
@@ -433,29 +420,18 @@ async def login(
 
 @app.post("/find-id")
 async def find_ID(form: FindIDForm, db: Session = Depends(get_db)):
-    if not auth.is_yonsei_member(form.portal_id, form.portal_pw):
-        raise HTTPException(401)
-    if member := crud.get_member(db=db, student_id=form.portal_id):
-        return member.username
-    raise HTTPException(404)
+    if auth.is_yonsei_member(form.portal_id, form.portal_pw):
+        if member := crud.get_member(db=db, student_id=form.portal_id):
+            return member.username
+        raise HTTPException(404)
 
 
 @app.post("/find-pw")
 async def find_PW(form: FindPWForm, db: Session = Depends(get_db)):
     if not auth.is_yonsei_member(form.portal_id, form.portal_pw):
         raise HTTPException(401)
-    try:
-        if (
-            crud.update_member(
-                db=db,
-                student_id=form.portal_id,
-                member=models.MemberModify(password=form.new_pw),
-            )
-            is None
-        ):
-            raise HTTPException(404)
-    except ValueError:
-        raise HTTPException(400)
+    if crud.update_member(db=db, student_id=form.portal_id, member=models.MemberModify(password=form.new_pw)) is None:
+        raise HTTPException(404)
 
 
 @app.post("/club-members")

@@ -45,10 +45,10 @@ class Post(Base):
 
 class UploadedFile(Base):
     __tablename__ = "uploadedFiles"
-    uuid = Column(String, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String)
     content_type = Column(String)
-    blob = Column(LargeBinary)
+    binary = Column(LargeBinary)
     post_no = Column(Integer, ForeignKey(
         "posts.no", ondelete="CASCADE"), nullable=True)
 
@@ -76,15 +76,19 @@ class ClassRecord(Base):
 
 class Magazine(Base):
     __tablename__ = "magazines"
-    cover = Column(String, ForeignKey("uploadedFiles.uuid"))  # 표지 파일 UUID
+    year = Column(Integer)
+    cover = Column(Integer, ForeignKey("uploadedFiles.id"))  # 표지 파일 ID
     published = Column(Date, primary_key=True)
-    contents = relationship("MagazineContent")
+    contents = relationship("MagazineContent",
+                            cascade="all,delete",
+                            passive_deletes=True,)
 
 
 class MagazineContent(Base):
     __tablename__ = "magazineContents"
     no = Column(Integer, primary_key=True)
-    published = Column(Date, ForeignKey("magazines.published"), index=True)
+    published = Column(Date, ForeignKey(
+        "magazines.published", ondelete="CASCADE"), index=True)
     type = Column(String)
     title = Column(String)
     author = Column(String)
