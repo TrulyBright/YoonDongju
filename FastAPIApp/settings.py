@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     db_username: str
     db_password: str
     db_host: str
-    db_port: int
+    db_port: str
     db_database: str
     yonsei_auth_function_endpoint: str
     yonsei_auth_function_code: str
