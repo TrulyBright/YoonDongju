@@ -1,12 +1,9 @@
 import re
 from typing import Union
 from datetime import datetime, date
-from pathlib import Path
-from sqlalchemy.sql import case
 from sqlalchemy.orm import Session, joinedload
 from fastapi import UploadFile, HTTPException
 import FastAPIApp.auth as auth
-from FastAPIApp.database import SessionLocal, get_db
 import FastAPIApp.models as models
 import FastAPIApp.schemas as schemas
 

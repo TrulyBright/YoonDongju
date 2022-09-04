@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Union
 from datetime import date
-from enum import Enum, auto, IntEnum
+from enum import Enum, IntEnum
 from pydantic import BaseModel
 
 

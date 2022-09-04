@@ -19,7 +19,7 @@ from FastAPIApp import auth, app, schemas
 import FastAPIApp.database as database
 import FastAPIApp.models as models
 import FastAPIApp.crud as crud
-from WrapperFunction import main, RegisterForm, FindIDForm, FindPWForm
+from WrapperFunction import RegisterForm, FindIDForm, FindPWForm
 
 
 class Settings(BaseSettings):
