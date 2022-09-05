@@ -107,7 +107,7 @@ async def get_recent_notices(limit: int = 4, db: Session = Depends(get_db)):
     return crud.get_posts(db=db, type=models.PostType.notice, limit=limit)
 
 
-@app.get("/notice-count", response_model=int)
+@app.get("/notices/count", response_model=int)
 async def get_notice_count(db: Session = Depends(get_db)):
     return crud.get_post_count(db=db, type=models.PostType.notice)
 
@@ -418,7 +418,7 @@ async def login(
     }
 
 
-@app.post("/find-id")
+@app.post("/find/id")
 async def find_ID(form: FindIDForm, db: Session = Depends(get_db)):
     if auth.is_yonsei_member(form.portal_id, form.portal_pw):
         if member := crud.get_member(db=db, student_id=form.portal_id):
@@ -426,7 +426,7 @@ async def find_ID(form: FindIDForm, db: Session = Depends(get_db)):
         raise HTTPException(404)
 
 
-@app.post("/find-pw")
+@app.post("/find/pw")
 async def find_PW(form: FindPWForm, db: Session = Depends(get_db)):
     if not auth.is_yonsei_member(form.portal_id, form.portal_pw):
         raise HTTPException(401)

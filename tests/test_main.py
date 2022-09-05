@@ -277,7 +277,7 @@ class TestPost:
                 content="qwer",
                 attached=[]
             ))
-        response = tested.get("/notice-count")
+        response = tested.get("/notices/count")
         assert response.status_code == 200
         assert response.json() == count
 
@@ -880,12 +880,12 @@ class TestAuth:
     def test_find_ID(self):
         self.test_register()
         response = tested.post(
-            "/find-id",
+            "/find/id",
             json=FindIDForm(portal_id=settings.portal_id, portal_pw="").dict()
         )
         assert response.status_code == 500
         response = tested.post(
-            "/find-id",
+            "/find/id",
             json=FindIDForm(portal_id=settings.portal_id,
                             portal_pw=settings.portal_pw).dict()
         )
@@ -895,12 +895,12 @@ class TestAuth:
     @with_table_cleared(schemas.Member)
     def test_find_ID_nonexistent(self):
         response = tested.post(
-            "/find-id",
+            "/find/id",
             json=FindIDForm(portal_id=settings.portal_id, portal_pw="").dict()
         )
         assert response.status_code == 500
         response = tested.post(
-            "/find-id",
+            "/find/id",
             json=FindIDForm(portal_id=settings.portal_id,
                             portal_pw=settings.portal_pw).dict()
         )
@@ -912,20 +912,20 @@ class TestAuth:
         failing = "asdf"
         assert re.match(auth.password_pattern, failing) is None
         response = tested.post(
-            "/find-pw",
+            "/find/pw",
             json=FindPWForm(portal_id=settings.portal_id,
                             portal_pw=failing, new_pw=settings.new_pw).dict()
         )
         assert response.status_code == 500
         response = tested.post(
-            "/find-pw",
+            "/find/pw",
             json=FindPWForm(portal_id=settings.portal_id,
                             portal_pw=settings.portal_pw,
                             new_pw=failing).dict()
         )
         assert response.status_code == 400
         response = tested.post(
-            "/find-pw",
+            "/find/pw",
             json=FindPWForm(portal_id=settings.portal_id,
                             portal_pw=settings.portal_pw,
                             new_pw=settings.new_pw).dict()
@@ -935,13 +935,13 @@ class TestAuth:
     @with_table_cleared(schemas.Member)
     def test_find_PW_nonexistent(self):
         response = tested.post(
-            "/find-pw",
+            "/find/pw",
             json=FindPWForm(portal_id=settings.portal_id,
                             portal_pw="", new_pw=settings.new_pw).dict()
         )
         assert response.status_code == 500
         response = tested.post(
-            "/find-pw",
+            "/find/pw",
             json=FindPWForm(portal_id=settings.portal_id,
                             portal_pw=settings.portal_pw,
                             new_pw=settings.new_pw).dict()
