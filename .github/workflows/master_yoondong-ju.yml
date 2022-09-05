@@ -51,10 +51,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Test (non-auth)
-        run: pytest -n 1 -k "not testauth"
       - name: Test (auth)
         run: pytest -n 1 -k "testauth"
+
+      - name: Test (non-auth)
+        run: pytest -n 1 -k "not testauth"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
