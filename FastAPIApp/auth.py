@@ -100,12 +100,14 @@ def get_student_status(id: str, pw: str):
 
 
 def get_student_information(id: str, pw: str):
+    id = str(id)
+    pw = str(pw)
     if len(pw) > 1024:
         raise
     if len(id) > 1024:
         raise
     if not is_sinchon_member(id):
-        raise HTTPException(204, "신촌캠 학부 학번이 필요합니다.")
+        raise HTTPException(401, "신촌캠 학부 학번이 필요합니다.")
     settings = get_settings()
     response = requests.get(settings.YONSEI_AUTH_FUNCTION_ENDPOINT, params={
         "id": id,
