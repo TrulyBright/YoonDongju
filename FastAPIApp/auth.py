@@ -112,7 +112,7 @@ def get_student_information(id: str, pw: str):
         "pw": pw,
         "code": settings.YONSEI_AUTH_FUNCTION_CODE
     })
-    if response.status_code != 200:
-        raise HTTPException(500, "연세포탈에서 정보를 받아오는 데 실패했습니다.")
+    if response.status_code == 500:
+        raise HTTPException(777, "연세포탈에서 정보를 받아오는 데 실패했습니다.")
     json = response.json()
     return models.ClubMember(status=json["status"], student_id=id, name=json["name"], dept_and_major=json["deptMajor"])
