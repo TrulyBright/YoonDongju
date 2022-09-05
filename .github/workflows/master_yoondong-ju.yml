@@ -11,29 +11,12 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: "." # set this to the path to your web app project, defaults to the repository root
-  PYTHON_VERSION: "3.9" # set this to the python version to use (supports 3.6, 3.7, 3.8)
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
+  PYTHON_VERSION: '3.9' # set this to the python version to use (supports 3.6, 3.7, 3.8)
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      DB_CONNECTION_STRING: "sqlite://"
-      FUNCTIONS_WORKER_RUNTIME: "python"
-      JWT_SECRET: "foobar"
-      NCLOUD_aCCESS_KEY: "${{secrets.NCLOUD_ACCESS_KEY}}"
-      NCLOUD_SECRET_KEY: "${{secrets.NCLOUD_SECRET_KEY}}"
-      NCLOUD_SMS_SERVICE_ID: "${{secrets.NCLOUD_SMS_SERVICE_ID}}"
-      NCLOUD_SMS_sERVICE_PHONE_NUMBER: "${{secrets.NCLOUD_SMS_SERVICE_PHONE_NUMBER}}"
-      YONSEI_AUTH_FUNCTION_ENDPOINT: "${{secrets.YONSEI_AUTH_FUNCTION_ENDPOINT}}"
-      YONSEI_AUTH_FUNCTION_CODE: "${{secrets.YONSEI_AUTH_FUNCTION_CODE}}"
-      PORTAL_ID: "${{secrets.PORTAL_ID}}"
-      PORTAL_PW: "${{secrets.PORTAL_PW}}"
-      REAL_NAME: "${{secrets.REAL_NAME}}"
-      USERNAME: trulybright
-      PASSWORD: trulybright1234
-      NEW_PW: trulybright01234
-      HR_MANAGER_TEL: "${{secrets.HR_MANAGER_TEL}}"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -50,13 +33,8 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
-
-      - name: auth-not-involved Test
-        run: |
-          pytest -k "not TestAuth" -n 1
-      - name: auth-involved Test
-        run: |
-          pytest -k "testauth" -n 1
+        
+      # Optional: Add step to run tests here
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
@@ -70,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     environment:
-      name: "Production"
+      name: 'Production'
       url: ${{ steps.deploy-to-function.outputs.webapp-url }}
 
     steps:
@@ -80,13 +58,13 @@ jobs:
           name: python-app
           path: .
 
-      - name: "Deploy to Azure Functions"
+      - name: 'Deploy to Azure Functions'
         uses: Azure/functions-action@v1
         id: deploy-to-function
         with:
-          app-name: "YoonDong-ju"
-          slot-name: "Production"
+          app-name: 'YoonDong-ju'
+          slot-name: 'Production'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2036A3C3A1F4400EB517DF549A6BE8CD }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C14F6FD85085439EA3FD6AB5B5502284 }}
           scm-do-build-during-deployment: true
           enable-oryx-build: true
