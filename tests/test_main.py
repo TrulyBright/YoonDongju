@@ -888,7 +888,7 @@ class TestAuth:
             "/find/id",
             json=FindIDForm(portal_id=settings.PORTAL_ID, portal_pw="").dict()
         )
-        assert response.status_code == 500
+        assert response.status_code == 777
         response = tested.post(
             "/find/id",
             json=FindIDForm(portal_id=settings.PORTAL_ID,
@@ -903,7 +903,7 @@ class TestAuth:
             "/find/id",
             json=FindIDForm(portal_id=settings.PORTAL_ID, portal_pw="").dict()
         )
-        assert response.status_code == 500
+        assert response.status_code == 777
         response = tested.post(
             "/find/id",
             json=FindIDForm(portal_id=settings.PORTAL_ID,
@@ -921,7 +921,7 @@ class TestAuth:
             json=FindPWForm(portal_id=settings.PORTAL_ID,
                             portal_pw=failing, new_pw=settings.NEW_PW).dict()
         )
-        assert response.status_code == 500
+        assert response.status_code == 777
         response = tested.post(
             "/find/pw",
             json=FindPWForm(portal_id=settings.PORTAL_ID,
@@ -944,7 +944,7 @@ class TestAuth:
             json=FindPWForm(portal_id=settings.PORTAL_ID,
                             portal_pw="", new_pw=settings.NEW_PW).dict()
         )
-        assert response.status_code == 500
+        assert response.status_code == 777
         response = tested.post(
             "/find/pw",
             json=FindPWForm(portal_id=settings.PORTAL_ID,
