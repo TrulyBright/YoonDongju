@@ -100,10 +100,6 @@ def get_student_status(id: str, pw: str):
 
 
 def get_student_information(id: str, pw: str):
-    id = str(id)
-    pw = str(pw)
-    print(len(id))
-    print(len(pw))
     if len(pw) > 1024:
         raise
     if len(id) > 1024:
