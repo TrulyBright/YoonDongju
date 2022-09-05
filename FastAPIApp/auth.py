@@ -13,7 +13,7 @@ import FastAPIApp.models as models
 from FastAPIApp.settings import get_settings
 import requests
 
-SECRET_KEY = get_settings().jwt_secret
+SECRET_KEY = get_settings().JWT_SECRET
 ALGORITHM = "HS256"
 
 id_pattern = "^.{1,65}$"  # 1자 이상 64자 이하에 어떤 문자든 허용됨
@@ -107,8 +107,11 @@ def get_student_information(id: str, pw: str):
     if not is_sinchon_member(id):
         raise HTTPException(401, "신촌캠 학부 학번이 필요합니다.")
     settings = get_settings()
-    response = requests.get(settings.yonsei_auth_function_endpoint, params={
-        "id": id, "pw": pw, "code": settings.yonsei_auth_function_code})
+    response = requests.get(settings.YONSEI_AUTH_FUNCTION_ENDPOINT, params={
+        "id": id,
+        "pw": pw,
+        "code": settings.YONSEI_AUTH_FUNCTION_CODE
+    })
     if response.status_code != 200:
         raise HTTPException(500, "연세포탈에서 정보를 받아오는 데 실패했습니다.")
     json = response.json()
