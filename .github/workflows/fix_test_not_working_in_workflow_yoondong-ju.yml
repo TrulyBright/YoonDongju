@@ -18,7 +18,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      DB_CONNECTION_STRING: ${secrets.DB_CONNECTION_STRING}
+      DB_CONNECTION_STRING: ${{secrets.DB_CONNECTION_STRING}}
       FUNCTIONS_WORKER_RUNTIME: "python"
       JWT_SECRET: ${{secrets.JWT_SECRET}}
       NCLOUD_aCCESS_KEY: ${{secrets.NCLOUD_ACCESS_KEY}}
