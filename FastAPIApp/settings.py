@@ -3,19 +3,14 @@ from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
-    jwt_secret: str
-    ncloud_access_key: str
-    ncloud_secret_key: str
-    ncloud_sms_service_id: str
-    ncloud_sms_service_phone_number: str
-    db_dialect: str
-    db_username: str
-    db_password: str
-    db_host: str
-    db_port: str
-    db_database: str
-    yonsei_auth_function_endpoint: str
-    yonsei_auth_function_code: str
+    JWT_SECRET: str
+    NCLOUD_ACCESS_KEY: str
+    NCLOUD_SECRET_KEY: str
+    NCLOUD_SMS_SERVICE_ID: str
+    NCLOUD_SMS_SERVICE_PHONE_NUMBER: str
+    DB_CONNECTION_STRING: str
+    YONSEI_AUTH_FUNCTION_ENDPOINT: str
+    YONSEI_AUTH_FUNCTION_CODE: str
 
 
 @cache

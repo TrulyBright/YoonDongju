@@ -18,19 +18,19 @@ from WrapperFunction import RegisterForm, FindIDForm, FindPWForm
 
 
 class Settings(BaseSettings):
-    portal_id: str
-    portal_pw: str
-    real_name: str
-    username: str
-    password: str
-    new_pw: str
-    HR_manager_tel: str
+    PORTAL_ID: str
+    PORTAL_PW: str
+    REAL_NAME: str
+    USERNAME: str
+    PASSWORD: str
+    NEW_PW: str
+    HR_MANAGER_TEL: str
 
 
 settings = Settings()
 
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
+SQLALCHEMY_DATABASE_URL = "sqlite://"
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False},
@@ -121,7 +121,7 @@ class TestClubInformation:
         email="someone@some.where",
         president_name="홍길동",
         president_tel="010-0000-0000",
-        HR_manager_tel=settings.HR_manager_tel
+        HR_manager_tel=settings.HR_MANAGER_TEL
     )
 
     @with_table_cleared(schemas.ClubInformation)
@@ -858,13 +858,18 @@ class TestMagazine:
 class TestAuth:
     @with_table_cleared(schemas.Member)
     def test_register(self):
-        data = RegisterForm(**settings.dict())
+        data = RegisterForm(
+            portal_id=settings.PORTAL_ID,
+            portal_pw=settings.PORTAL_PW,
+            username=settings.USERNAME,
+            password=settings.PASSWORD
+        )
         response = tested.post("/register", json=data.dict())
         assert response.status_code == 200
         created = models.Member(**response.json())
-        assert created.student_id == settings.portal_id
-        assert created.real_name == settings.real_name
-        assert created.username == settings.username
+        assert created.student_id == settings.PORTAL_ID
+        assert created.real_name == settings.REAL_NAME
+        assert created.username == settings.USERNAME
         assert created.role == models.Role.member
 
     @with_table_cleared(schemas.Member)
@@ -881,28 +886,28 @@ class TestAuth:
         self.test_register()
         response = tested.post(
             "/find/id",
-            json=FindIDForm(portal_id=settings.portal_id, portal_pw="").dict()
+            json=FindIDForm(portal_id=settings.PORTAL_ID, portal_pw="").dict()
         )
         assert response.status_code == 500
         response = tested.post(
             "/find/id",
-            json=FindIDForm(portal_id=settings.portal_id,
-                            portal_pw=settings.portal_pw).dict()
+            json=FindIDForm(portal_id=settings.PORTAL_ID,
+                            portal_pw=settings.PORTAL_PW).dict()
         )
         assert response.status_code == 200
-        assert response.json() == settings.username
+        assert response.json() == settings.USERNAME
 
     @with_table_cleared(schemas.Member)
     def test_find_ID_nonexistent(self):
         response = tested.post(
             "/find/id",
-            json=FindIDForm(portal_id=settings.portal_id, portal_pw="").dict()
+            json=FindIDForm(portal_id=settings.PORTAL_ID, portal_pw="").dict()
         )
         assert response.status_code == 500
         response = tested.post(
             "/find/id",
-            json=FindIDForm(portal_id=settings.portal_id,
-                            portal_pw=settings.portal_pw).dict()
+            json=FindIDForm(portal_id=settings.PORTAL_ID,
+                            portal_pw=settings.PORTAL_PW).dict()
         )
         assert response.status_code == 404
 
@@ -913,22 +918,22 @@ class TestAuth:
         assert re.match(auth.password_pattern, failing) is None
         response = tested.post(
             "/find/pw",
-            json=FindPWForm(portal_id=settings.portal_id,
-                            portal_pw=failing, new_pw=settings.new_pw).dict()
+            json=FindPWForm(portal_id=settings.PORTAL_ID,
+                            portal_pw=failing, new_pw=settings.NEW_PW).dict()
         )
         assert response.status_code == 500
         response = tested.post(
             "/find/pw",
-            json=FindPWForm(portal_id=settings.portal_id,
-                            portal_pw=settings.portal_pw,
+            json=FindPWForm(portal_id=settings.PORTAL_ID,
+                            portal_pw=settings.PORTAL_PW,
                             new_pw=failing).dict()
         )
         assert response.status_code == 400
         response = tested.post(
             "/find/pw",
-            json=FindPWForm(portal_id=settings.portal_id,
-                            portal_pw=settings.portal_pw,
-                            new_pw=settings.new_pw).dict()
+            json=FindPWForm(portal_id=settings.PORTAL_ID,
+                            portal_pw=settings.PORTAL_PW,
+                            new_pw=settings.NEW_PW).dict()
         )
         assert response.status_code == 200
 
@@ -936,14 +941,14 @@ class TestAuth:
     def test_find_PW_nonexistent(self):
         response = tested.post(
             "/find/pw",
-            json=FindPWForm(portal_id=settings.portal_id,
-                            portal_pw="", new_pw=settings.new_pw).dict()
+            json=FindPWForm(portal_id=settings.PORTAL_ID,
+                            portal_pw="", new_pw=settings.NEW_PW).dict()
         )
         assert response.status_code == 500
         response = tested.post(
             "/find/pw",
-            json=FindPWForm(portal_id=settings.portal_id,
-                            portal_pw=settings.portal_pw,
-                            new_pw=settings.new_pw).dict()
+            json=FindPWForm(portal_id=settings.PORTAL_ID,
+                            portal_pw=settings.PORTAL_PW,
+                            new_pw=settings.NEW_PW).dict()
         )
         assert response.status_code == 404

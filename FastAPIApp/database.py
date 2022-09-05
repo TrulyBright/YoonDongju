@@ -5,8 +5,7 @@ from FastAPIApp.settings import get_settings
 
 settings = get_settings()
 
-SQLALCHEMY_DATEBASE_URL = f"{settings.db_dialect}://{settings.db_username}:{settings.db_password}@{settings.db_host}:{settings.db_port}/{settings.db_database}"
-engine = create_engine(SQLALCHEMY_DATEBASE_URL)
+engine = create_engine(settings.DB_CONNECTION_STRING)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
