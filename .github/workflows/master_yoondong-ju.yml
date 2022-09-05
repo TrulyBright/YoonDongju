@@ -21,7 +21,7 @@ jobs:
       DB_CONNECTION_STRING: "sqlite://"
       FUNCTIONS_WORKER_RUNTIME: "python"
       JWT_SECRET: "foobar"
-      NCLOUD_aCCESS_KEY: "${{ secrets.NCLOUD_ACCESS_KEY }}"
+      NCLOUD_ACCESS_KEY: "${{ secrets.NCLOUD_ACCESS_KEY }}"
       NCLOUD_SECRET_KEY: "${{ secrets.NCLOUD_SECRET_KEY }}"
       NCLOUD_SMS_SERVICE_ID: "${{ secrets.NCLOUD_SMS_SERVICE_ID }}"
       NCLOUD_SMS_sERVICE_PHONE_NUMBER: "${{ secrets.NCLOUD_SMS_SERVICE_PHONE_NUMBER }}"
