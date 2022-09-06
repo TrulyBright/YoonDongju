@@ -1,19 +1,23 @@
 import re
 from typing import Union
 from datetime import date, timedelta
-import azure.functions as func
-from FastAPIApp import app, models, crud, auth
-from FastAPIApp.database import get_db
+import models
+import crud
+import auth
+import database
+from database import get_db
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, UploadFile
 from fastapi.responses import Response
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
-from FastAPIApp import schemas, push_message
-import nest_asyncio
+import schemas
+import push_message
+import fastapi
 
-nest_asyncio.apply()
+app = fastapi.FastAPI()
 
+schemas.Base.metadata.create_all(bind=database.engine)
 
 class RegisterForm(BaseModel):
     portal_id: str
@@ -31,10 +35,6 @@ class FindPWForm(BaseModel):
     portal_id: str
     portal_pw: str
     new_pw: str
-
-
-def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
-    return func.AsgiMiddleware(app).handle(req, context)
 
 
 @app.get("/club-information", response_model=models.ClubInformation)

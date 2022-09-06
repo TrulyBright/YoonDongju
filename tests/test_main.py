@@ -10,11 +10,13 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 import sqlalchemy.event as sqlevent
 from fastapi.testclient import TestClient
-from FastAPIApp import auth, app, schemas
-import FastAPIApp.database as database
-import FastAPIApp.models as models
-import FastAPIApp.crud as crud
-from WrapperFunction import RegisterForm, FindIDForm, FindPWForm
+import auth
+from main import app
+import schemas
+import database
+import models
+import crud
+from main import RegisterForm, FindIDForm, FindPWForm
 
 
 class Settings(BaseSettings):

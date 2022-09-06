@@ -7,10 +7,10 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-import FastAPIApp.crud as crud
-import FastAPIApp.database as database
-import FastAPIApp.models as models
-from FastAPIApp.settings import get_settings
+import crud
+import database
+import models
+from settings import get_settings
 import requests
 
 SECRET_KEY = get_settings().JWT_SECRET

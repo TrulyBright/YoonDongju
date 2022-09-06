@@ -3,9 +3,9 @@ from typing import Union
 from datetime import datetime, date
 from sqlalchemy.orm import Session, joinedload
 from fastapi import UploadFile, HTTPException
-import FastAPIApp.auth as auth
-import FastAPIApp.models as models
-import FastAPIApp.schemas as schemas
+import auth
+import models
+import schemas
 
 
 def get_member(db: Session, student_id: str) -> schemas.Member:
