@@ -19,6 +19,7 @@ app = fastapi.FastAPI()
 
 schemas.Base.metadata.create_all(bind=database.engine)
 
+
 class RegisterForm(BaseModel):
     portal_id: str
     portal_pw: str
@@ -37,14 +38,14 @@ class FindPWForm(BaseModel):
     new_pw: str
 
 
-@app.get("/club-information", response_model=models.ClubInformation)
+@app.get("/club-information", response_model=dict[str, str])
 async def get_club_information(db: Session = Depends(get_db)):
     return crud.get_club_information(db=db)
 
 
-@app.put("/club-information", response_model=models.ClubInformation)
+@app.put("/club-information", response_model=dict[str, str])
 async def update_club_information(
-    info: models.ClubInformationCreate,
+    info: dict[str, str],
     db: Session = Depends(get_db),
     modifier: schemas.Member = Depends(auth.get_current_member_board_only),
 ):
@@ -250,7 +251,7 @@ async def get_recent_magazines(limit: int = 4, db: Session = Depends(get_db)):
 async def get_magazine(published: date, db: Session = Depends(get_db)):
     if volume := crud.get_magazine(db=db, published=published):
         return volume
-    raise HTTPException(404, f"{published}에 발행된 문집이 없습니다.")
+    raise HTTPException(404)
 
 
 @app.post("/magazines", response_model=models.Magazine)
@@ -271,7 +272,7 @@ async def update_magazine(
 ):
     if updated := crud.update_magazine(db=db, published=published, magazine=magazine):
         return updated
-    raise HTTPException(404, f"{published}에 발행된 문집이 없습니다.")
+    raise HTTPException(404)
 
 
 @app.delete("/magazines/{published}")
@@ -281,97 +282,62 @@ async def delete_magazine(
     deleter: schemas.Member = Depends(auth.get_current_member_board_only),
 ):
     if not crud.delete_magazine(db=db, published=published):
-        raise HTTPException(404, f"{published}에 발행된 문집이 없습니다.")
+        raise HTTPException(404)
 
 
-# @app.get("/classes", response_model=list[models.Class])
-# async def get_classes(db: Session = Depends(get_db)):
-#     # Depends() not working at startup.
-#     return crud.get_classes(db=db) or crud.create_classes_with_default_values(db=db)
+@app.get("/classes", response_model=list[models.Class])
+async def get_classes(db: Session = Depends(get_db)):
+    return crud.get_classes(db=db)
 
 
-# @app.get("/classes/{class_name}", response_model=models.Class)
-# async def get_class(class_name: models.ClassName, db: Session = Depends(get_db)):
-#     return crud.get_class(db=db, name=class_name)
+@app.get("/classes/{name}", response_model=models.Class)
+async def get_classes(name: str, db: Session = Depends(get_db)):
+    if fetched := crud.get_class(db=db, name=name):
+        return fetched
+    raise HTTPException(404)
 
 
-# @app.put("/classes/{class_name}", response_model=models.Class)
-# async def update_class(
-#     class_name: models.ClassName,
-#     class_data: models.ClassCreate,
-#     db: Session = Depends(get_db),
-#     modifier: schemas.Member = Depends(auth.get_current_member_board_only),
-# ):
-#     return crud.update_class(db=db, name=class_name, class_data=class_data)
+@app.post("/classes", response_model=models.Class)
+async def create_class(cls: models.ClassCreate, db: Session = Depends(get_db), creator=Depends(auth.get_current_member_board_only)):
+    return crud.create_class(db=db, cls=cls)
 
 
-# @app.get(
-#     "/classes/{class_name}/records", response_model=list[models.ClassRecordOutline]
-# )
-# async def get_class_records(
-#     class_name: models.ClassName,
-#     skip: int = 0,
-#     limit: int = 100,
-#     db: Session = Depends(get_db),
-# ):
-#     return crud.get_class_records(db=db, class_name=class_name, skip=skip, limit=limit)
+@app.put("/classes/{name}", response_model=models.Class)
+async def update_class(cls: models.ClassModify, name: str, db: Session = Depends(get_db), modifier=Depends(auth.get_current_member_board_only)):
+    if updated := crud.update_class(db=db, cls=cls, name=name):
+        return updated
+    raise HTTPException(404)
 
 
-# @app.get(
-#     "/classes/{class_name}/records/{conducted}",
-#     response_model=Union[models.ClassRecord, models.ClassRecord],
-# )
-# async def get_class_record(
-#     class_name: models.ClassName,
-#     conducted: date,
-#     db: Session = Depends(get_db),
-#     accessing: schemas.Member = Depends(auth.get_current_member),
-# ):
-#     if record := crud.get_class_record(
-#         db=db, class_name=class_name, conducted=conducted
-#     ):
-#         return record
-#     raise HTTPException(404, f"{conducted}에 진행한 활동이 없습니다.")
+@app.delete("/classes/{name}")
+async def delete_class(name: str, db: Session = Depends(get_db), deleting=Depends(auth.get_current_member_board_only)):
+    if not crud.delete_class(db=db, name=name):
+        raise HTTPException(404)
 
 
-# @app.post("/classes/{class_name}/records", response_model=models.ClassRecord)
-# async def create_class_record(
-#     class_name: models.ClassName,
-#     record: models.ClassRecordCreate,
-#     db: Session = Depends(get_db),
-#     recorder: schemas.Member = Depends(auth.get_current_member_board_only),
-# ):
-#     return crud.create_class_record(
-#         db=db, class_name=class_name, moderator=recorder, record=record
-#     )
+@app.post("/classes/{name}/records", response_model=models.ClassRecord)
+async def create_class_record(name: str, record: models.ClassRecordCreate, db: Session = Depends(get_db), creating=Depends(auth.get_current_member_board_only)):
+    return crud.create_class_record(db=db, name=name, record=record, moderator=creating)
 
 
-# @app.put(
-#     "/classes/{class_name}/records/{conducted}", response_model=models.ClassRecord
-# )
-# async def update_class_record(
-#     class_name: models.ClassName,
-#     conducted: date,
-#     record: models.ClassRecordCreate,
-#     db: Session = Depends(get_db),
-#     recorder: schemas.Member = Depends(auth.get_current_member_board_only),
-# ):
-#     if updated := crud.update_class_record(
-#         db=db, class_name=class_name, conducted=conducted, record=record
-#     ):
-#         return updated
-#     raise HTTPException(404, f"{conducted}에 진행한 활동이 없습니다.")
+@app.get("/classes/{name}/records/{conducted}", response_model=models.ClassRecord)
+async def get_class_record(name: str, conducted: date, db: Session = Depends(get_db), accessing=Depends(auth.get_current_member)):
+    return crud.get_class_record(db=db, name=name, conducted=conducted)
 
 
-# @app.delete("/classes/{class_name}/records/{conducted}")
-# async def delete_class_record(
-#     class_name: models.ClassName,
-#     conducted: date,
-#     recorder: schemas.Member = Depends(auth.get_current_member_board_only),
-#     db: Session = Depends(get_db),
-# ):
-#     if not crud.delete_class_record(db=db, class_name=class_name, conducted=conducted):
-#         raise HTTPException(404, f"{conducted}에 진행된 활동이 없습니다.")
+@app.get("/classes/{name}/records", response_model=list[models.ClassRecordOutline])
+async def get_class_records(name: str, limit: int = 10, skip: int = 0, db: Session = Depends(get_db)):
+    return crud.get_class_records(db=db, name=name, limit=limit, skip=skip)
+
+
+@app.put("/classes/{name}/records/{conducted}", response_model=models.ClassRecord)
+async def update_class_record(name: str, conducted: date, record: models.ClassRecordCreate, db: Session = Depends(get_db), updating=Depends(auth.get_current_member_board_only)):
+    return crud.update_class_record(db=db, name=name, conducted=conducted, record=record)
+
+
+@app.delete("/classes/{name}/records/{conducted}")
+async def delete_class_record(name: str, conducted: date, db: Session = Depends(get_db), deleting=Depends(auth.get_current_member_board_only)):
+    return crud.delete_class_record(db=db, name=name, conducted=conducted)
 
 
 @app.post("/register", response_model=models.Member)

@@ -15,6 +15,7 @@ class PostType(str, Enum):
     notice = "notice"
     about = "about"
     rules = "rules"
+    class_record = "class_record"
 
 
 class TokenData(BaseModel):
@@ -33,23 +34,6 @@ class UploadedFileCreate(UploadedFileBase):
 class UploadedFile(UploadedFileBase):
     id: int
 
-    class Config:
-        orm_mode = True
-
-
-class ClubInformationBase(BaseModel):
-    address: Union[str, None]
-    email: Union[str, None]
-    president_name: Union[str, None]
-    president_tel: Union[str, None]
-    HR_manager_tel: Union[str, None]
-
-
-class ClubInformationCreate(ClubInformationBase):
-    pass
-
-
-class ClubInformation(ClubInformationBase):
     class Config:
         orm_mode = True
 
@@ -130,50 +114,52 @@ class PostOutline(BaseModel):
         orm_mode = True
 
 
-# class ClassBase(BaseModel):
-#     moderator: str
-#     schedule: str
-#     description: str
-#     korean: str
+class ClassBase(BaseModel):
+    moderator: str
+    schedule: str
+    description: str
+    order: int
 
 
-# class ClassCreate(ClassBase):
-#     pass
+class ClassCreate(ClassBase):
+    name: str
 
 
-# class Class(ClassBase):
-#     name: ClassName
-
-#     class Config:
-#         orm_mode = True
+class ClassModify(ClassBase):
+    pass
 
 
-# class ClassRecordBase(BaseModel):
-#     conducted: date
-#     topic: str
-#     content: str
+class Class(ClassBase):
+    name: str
+
+    class Config:
+        orm_mode = True
 
 
-# class ClassRecordCreate(ClassRecordBase):
-#     pass
+class ClassRecordBase(BaseModel):
+    conducted: date
+    topic: str
+    content: str
 
 
-# class ClassRecord(ClassRecordBase):
-#     class_name: ClassName
-#     moderator: str
-
-#     class Config:
-#         orm_mode = True
+class ClassRecordCreate(ClassRecordBase):
+    pass
 
 
-# class ClassRecordOutline(BaseModel):
-#     class_name: ClassName
-#     moderator: str
-#     conducted: date
-#     topic: str
+class ClassRecord(ClassRecordBase):
+    moderator: str
 
-#     class Config:
-#         orm_mode = True
+    class Config:
+        orm_mode = True
+
+
+class ClassRecordOutline(BaseModel):
+    moderator: str
+    conducted: date
+    topic: str
+
+    class Config:
+        orm_mode = True
 
 
 class MagazineContentBase(BaseModel):
@@ -212,6 +198,23 @@ class Magazine(MagazineBase):
 class MagazineOutline(BaseModel):
     published: date
     cover: int
+
+    class Config:
+        orm_mode = True
+
+
+class ClubInformation(BaseModel):
+    key: str
+    value: str
+    public: bool
+
+    class Config:
+        orm_mode = True
+
+
+class FunctionSwitch(BaseModel):
+    name: str
+    on: bool
 
     class Config:
         orm_mode = True

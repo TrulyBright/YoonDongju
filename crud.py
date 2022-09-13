@@ -1,6 +1,8 @@
+from msilib import schema
 import re
 from typing import Union
 from datetime import datetime, date
+import sqlalchemy
 from sqlalchemy.orm import Session, joinedload
 from fastapi import UploadFile, HTTPException
 import auth
@@ -168,16 +170,15 @@ def delete_post(db: Session, type: models.PostType, no: int):
 
 
 def get_club_information(db: Session):
-    return models.ClubInformation(**{row.key: row.value for row in db.query(schemas.ClubInformation).all()})
+    return {row.key: row.value for row in db.query(schemas.ClubInformation).all()}
 
 
-def update_club_information(db: Session, info: models.ClubInformationCreate):
-    token_excluded = models.ClubInformation(**info.dict()).dict()
+def update_club_information(db: Session, info: dict[str, str]):
     db.query(schemas.ClubInformation).delete()
     db.add_all(
         [
             schemas.ClubInformation(key=key, value=value)
-            for key, value in token_excluded.items()
+            for key, value in info.items()
         ]
     )
     db.commit()
@@ -297,118 +298,115 @@ def get_magazine_content(db: Session, published: date):
     )
 
 
-# def get_class(db: Session, name: models.ClassName):
-#     return db.query(schemas.Class).filter(schemas.Class.name == name).first()
+def get_class(db: Session, name: str):
+    return db.query(schemas.Class).filter(schemas.Class.name == name).first()
 
 
-# def get_classes(db: Session):
-#     return db.query(schemas.Class).all()
+def get_classes(db: Session):
+    return db.query(schemas.Class).order_by(schemas.Class.order).all()
 
 
-# def create_classes_with_default_values(db: Session):
-#     created = [
-#         schemas.Class(
-#             name=name,
-#             korean=models.ClassKoreanName[name],
-#             moderator="홍길동",
-#             schedule="매주 월요일 오후 5시",
-#             description="이러쿵저러쿵",
-#         )
-#         for name in models.ClassName
-#     ]
-#     db.add_all(created)
-#     db.commit()
-#     return created
+def create_class(db: Session, cls: models.ClassCreate):
+    instance = schemas.Class(**cls.dict())
+    db.add(instance)
+    db.commit()
+    return instance
 
 
-# def update_class(db: Session, name: models.ClassName, class_data: models.ClassCreate):
-#     queried = db.query(schemas.Class).filter(schemas.Class.name == name)
-#     if existing := queried.first():
-#         queried.update(class_data.dict())
-#         db.commit()
-#         return existing
+def delete_class(db: Session, name: str):
+    if deleted := db.query(schemas.Class).filter(schemas.Class.name == name).delete():
+        db.commit()
+    return deleted
 
 
-# def create_class_record(
-#     db: Session,
-#     class_name: models.ClassName,
-#     moderator: models.Member,
-#     record: models.ClassRecordCreate,
-# ):
-#     new_record = schemas.ClassRecord(
-#         class_name=class_name,
-#         conducted=record.conducted,
-#         moderator=moderator.real_name,
-#         topic=record.topic,
-#         content=record.content,
-#     )
-#     db.add(new_record)
-#     db.commit()
-#     return new_record
+def update_class(db: Session, cls: models.ClassModify, name: str):
+    updated = db.query(schemas.Class).filter(
+        schemas.Class.name == name)
+    updated.update(cls.dict())
+    db.commit()
+    return updated.first()
 
 
-# def update_class_record(
-#     db: Session,
-#     class_name: models.ClassName,
-#     conducted: date,
-#     record: models.ClassRecordCreate,
-# ):
-#     deleted = db.query(schemas.ClassRecord).filter(
-#         schemas.ClassRecord.class_name == class_name,
-#         schemas.ClassRecord.conducted == conducted,
-#     )
-#     original: schemas.ClassRecord = deleted.first()
-#     if not original:
-#         return False
-#     deleted.delete()
-#     moderator = original.moderator
-#     updated = schemas.ClassRecord(
-#         class_name=class_name,
-#         conducted=record.conducted,
-#         moderator=moderator,
-#         topic=record.topic,
-#         content=record.content,
-#     )
-#     db.add(updated)
-#     db.commit()
-#     db.refresh(updated)
-#     return updated
+def create_class_record(db: Session, name: str, record: models.ClassRecordCreate, moderator: models.Member):
+    if db.query(schemas.ClassRecord).filter(schemas.ClassRecord.cls == name, schemas.ClassRecord.conducted == record.conducted).one_or_none():
+        raise HTTPException(409)
+    instance = schemas.Post(
+        type=models.PostType.class_record,
+        title=record.topic,
+        author=moderator.real_name,
+        content=record.content,
+        published=record.conducted,
+    )
+    db.add(instance)
+    db.commit()
+    db.refresh(instance)
+    relation = schemas.ClassRecord(
+        cls=name, conducted=record.conducted, post_no=instance.no)
+    db.add(relation)
+    db.commit()
+    return models.ClassRecord(
+        conducted=record.conducted,
+        topic=record.topic,
+        content=record.content,
+        moderator=moderator.real_name
+    )
 
 
-# def get_class_record(
-#     db: Session, class_name: models.ClassName, conducted: date
-# ) -> schemas.ClassRecord:
-#     return (
-#         db.query(schemas.ClassRecord)
-#         .filter(
-#             schemas.ClassRecord.class_name == class_name,
-#             schemas.ClassRecord.conducted == conducted,
-#         )
-#         .first()
-#     )
+def update_class_record(db: Session, name: str, conducted: date, record: models.ClassRecordCreate):
+    if db.query(schemas.ClassRecord).filter(schemas.ClassRecord.cls == name, schemas.ClassRecord.conducted == conducted).one_or_none() is None:
+        raise HTTPException(404)
+    post = db.query(schemas.Post).filter(schemas.Post.no == db.query(schemas.ClassRecord).filter(
+        schemas.ClassRecord.cls == name,
+        schemas.ClassRecord.conducted == conducted
+    ).one().post_no)
+    post.update({
+        "title": record.topic,
+        "content": record.content,
+        "published": record.conducted
+    })
+    db.commit()
+    row = post.first()
+    return models.ClassRecord(
+        conducted=row.published,
+        topic=row.title,
+        content=row.content,
+        moderator=row.author
+    )
 
 
-# def get_class_records(
-#     db: Session, class_name: models.ClassName, skip: int = 0, limit: int = 100
-# ):
-#     return (
-#         db.query(schemas.ClassRecord)
-#         .filter(schemas.ClassRecord.class_name == class_name)
-#         .order_by(schemas.ClassRecord.conducted.desc())
-#         .offset(skip)
-#         .limit(limit)
-#         .all()
-#     )
+def get_class_record(db: Session, name: str, conducted: date):
+    try:
+        post_instance: schemas.Post = db.query(schemas.Post).filter(
+            schemas.Post.no == db.query(
+                schemas.ClassRecord
+            ).filter(
+                schemas.ClassRecord.cls == name,
+                schemas.ClassRecord.conducted == conducted
+            ).one().post_no).one()
+    except sqlalchemy.exc.NoResultFound:
+        raise HTTPException(404)
+    return models.ClassRecord(
+        conducted=post_instance.published,
+        topic=post_instance.title,
+        content=post_instance.content,
+        moderator=post_instance.author,
+    )
 
 
-# def delete_class_record(db: Session, class_name: models.ClassName, conducted: date):
-#     deleted = (
-#         db.query(schemas.ClassRecord)
-#         .filter(
-#             schemas.ClassRecord.class_name == class_name,
-#             schemas.ClassRecord.conducted == conducted,
-#         )
-#         .delete()
-#     )
-#     db.commit()
-#     return deleted
+def get_class_records(db: Session, name: str, limit: int, skip: int):
+    rows = db.query(schemas.ClassRecord).filter(
+        schemas.ClassRecord.cls == name).offset(skip).limit(limit).all()
+    results: list[schemas.Post] = db.query(schemas.Post).filter(
+        schemas.Post.no.in_({int(row.post_no) for row in rows})).order_by(schemas.Post.published.desc()).all()
+    return [models.ClassRecordOutline(
+        moderator=r.author,
+        conducted=r.published,
+        topic=r.title
+    ) for r in results]
+
+
+def delete_class_record(db: Session, name: str, conducted: date):
+    if deleted := db.query(schemas.Post).filter(schemas.Post.no == db.query(schemas.ClassRecord).filter(
+            schemas.ClassRecord.cls == name, schemas.ClassRecord.conducted == conducted).one().post_no).delete():
+        db.commit()
+    return deleted

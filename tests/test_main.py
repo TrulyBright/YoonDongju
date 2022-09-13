@@ -1,5 +1,7 @@
 from __future__ import annotations
+from faker import Faker
 import itertools
+import random
 import re
 import uuid
 import pytest
@@ -17,6 +19,9 @@ import database
 import models
 import crud
 from main import RegisterForm, FindIDForm, FindPWForm
+
+random.seed()
+fake = Faker()
 
 
 class Settings(BaseSettings):
@@ -117,34 +122,34 @@ def president():
     return FakeMember(models.Role.president)
 
 
-class TestClubInformation:
-    info = models.ClubInformationCreate(
-        address="어딘가",
-        email="someone@some.where",
-        president_name="홍길동",
-        president_tel="010-0000-0000",
-        HR_manager_tel=settings.HR_MANAGER_TEL
-    )
+# class TestClubInformation:
+#     info = [models.ClubInformation(**data) for data in [
+#         {"key": "주소", "value": "어딘가", "public": True},
+#         {"key": "이메일", "value": "someone@some.where", "public": True},
+#         {"key": "회장 실명", "value": "홍길동", "public": True},
+#         {"key": "회장 전화번호", "value": "010-0000-0000", "public": True},
+#         {"key": "인사행정팀장 전화번호", "value": settings.HR_MANAGER_TEL, "public": False}
+#     ]]
 
-    @with_table_cleared(schemas.ClubInformation)
-    def test_update_club_information(self):
-        response = tested.put("/club-information", json=self.info.dict())
-        assert response.status_code == 401
-        response = tested.put("/club-information", json=self.info.dict(),
-                              headers=jwt(member()))
-        assert response.status_code == 403
-        response = tested.put("/club-information", json=self.info.dict(),
-                              headers=jwt(board()))
-        assert response.status_code == 200
-        updated = models.ClubInformation(**response.json())
-        assert updated == self.info
+#     @with_table_cleared(schemas.ClubInformation)
+#     def test_update_club_information(self):
+#         response = tested.put("/club-information", json=self.info.dict())
+#         assert response.status_code == 401
+#         response = tested.put("/club-information", json=self.info.dict(),
+#                               headers=jwt(member()))
+#         assert response.status_code == 403
+#         response = tested.put("/club-information", json=self.info.dict(),
+#                               headers=jwt(board()))
+#         assert response.status_code == 200
+#         updated = models.ClubInformation(**response.json())
+#         assert updated == self.info
 
-    @with_table_cleared(schemas.ClubInformation)
-    def test_get_club_information(self):
-        self.test_update_club_information()
-        response = tested.get("/club-information")
-        assert response.status_code == 200
-        assert models.ClubInformation(**response.json()) == self.info
+#     @with_table_cleared(schemas.ClubInformation)
+#     def test_get_club_information(self):
+#         self.test_update_club_information()
+#         response = tested.get("/club-information")
+#         assert response.status_code == 200
+#         assert models.ClubInformation(**response.json()) == self.info
 
 
 class TestUploadedFile:
@@ -292,7 +297,7 @@ class TestPost:
         assert response.status_code == 200
         fetched = [models.PostOutline(**data) for data in response.json()]
         assert len(fetched) == limit
-        for fetched, standard in zip(fetched, created[::-1][:limit]):
+        for fetched, standard in zip(fetched, created[::-1][:limit], strict=True):
             assert fetched == models.PostOutline(**standard.dict())
 
     @with_table_cleared(schemas.Post)
@@ -307,7 +312,7 @@ class TestPost:
             assert response.status_code == 200
             fetched = [models.PostOutline(**data) for data in response.json()]
             assert len(fetched) == limit
-            for fetched, standard in zip(fetched, created[::-1][skip:][:limit]):
+            for fetched, standard in zip(fetched, created[::-1][skip:][:limit], strict=True):
                 assert fetched == models.PostOutline(**standard.dict())
 
     @with_table_cleared(schemas.Post)
@@ -534,7 +539,7 @@ class TestMagazine:
             response = tested.get(
                 "/magazines", params={"skip": skip, "limit": limit})
             assert response.status_code == 200
-            for fetched, standard in zip(response.json(), magazines[::-1][skip:][:limit]):
+            for fetched, standard in zip(response.json(), magazines[::-1][skip:][:limit], strict=True):
                 assert models.MagazineOutline(
                     **fetched) == models.MagazineOutline(**standard.dict())
 
@@ -619,246 +624,217 @@ class TestMagazine:
         assert response.status_code == 404
 
 
-# def test_get_classes():
-#     response = tested.get("/classes")
-#     assert response.status_code == 200
-#     names = set(models.ClassName)
-#     for data in response.json():
-#         assert data["name"] in names
-#         assert "korean" in data
+class TestClass:
+    def get_class_list(self):
+        return [models.Class(**data) for data in tested.get("/classes").json()]
 
+    def create_class():
+        return models.Class(**tested.post("/classes", json=models.ClassCreate(
+            name=str(uuid.uuid4()),
+            moderator=str(uuid.uuid4()),
+            schedule=str(uuid.uuid4()),
+            description=str(uuid.uuid4()),
+            order=random.randint(1, 0x7fffffff)
+        ).dict(), headers=jwt(board())).json())
 
-# def test_update_class():
-#     with TestClient(main.app) as tested:
-#         eng2kor = {
-#             models.ClassName.poetry: "시반",
-#             models.ClassName.novel: "소설반",
-#             models.ClassName.critique: "합평반",
-#             models.ClassName.reading: "독서반",
-#         }
-#         for name in models.ClassName:
-#             class_data["korean"] = eng2kor[name]
-#             expected = class_data.copy()
-#             expected["name"] = name
-#             response = tested.put(f"/classes/{name}", json=class_data)
-#             assert response.status_code == 401
+    def create_class_record_serialized():
+        instance = models.ClassRecordCreate(
+            conducted=fake.date_between(
+                start_date="today", end_date="+100y"),
+            topic=str(uuid.uuid4()),
+            content=str(uuid.uuid4())
+        ).dict()
+        instance["conducted"] = instance["conducted"].strftime("%Y-%m-%d")
+        return instance
 
-#             change_role(models.Role.member)
-#             response = tested.put(
-#                 f"/classes/{name}", json=class_data, headers=get_jwt_header()
-#             )
-#             assert response.status_code == 403
+    @with_table_cleared(schemas.Class)
+    def test_get_classes(self):
+        response = tested.get("/classes")
+        assert response.status_code == 200
+        assert response.json() == []
+        length = 5
+        classes = sorted([TestClass.create_class()
+                         for _ in range(length)], key=lambda info: info.order)
+        response = tested.get("/classes")
+        assert response.status_code == 200
+        assert len(response.json()) == length
+        for fetched, standard in zip(response.json(), classes, strict=True):
+            assert models.Class(**fetched) == standard
 
-#             change_role(models.Role.board)
-#             response = tested.put(
-#                 f"/classes/{name}", json=class_data, headers=get_jwt_header()
-#             )
-#             assert response.status_code == 200
-#             assert response.json() == expected
+    @with_table_cleared(schemas.Class)
+    def test_create_class(self):
+        classInfo = models.ClassCreate(
+            name="합평회",
+            moderator="홍길동",
+            schedule="매주 월요일 오후 7시",
+            description="합평회는 회원의 작품을 합평합니다.",
+            order=1
+        )
+        response = tested.post("/classes", json=classInfo.dict())
+        assert response.status_code == 401
+        response = tested.post(
+            "/classes", json=classInfo.dict(), headers=jwt(member()))
+        assert response.status_code == 403
+        response = tested.post(
+            "/classes", json=classInfo.dict(), headers=jwt(board()))
+        assert response.status_code == 200
+        assert models.Class(
+            **response.json()) == models.Class(**classInfo.dict())
 
-#             response = tested.get(f"/classes/{name}")
-#             assert response.status_code == 200
-#             assert response.json() == expected
+    @with_table_cleared(schemas.Class)
+    def test_get_class(self):
+        created = TestClass.create_class()
+        response = tested.get(f"/classes/{created.name}")
+        assert response.status_code == 200
+        assert models.Class(**response.json()) == created
 
-#             modified = class_data
-#             modified["moderator"] = expected["moderator"] = "이몽룡"
-#             modified["description"] = expected["description"] = "성춘향 환영"
-#             response = tested.put(
-#                 f"/classes/{name}", json=modified, headers=get_jwt_header()
-#             )
-#             assert response.status_code == 200
-#             assert response.json() == expected
-#             response = tested.get(f"/classes/{name}")
-#             assert response.status_code == 200
-#             assert response.json() == expected
+    @with_table_cleared(schemas.Class)
+    def test_update_class(self):
+        created = TestClass.create_class()
+        info = models.ClassCreate(
+            name=created.name,
+            moderator=created.moderator + "asdf",
+            schedule=created.schedule + "asdf",
+            description=created.description + "asdf",
+            order=0
+        )
+        response = tested.put(f"/classes/{created.name}", json=info.dict())
+        assert response.status_code == 401
+        response = tested.put(
+            f"/classes/{created.name}", json=info.dict(), headers=jwt(member()))
+        assert response.status_code == 403
+        response = tested.put(
+            f"/classes/{created.name}", json=info.dict(), headers=jwt(board()))
+        assert response.status_code == 200
+        assert models.Class(**response.json()) == models.Class(**info.dict())
+        response = tested.get(f"/classes/{created.name}")
+        assert response.status_code == 200
+        assert models.Class(**response.json()) == models.Class(**info.dict())
 
+    @with_table_cleared(schemas.Class)
+    def test_delete_class(self):
+        created = TestClass.create_class()
+        response = tested.delete(f"/classes/{created.name}")
+        assert response.status_code == 401
+        response = tested.delete(
+            f"/classes/{created.name}", headers=jwt(member()))
+        assert response.status_code == 403
+        response = tested.delete(
+            f"/classes/{created.name}", headers=jwt(board()))
+        assert response.status_code == 200
+        response = tested.get(f"/classes/{created.name}")
+        assert response.status_code == 404
 
-# def test_get_class():
-#     eng2kor = {
-#         models.ClassName.poetry: "시반",
-#         models.ClassName.novel: "소설반",
-#         models.ClassName.critique: "합평반",
-#         models.ClassName.reading: "독서반",
-#     }
-#     for name in models.ClassName:
-#         class_data["korean"] = eng2kor[name]
-#         expected = class_data.copy()
-#         expected["name"] = name
-#         response = tested.get(f"/classes/{name}")
-#         assert response.status_code == 200
-#         assert response.json() == expected
+    @with_table_cleared(schemas.Class)
+    def test_create_class_record(self):
+        cls = TestClass.create_class()
+        record = TestClass.create_class_record_serialized()
+        response = tested.post(
+            f"/classes/{cls.name}/records", json=record)
+        assert response.status_code == 401
+        response = tested.post(
+            f"/classes/{cls.name}/records", json=record, headers=jwt(member()))
+        assert response.status_code == 403
+        moderator = board()
+        response = tested.post(
+            f"/classes/{cls.name}/records", json=record, headers=jwt(moderator))
+        assert response.status_code == 200
+        response = tested.get(
+            f"/classes/{cls.name}/records/{models.ClassRecord(**response.json()).conducted}", headers=jwt(member()))
+        assert response.status_code == 200
+        assert models.ClassRecordCreate(
+            **response.json()) == models.ClassRecordCreate(**record)
+        assert models.ClassRecord(
+            **response.json()).moderator == moderator.real_name
+        response = tested.post(
+            f"/classes/{cls.name}/records", json=record, headers=jwt(board()))
+        assert response.status_code == 409
 
+    @with_table_cleared(schemas.Class)
+    def test_update_class_record(self):
+        cls = TestClass.create_class()
+        record = TestClass.create_class_record_serialized()
+        updated = TestClass.create_class_record_serialized()
+        assert tested.post(
+            f"/classes/{cls.name}/records", json=record, headers=jwt(board()))
+        response = tested.put(
+            f"/classes/{cls.name}/records/{record['conducted']}", json=updated)
+        assert response.status_code == 401
+        response = tested.put(
+            f"/classes/{cls.name}/records/{record['conducted']}", json=updated, headers=jwt(member()))
+        assert response.status_code == 403
+        modifier = board()
+        response = tested.put(
+            f"/classes/{cls.name}/records/{record['conducted']}", json=updated, headers=jwt(modifier))
+        assert response.status_code == 200
+        assert models.ClassRecordCreate(
+            **response.json()) == models.ClassRecordCreate(**updated)
+        response = tested.get(
+            f"/classes/{cls.name}/records/{record['conducted']}", headers=jwt(member()))
+        assert response.status_code == 200
+        assert models.ClassRecordCreate(
+            **response.json()) == models.ClassRecordCreate(**updated)
 
-# def test_get_class_records():
-#     for name in models.ClassName:
-#         change_role(models.Role.board)
-#         data = {
-#             "topic": "뒤치닥, 『투명드래곤』",
-#             "content": "본 회차 독서반에서 우리는 뒤치닥이 톨킨보다 위대한 이유를 명쾌히 논증해냈으나 여백이 부족해 그 내용을 적지 않는다.",
-#         }
-#         for d in range(1, 10):
-#             data["conducted"] = f"200{d}-0{d}-0{d}"
-#             tested.post(f"/classes/{name}/records",
-#                         headers=get_jwt_header(), json=data)
-#         response = tested.get(f"/classes/{name}/records")
-#         assert response.status_code == 200
-#         for d, row in enumerate(response.json()[::-1]):
-#             d += 1
-#             assert row["topic"] == data["topic"]
-#             assert row["moderator"] == settings.test_real_name
-#             assert row["conducted"] == f"200{d}-0{d}-0{d}"
+    @with_table_cleared(schemas.Class)
+    def test_get_class_record(self):
+        cls = TestClass.create_class()
+        record = TestClass.create_class_record_serialized()
+        record_model = models.ClassRecordCreate(**record)
+        response = tested.get(
+            f"/classes/{cls.name}/records/{record_model.conducted}", headers=jwt(member()))
+        assert response.status_code == 404
+        moderator = board()
+        tested.post(
+            f"/classes/{cls.name}/records", json=record, headers=jwt(moderator))
+        response = tested.get(
+            f"/classes/{cls.name}/records/{record_model.conducted}", headers=jwt(member()))
+        assert response.status_code == 200
+        assert models.ClassRecordCreate(**response.json()) == record_model
 
+    @with_table_cleared(schemas.Class)
+    def test_get_class_records(self):
+        cls = TestClass.create_class()
+        count = 10
+        records = sorted([
+            models.ClassRecordOutline(
+                **tested.post(
+                    f"/classes/{cls.name}/records",
+                    json=TestClass.create_class_record_serialized(),
+                    headers=jwt(board()),
+                    params={"limit": count, "skip": 0}
+                ).json()
+            ) for _ in range(count)],
+            key=lambda data: data.conducted
+        )
+        response = tested.get(f"/classes/{cls.name}/records")
+        assert response.status_code == 200
+        for fetched, standard in zip(response.json(), records[::-1], strict=True):
+            assert models.ClassRecordOutline(**fetched) == standard
 
-# def test_create_class_record():
-#     for name in models.ClassName:
-#         response = tested.post(
-#             f"/classes/{name}/records", json=class_record_data)
-#         assert response.status_code == 401
-
-#         change_role(models.Role.member)
-#         response = tested.post(
-#             f"/classes/{name}/records", json=class_record_data, headers=get_jwt_header()
-#         )
-#         assert response.status_code == 403
-
-#         change_role(models.Role.board)
-#         response = tested.post(
-#             f"/classes/{name}/records", json=class_record_data, headers=get_jwt_header()
-#         )
-#         assert response.status_code == 200
-#         parsed = response.json()
-#         assert parsed["conducted"] == class_record_data["conducted"]
-#         assert parsed["topic"] == class_record_data["topic"]
-#         assert parsed["content"] == class_record_data["content"]
-
-#         response = tested.get(
-#             f"/classes/{name}/records/{class_record_data['conducted']}",
-#             headers=get_jwt_header(),
-#         )
-#         assert response.status_code == 200
-#         parsed = response.json()
-#         assert parsed["conducted"] == class_record_data["conducted"]
-#         assert parsed["topic"] == class_record_data["topic"]
-#         assert parsed["content"] == class_record_data["content"]
-
-
-# def test_update_class_record():
-#     class_record_data["topic"] = "One Day in the Life of Ivan Denisovich"
-#     class_record_data[
-#         "content"
-#     ] = "Death is the solution to all problems; no man, no problem."
-#     original_conducted = class_record_data["conducted"]
-#     class_record_data["conducted"] = "1962-01-01"
-#     for name in models.ClassName:
-#         response = tested.put(
-#             f"/classes/{name}/records/{original_conducted}", json=class_record_data
-#         )
-#         assert response.status_code == 401
-
-#         change_role(models.Role.member)
-#         response = tested.put(
-#             f"/classes/{name}/records/{original_conducted}",
-#             json=class_record_data,
-#             headers=get_jwt_header(),
-#         )
-#         assert response.status_code == 403
-
-#         change_role(models.Role.board)
-#         response = tested.put(
-#             f"/classes/{name}/records/{original_conducted}",
-#             json=class_record_data,
-#             headers=get_jwt_header(),
-#         )
-#         assert response.status_code == 200
-#         parsed = response.json()
-#         assert parsed["topic"] == class_record_data["topic"]
-#         assert parsed["conducted"] == class_record_data["conducted"]
-#         assert parsed["content"] == class_record_data["content"]
-
-#         response = tested.get(
-#             f"/classes/{name}/records/{class_record_data['conducted']}",
-#             headers=get_jwt_header(),
-#         )
-#         assert response.json() == parsed
-#         response = tested.get(
-#             f"/classes/{name}/records/{original_conducted}", headers=get_jwt_header()
-#         )
-#         assert response.status_code == 404
-
-
-# def test_get_class_record():
-#     for name in models.ClassName:
-#         response = tested.get(
-#             f"/classes/{name}/records/{class_record_data['conducted']}"
-#         )
-#         assert response.status_code == 401
-
-#         change_role(models.Role.board)
-#         response = tested.get(
-#             f"/classes/{name}/records/{class_record_data['conducted']}",
-#             headers=get_jwt_header(),
-#         )
-#         assert response.status_code == 200
-#         parsed = response.json()
-#         assert parsed["topic"] == class_record_data["topic"]
-#         assert parsed["conducted"] == class_record_data["conducted"]
-#         assert parsed["content"] == class_record_data["content"]
-
-#         change_role(models.Role.member)
-#         response = tested.get(
-#             f"/classes/{name}/records/{class_record_data['conducted']}",
-#             headers=get_jwt_header(),
-#         )
-#         assert response.status_code == 200
-#         parsed = response.json()
-#         assert parsed["topic"] == class_record_data["topic"]
-#         assert parsed["conducted"] == class_record_data["conducted"]
-#         assert parsed["content"] == class_record_data["content"]
-
-
-# def test_delete_class_record():
-#     for name in models.ClassName:
-#         response = tested.delete(
-#             f"/classes/{name}/records/{class_record_data['conducted']}"
-#         )
-#         assert response.status_code == 401
-
-#         change_role(models.Role.member)
-#         response = tested.delete(
-#             f"/classes/{name}/records/{class_record_data['conducted']}",
-#             headers=get_jwt_header(),
-#         )
-#         assert response.status_code == 403
-
-#         change_role(models.Role.board)
-#         response = tested.delete(
-#             f"/classes/{name}/records/{class_record_data['conducted']}",
-#             headers=get_jwt_header(),
-#         )
-#         assert response.status_code == 200
-#         response = tested.delete(
-#             f"/classes/{name}/records/{class_record_data['conducted']}",
-#             headers=get_jwt_header(),
-#         )
-#         assert response.status_code == 404
-#         for record in tested.get(f"/classes/{name}/records").json():
-#             response = tested.delete(
-#                 f"/classes/{name}/records/{record['conducted']}",
-#                 headers=get_jwt_header(),
-#             )
-#             assert response.status_code == 200
-#             response = tested.delete(
-#                 f"/classes/{name}/records/{record['conducted']}",
-#                 headers=get_jwt_header(),
-#             )
-#             assert response.status_code == 404
-#         response = tested.get(f"/classes/{name}/records")
-#         assert response.status_code == 200
-#         assert response.json() == []
+    @ with_table_cleared(schemas.Class)
+    def test_delete_class_record(self):
+        cls = TestClass.create_class()
+        record = TestClass.create_class_record_serialized()
+        instance = models.ClassRecord(
+            **record, cls=cls, moderator=cls.moderator)
+        tested.post(
+            f"/classes/{cls.name}/records", json=record, headers=jwt(board()))
+        response = tested.delete(
+            f"/classes/{cls.name}/records/{instance.conducted}")
+        assert response.status_code == 401
+        response = tested.delete(
+            f"/classes/{cls.name}/records/{instance.conducted}", headers=jwt(member()))
+        assert response.status_code == 403
+        response = tested.delete(
+            f"/classes/{cls.name}/records/{instance.conducted}", headers=jwt(board()))
+        assert response.status_code == 200
+        response = tested.get(
+            f"/classes/{cls.name}/records/{instance.conducted}", headers=jwt(member()))
+        assert response.status_code == 404
 
 
 class TestAuth:
-    @with_table_cleared(schemas.Member)
+    @ with_table_cleared(schemas.Member)
     def test_register(self):
         data = RegisterForm(
             portal_id=settings.PORTAL_ID,
@@ -874,7 +850,7 @@ class TestAuth:
         assert created.username == settings.USERNAME
         assert created.role == models.Role.member
 
-    @with_table_cleared(schemas.Member)
+    @ with_table_cleared(schemas.Member)
     def test_login(self):
         logging_in = member()
         response = tested.post("/token", data={
@@ -883,7 +859,7 @@ class TestAuth:
         })
         assert response.status_code == 200
 
-    @with_table_cleared(schemas.Member)
+    @ with_table_cleared(schemas.Member)
     def test_find_ID(self):
         self.test_register()
         response = tested.post(
@@ -899,7 +875,7 @@ class TestAuth:
         assert response.status_code == 200
         assert response.json() == settings.USERNAME
 
-    @with_table_cleared(schemas.Member)
+    @ with_table_cleared(schemas.Member)
     def test_find_ID_nonexistent(self):
         response = tested.post(
             "/find/id",
@@ -913,7 +889,7 @@ class TestAuth:
         )
         assert response.status_code == 404
 
-    @with_table_cleared(schemas.Member)
+    @ with_table_cleared(schemas.Member)
     def test_find_PW(self):
         self.test_register()
         failing = "asdf"
@@ -939,7 +915,7 @@ class TestAuth:
         )
         assert response.status_code == 200
 
-    @with_table_cleared(schemas.Member)
+    @ with_table_cleared(schemas.Member)
     def test_find_PW_nonexistent(self):
         response = tested.post(
             "/find/pw",

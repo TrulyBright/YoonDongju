@@ -4,7 +4,9 @@ from sqlalchemy import (
     String,
     Date,
     ForeignKey,
-    LargeBinary
+    LargeBinary,
+    Boolean,
+    UniqueConstraint
 )
 from sqlalchemy.orm import relationship
 
@@ -15,6 +17,13 @@ class ClubInformation(Base):
     __tablename__ = "clubInformations"
     key = Column(String, primary_key=True)
     value = Column(String)
+    public = Column(Boolean)
+
+
+class FunctionSwitch(Base):
+    __tablename__ = "functionSwitch"
+    name = Column(String, primary_key=True)
+    on = Column(Boolean)
 
 
 class Member(Base):
@@ -56,22 +65,24 @@ class UploadedFile(Base):
 class Class(Base):
     __tablename__ = "classes"
     name = Column(String, primary_key=True)
-    korean = Column(String, unique=True)
     moderator = Column(String)
     schedule = Column(String)
     description = Column(String)
-    records = relationship("ClassRecord")
+    order = Column(Integer)
+    records = relationship(
+        "ClassRecord",
+        cascade="all,delete",
+        passive_deletes=True,
+    )
 
 
 class ClassRecord(Base):
-    __tablename__ = "classRecords"
-    class_name = Column(
-        String, ForeignKey("classes.name"), index=True, primary_key=True
-    )
-    conducted = Column(Date, index=True, primary_key=True)
-    moderator = Column(String)
-    topic = Column(String)
-    content = Column(String)
+    __tablename__ = "classPostRelationship"
+    cls = Column(String, ForeignKey("classes.name", ondelete="CASCADE"))
+    conducted = Column(Date)
+    post_no = Column(String, ForeignKey(
+        "posts.no", ondelete="CASCADE"), primary_key=True)
+    __table_args__ = (UniqueConstraint("cls", "conducted"),)
 
 
 class Magazine(Base):
